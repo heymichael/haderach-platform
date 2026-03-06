@@ -1,0 +1,28 @@
+---
+description: Todo file structure and lifecycle conventions
+alwaysApply: true
+---
+
+# Todo Conventions
+
+Location: Root-level `todo/` folder; one file per app: `todo_<appname>.md` (e.g. `todo_card.md`, `todo_quote.md`).
+
+Structure:
+
+- Open items (heading at top) - Single numbered list sorted by priority in this order: `[High]`, then `[Med]`, then `[Low]`. Renumber sequentially after any reorder so numbering is always `1..N`. Format: `N. [High] <item name>`.
+- Completed items (section below open items) - Use bullets (no numbering), keep completion date in brackets, and include PR status. Format: `- [YYYY-MM-DD] <item name> (PR #123)` or `- [YYYY-MM-DD] <item name> (no PR)`. Sort in descending order by date (newest first). If there are none, use `_(none)_`.
+- Detail sections (below the lists) - Include detail sections only for open numbered items, with enough Purpose and Approach so that later instructions like "work on todo item 3" can be executed with full context.
+
+When adding a todo: add the line to Open items with the appropriate tag (`[High]`, `[Med]`, or `[Low]`), then place it in priority order and renumber the open list. Add a matching detail section (Purpose + Approach) below.
+
+When completing a todo: move the line from Open items to Completed items, convert it to completed format with PR status (e.g. `- [2025-03-01] Point card app... (PR #123)` or `... (no PR)`), sort Completed items descending by date, and renumber the open list. Remove the completed item's detail section.
+
+If a completed item included a `[BUG]` tag in Open items, preserve `[BUG]` in the Completed item text (e.g. `- [2026-03-04] [BUG] Fix ... (PR #123)`).
+
+When working on a todo item: read the detail section for that number to get purpose and approach before implementing.
+
+Regeneration requirement: Any change to `todo/todo_*.md` must regenerate priorities HTML before finishing:
+
+- Run `python scripts/generate_priorities_docs.py`
+- Run `bash scripts/sync_docs_card.sh` to copy regenerated docs into `hosting/public/<app>/docs/`
+- Verify the matching served file updates under `hosting/public/<app>/docs/priorities/index.html`

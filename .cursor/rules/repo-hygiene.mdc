@@ -1,0 +1,27 @@
+---
+description: Platform repo boundaries and documentation-first guardrails
+alwaysApply: true
+---
+
+# Platform Boundary Rule
+
+This repository is the control plane for hosting, routing, deployment orchestration, and cross-app smoke checks.
+
+- Keep strict separation of concerns:
+  - Platform repo owns orchestration and shared infrastructure.
+  - App repos own app code, app CI, and app-local tests.
+- Do not add app business logic to this repository.
+- Keep naming kebab-case for repo/path conventions unless language-specific rules require otherwise.
+- Prefer explicit docs and small config contracts over heavy scripts or premature automation.
+- Use or update docs when behavior/contracts change:
+  - `README.md`
+  - `docs/architecture.md`
+  - app registry contract docs/config
+  - `todo/todo_*.md` files when work priority/state changes
+  - keep repository ASCII trees in `README.md` and `docs/architecture.md` synchronized with actual repo structure
+- Preserve security/indexing defaults:
+  - default `noindex` / `nofollow`
+  - only allow indexing with explicit approval path documented
+- When adding new structure, keep it minimal and production-minded.
+- Follow todo lifecycle and formatting rules defined in:
+  - `.cursor/rules/todo-conventions.mdc`

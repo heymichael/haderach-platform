@@ -1,0 +1,56 @@
+name: platform-deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: "Deployment target environment"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      release_ref:
+        description: "Platform release reference (tag/sha/manifest id)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: platform-deploy-${{ inputs.target_env }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate deployment request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Display requested deployment
+        run: |
+          echo "target_env=${{ inputs.target_env }}"
+          echo "release_ref=${{ inputs.release_ref }}"
+
+      - name: Verify firebase config exists
+        run: test -f firebase.json && test -f .firebaserc
+
+  deploy:
+    name: Deploy (placeholder)
+    needs: validate
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.target_env }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Placeholder deploy step
+        run: |
+          echo "Deploy is intentionally placeholder."
+          echo "Wire OIDC + Firebase/GCP auth before enabling real deploy."
+          echo "Requested ref: ${{ inputs.release_ref }}"
