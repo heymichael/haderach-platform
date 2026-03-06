@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Todo Conventions
 
-Location: Root-level `todo/` folder; one file per app: `todo_<appname>.md` (e.g. `todo_card.md`, `todo_quote.md`).
+Location: Root-level `todo/` folder; single file: `todo.md`.
 
 Structure:
 
@@ -21,7 +21,7 @@ If a completed item included a `[BUG]` tag in Open items, preserve `[BUG]` in th
 
 When working on a todo item: read the detail section for that number to get purpose and approach before implementing.
 
-Regeneration requirement: Any change to `todo/todo_*.md` must regenerate priorities HTML before finishing:
+Regeneration requirement: Any change to `todo/todo.md` must regenerate priorities HTML before finishing:
 
 - Run `python scripts/generate_priorities_docs.py`
 - Run `bash scripts/sync_docs_card.sh` to copy regenerated docs into `hosting/public/<app>/docs/`

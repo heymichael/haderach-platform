@@ -31,6 +31,8 @@ Application implementation, app CI, and app-local tests live in separate app rep
 haderach-platform/
 ├── .cursor/
 │   └── rules/
+│       ├── architecture-pointer.mdc
+│       ├── branch-safety-reminder.mdc
 │       ├── repo-hygiene.mdc
 │       └── todo-conventions.mdc
 ├── .github/

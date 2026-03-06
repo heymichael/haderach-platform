@@ -11,6 +11,8 @@ It does not own app business logic. It owns shared hosting/routing/deployment or
 haderach-platform/
 ├── .cursor/
 │   └── rules/
+│       ├── architecture-pointer.mdc
+│       ├── branch-safety-reminder.mdc
 │       ├── repo-hygiene.mdc
 │       └── todo-conventions.mdc
 ├── .github/
@@ -67,6 +69,11 @@ The platform never builds app source directly; it consumes app-published artifac
 
 - `haderach.ai/`
 - Platform landing/status page (or future shared portal shell).
+
+### Root docs
+
+- `haderach.ai/docs/`
+- Platform-level docs hub/shell route.
 
 ### App runtime
 

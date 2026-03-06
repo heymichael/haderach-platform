@@ -17,7 +17,7 @@ This repository is the control plane for hosting, routing, deployment orchestrat
   - `README.md`
   - `docs/architecture.md`
   - app registry contract docs/config
-  - `todo/todo_*.md` files when work priority/state changes
+  - `todo/todo.md` when work priority/state changes
   - keep repository ASCII trees in `README.md` and `docs/architecture.md` synchronized with actual repo structure
 - Preserve security/indexing defaults:
   - default `noindex` / `nofollow`
