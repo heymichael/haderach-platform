@@ -1,0 +1,9 @@
+{
+  "suite": "nightly-e2e-regression",
+  "status": "placeholder",
+  "lastRunUtc": "not run yet",
+  "notes": [
+    "Placeholder summary until nightly regression workflow publishes run metadata.",
+    "Use this location for trend/summary snapshots."
+  ]
+}

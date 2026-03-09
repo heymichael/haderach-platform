@@ -9,7 +9,10 @@
       "environment": "staging",
       "platforms": "linux (ubuntu-latest): chromium",
       "trigger": "on-demand during deploy validation",
-      "reportUrl": "/docs/test-status/reports/deploy-smoke.html"
+      "reportUrl": "/docs/test-status/reports/deploy-smoke.html",
+      "summaryUrl": "/docs/test-status/summaries/deploy-smoke-summary.json",
+      "contractChecksUrl": "/docs/test-status/checks/deploy-smoke-contract-checks.html",
+      "artifactChecksUrl": "/docs/test-status/checks/deploy-smoke-artifact-checks.html"
     },
     {
       "slug": "nightly-e2e-regression",
@@ -20,7 +23,10 @@
       "environment": "staging",
       "platforms": "linux (ubuntu-latest): chromium, firefox, webkit",
       "trigger": "daily schedule (fixed UTC) + manual dispatch",
-      "reportUrl": "/docs/test-status/reports/nightly-e2e-regression.html"
+      "reportUrl": "/docs/test-status/reports/nightly-e2e-regression.html",
+      "summaryUrl": "/docs/test-status/summaries/nightly-e2e-regression-summary.json",
+      "contractChecksUrl": "/docs/test-status/checks/nightly-e2e-regression-contract-checks.html",
+      "artifactChecksUrl": "/docs/test-status/checks/nightly-e2e-regression-artifact-checks.html"
     },
     {
       "slug": "prod-monitor",
@@ -31,7 +37,10 @@
       "environment": "production",
       "platforms": "linux (ubuntu-latest): chromium",
       "trigger": "scheduled canary + manual dispatch",
-      "reportUrl": "/docs/test-status/reports/prod-monitor.html"
+      "reportUrl": "/docs/test-status/reports/prod-monitor.html",
+      "summaryUrl": "/docs/test-status/summaries/prod-monitor-summary.json",
+      "contractChecksUrl": "/docs/test-status/checks/prod-monitor-contract-checks.html",
+      "artifactChecksUrl": "/docs/test-status/checks/prod-monitor-artifact-checks.html"
     }
   ]
 }

@@ -1,0 +1,9 @@
+{
+  "suite": "prod-monitor",
+  "status": "placeholder",
+  "lastRunUtc": "not run yet",
+  "notes": [
+    "Placeholder summary until prod monitor checks are publishing results.",
+    "Use this location for canary health snapshots."
+  ]
+}

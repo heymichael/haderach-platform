@@ -54,10 +54,21 @@ haderach-platform/
 │   │       └── requirements-project.template.html
 │   ├── test-status/
 │   │   ├── catalog.json
-│   │   └── reports/
+│   │   ├── checks/
+│   │   │   ├── deploy-smoke-artifact-checks.html
+│   │   │   ├── deploy-smoke-contract-checks.html
+│   │   │   ├── nightly-e2e-regression-artifact-checks.html
+│   │   │   ├── nightly-e2e-regression-contract-checks.html
+│   │   │   ├── prod-monitor-artifact-checks.html
+│   │   │   └── prod-monitor-contract-checks.html
+│   │   ├── reports/
 │   │       ├── deploy-smoke.html
 │   │       ├── nightly-e2e-regression.html
 │   │       └── prod-monitor.html
+│   │   └── summaries/
+│   │       ├── deploy-smoke-summary.json
+│   │       ├── nightly-e2e-regression-summary.json
+│   │       └── prod-monitor-summary.json
 │   ├── testing/
 │   │   ├── catalog.json
 │   │   ├── test-lineup.html
