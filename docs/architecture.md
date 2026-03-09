@@ -22,9 +22,14 @@ haderach-platform/
 ├── docs/
 │   ├── index.html
 │   ├── architecture.md
+│   ├── architecture.html
 │   ├── app-registry.example.json
 │   ├── priorities/
 │   │   └── index.html
+│   ├── requirements/
+│   │   ├── catalog.json
+│   │   └── projects/
+│   │       └── requirements-project.template.html
 │   └── shared/
 │       ├── docs-shell.css
 │       ├── docs-shell-page.template.html
@@ -178,3 +183,9 @@ For consistent docs UI across platform and apps:
 - Canonical shell assets live in `docs/shared/docs-shell.css` and `docs/shared/docs-shell.js`.
 - Platform page at `docs/index.html` uses those shared assets for `/docs`.
 - App repos should use the same markup pattern (template: `docs/shared/docs-shell-page.template.html`) and only customize app-specific labels, route base path, and tab sources.
+
+For requirements docs, use the same source->served contract used by priorities:
+
+- Authoring source of truth: `docs/requirements/projects/*.html` and `docs/requirements/catalog.json`.
+- Served/deploy copy after sync: `hosting/public/docs/requirements/projects/*.html` and `hosting/public/docs/requirements/catalog.json`.
+- Canonical project template: `docs/requirements/projects/requirements-project.template.html`.

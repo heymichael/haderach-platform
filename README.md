@@ -44,9 +44,14 @@ haderach-platform/
 ├── docs/
 │   ├── index.html
 │   ├── architecture.md
+│   ├── architecture.html
 │   ├── app-registry.example.json
 │   ├── priorities/
 │   │   └── index.html
+│   ├── requirements/
+│   │   ├── catalog.json
+│   │   └── projects/
+│   │       └── requirements-project.template.html
 │   └── shared/
 │       ├── docs-shell.css
 │       ├── docs-shell-page.template.html
@@ -127,6 +132,16 @@ For strict tab parity, each app docs root should also include:
 - `<base>/architecture.html` (rendered target)
 
 Architecture tab standard: `baseDocsPath + "/architecture.html"` for both platform and app docs shells.
+
+Requirements authoring/deploy contract (same pattern as priorities):
+
+- Canonical authoring source: `docs/requirements/projects/*.html`
+- Canonical index/catalog source: `docs/requirements/catalog.json`
+- Served deploy copy after sync: `hosting/public/docs/requirements/projects/*.html` and `hosting/public/docs/requirements/catalog.json`
+
+Canonical requirements template:
+
+- `docs/requirements/projects/requirements-project.template.html`
 
 See:
 
