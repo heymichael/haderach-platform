@@ -26,6 +26,7 @@ Application implementation, app CI, and app-local tests live in separate app rep
 - `.github/workflows/deploy.yml` - safe starter deploy workflow (manual, placeholder deploy).
 - `docs/architecture.md` - ownership boundaries, release flow, routing model.
 - `docs/app-registry.example.json` - app registry contract template.
+- `scripts/` - docs generation and hosting sync helpers for local parity.
 
 ```text
 haderach-platform/
@@ -33,6 +34,7 @@ haderach-platform/
 │   └── rules/
 │       ├── architecture-pointer.mdc
 │       ├── branch-safety-reminder.mdc
+│       ├── pr-conventions.mdc
 │       ├── repo-hygiene.mdc
 │       └── todo-conventions.mdc
 ├── .github/
@@ -43,7 +45,12 @@ haderach-platform/
 │   └── app-registry.example.json
 ├── hosting/
 │   └── public/
-│       └── index.html
+│       ├── index.html
+│       └── robots.txt
+├── scripts/
+│   ├── generate_priorities_docs.py
+│   ├── requirements-docs.txt
+│   └── sync_docs_card.sh
 ├── todo/
 │   └── todo.md
 ├── .firebaserc
@@ -52,22 +59,25 @@ haderach-platform/
 └── README.md
 ```
 
-## Local development (placeholder commands)
+## Local development
 
 Prerequisites:
 
 - Node.js + npm
 - Firebase CLI
+- Python 3 (for docs generation)
 
 Suggested commands:
 
 ```bash
 npm --version
+python3 --version
 firebase --version
-firebase emulators:start --only hosting
+python3 -m pip install -r scripts/requirements-docs.txt
+python3 scripts/generate_priorities_docs.py
+bash scripts/sync_docs_card.sh
+firebase emulators:start --only hosting --project haderach-ai --config firebase.json
 ```
-
-If you want a script wrapper later, add a minimal `package.json` with `dev:hosting` mapped to the emulator command.
 
 ## App repo integration model
 
