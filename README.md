@@ -52,6 +52,12 @@ haderach-platform/
 │   │   ├── catalog.json
 │   │   └── projects/
 │   │       └── requirements-project.template.html
+│   ├── test-status/
+│   │   ├── catalog.json
+│   │   └── reports/
+│   │       ├── deploy-smoke.html
+│   │       ├── nightly-e2e-regression.html
+│   │       └── prod-monitor.html
 │   ├── testing/
 │   │   ├── catalog.json
 │   │   ├── test-lineup.html
