@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <title>Testing Infrastructure</title>
+  </head>
+  <body>
+    <h1>Testing Infrastructure</h1>
+    <p>
+      This page documents the current test model for haderach and where test status will be published.
+    </p>
+
+    <h2>Current Test Model</h2>
+    <p>Haderach testing follows the same three-suite model used by app docs surfaces:</p>
+    <ul>
+      <li>Deploy Smoke: blocking subset for deploy-linked changes.</li>
+      <li>Nightly E2E Regression: full non-blocking regression run on schedule.</li>
+      <li>Prod Monitor: non-blocking production canary checks.</li>
+    </ul>
+
+    <h2>Workflows and Triggers</h2>
+    <p>Workflow wiring for haderach-specific suites is not configured yet.</p>
+    <p>When added, latest report snapshots should be published under <code>/docs/test-status/</code>.</p>
+
+    <h2>Source of Truth</h2>
+    <ul>
+      <li>Test status catalog: <code>docs/test-status/catalog.json</code></li>
+      <li>Testing catalog: <code>docs/testing/catalog.json</code></li>
+    </ul>
+
+    <h2>Notes</h2>
+    <ul>
+      <li>Docs shell reads this page from the Testing tab catalog entry.</li>
+      <li>Keep terminology and trigger names consistent with deploy/CI workflows.</li>
+    </ul>
+  </body>
+</html>

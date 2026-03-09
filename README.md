@@ -52,6 +52,10 @@ haderach-platform/
 │   │   ├── catalog.json
 │   │   └── projects/
 │   │       └── requirements-project.template.html
+│   ├── testing/
+│   │   ├── catalog.json
+│   │   ├── test-lineup.html
+│   │   └── testing-infrastructure.html
 │   └── shared/
 │       ├── docs-shell.css
 │       ├── docs-shell-page.template.html

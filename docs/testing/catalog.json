@@ -1,0 +1,16 @@
+{
+  "links": [
+    {
+      "slug": "testing-infrastructure",
+      "title": "Testing Infrastructure",
+      "summary": "Overview of frameworks, execution modes, and CI integration.",
+      "url": "/docs/testing/testing-infrastructure.html"
+    },
+    {
+      "slug": "test-lineup",
+      "title": "Test Lineup",
+      "summary": "Current suites grouped by Deploy Smoke, Nightly Regression, and Prod Monitor triggers.",
+      "url": "/docs/testing/test-lineup.html"
+    }
+  ]
+}
