@@ -103,6 +103,10 @@ Use `docs/shared/docs-shell-page.template.html` as the copy baseline for app rep
 
 Canonical files to copy into each app repo:
 
+- `scripts/generate_priorities_docs.py`
+- `scripts/sync_docs_card.sh`
+- `scripts/requirements-docs.txt`
+
 - `docs/index.html`
 - `docs/shared/docs-shell.css`
 - `docs/shared/docs-shell.js`
@@ -111,7 +115,6 @@ Canonical files to copy into each app repo:
 Template replacement values per app:
 
 - `__APP_NAME__` (for example `Card`)
-- `__SIGNED_IN_LABEL__` (for example `card docs`)
 - `__DOCS_BASE_PATH__` (for example `/card/docs`)
 
 For strict tab parity, each app docs root should also include:
@@ -120,9 +123,10 @@ For strict tab parity, each app docs root should also include:
 - `<base>/priorities/index.html`
 - `<base>/requirements/catalog.json`
 - `<base>/testing/catalog.json`
-- `<base>/architecture.md`
+- `<base>/architecture.md` (source)
+- `<base>/architecture.html` (rendered target)
 
-Architecture tab standard: `baseDocsPath + "/architecture.md"` for both platform and app docs shells.
+Architecture tab standard: `baseDocsPath + "/architecture.html"` for both platform and app docs shells.
 
 See:
 

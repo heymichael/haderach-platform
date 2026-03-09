@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate platform priorities docs pages from todo markdown files."""
+"""Generate platform docs pages from markdown sources."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ except ImportError:
     sys.exit(1)
 
 
-def render_priorities_page(source: Path, target: Path, page_title: str) -> None:
+def render_markdown_page(source: Path, target: Path, page_title: str) -> None:
     markdown_text = source.read_text(encoding="utf-8")
     body = markdown.markdown(
         markdown_text,
@@ -44,15 +44,26 @@ def render_priorities_page(source: Path, target: Path, page_title: str) -> None:
 
 def main() -> int:
     root = Path(__file__).resolve().parents[1]
-    source = root / "todo" / "todo.md"
-    target = root / "docs" / "priorities" / "index.html"
+    mappings = [
+        (
+            root / "todo" / "todo.md",
+            root / "docs" / "priorities" / "index.html",
+            "Haderach Platform - Priorities",
+        ),
+        (
+            root / "docs" / "architecture.md",
+            root / "docs" / "architecture.html",
+            "Haderach Platform - Architecture",
+        ),
+    ]
 
-    if not source.exists():
-        print(f"Source file not found: {source}", file=sys.stderr)
-        return 1
+    for source, target, title in mappings:
+        if not source.exists():
+            print(f"Source file not found: {source}", file=sys.stderr)
+            return 1
 
-    render_priorities_page(source, target, "Haderach Platform - Priorities")
-    print(f"Generated {target.relative_to(root)} from {source.relative_to(root)}")
+        render_markdown_page(source, target, title)
+        print(f"Generated {target.relative_to(root)} from {source.relative_to(root)}")
     return 0
 
 
