@@ -79,6 +79,9 @@ haderach-platform/
 │       └── docs-shell.js
 ├── hosting/
 │   └── public/
+│       ├── assets/
+│       │   └── landing/
+│       │       └── logo.svg
 │       ├── index.html
 │       └── robots.txt
 ├── scripts/
