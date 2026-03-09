@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <title>Requirements - [Project Title]</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 40px 24px 64px;
+        color: #1f2937;
+        line-height: 1.55;
+      }
+      h1 {
+        margin-bottom: 8px;
+      }
+      h2 {
+        margin-top: 36px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 6px;
+      }
+      h3 {
+        margin-top: 24px;
+        margin-bottom: 8px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 12px 0 20px;
+        font-size: 14px;
+      }
+      th,
+      td {
+        border: 1px solid #d1d5db;
+        padding: 10px;
+        vertical-align: top;
+        text-align: left;
+      }
+      th {
+        background: #f9fafb;
+      }
+      .meta td:first-child {
+        width: 220px;
+        font-weight: 600;
+      }
+      .req-id {
+        white-space: nowrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-weight: 600;
+      }
+      .must {
+        color: #b91c1c;
+        font-weight: 600;
+      }
+      .should {
+        color: #92400e;
+        font-weight: 600;
+      }
+      .could {
+        color: #166534;
+        font-weight: 600;
+      }
+      .note {
+        background: #f9fafb;
+        border-left: 4px solid #9ca3af;
+        padding: 10px 12px;
+      }
+      .back-link {
+        display: inline-block;
+        margin-bottom: 16px;
+      }
+      .checklist li {
+        margin: 6px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Replace docs base path, e.g. /docs or /card/docs -->
+    <a class="back-link" href="__DOCS_BASE_PATH__/?tab=requirements">Back to all requirements</a>
+    <h1>[Project Title] Requirements</h1>
+    <p>
+      This document defines business and product requirements for [project/surface],
+      including scope, expected behaviors, constraints, acceptance checks, and rollout risks.
+    </p>
+
+    <table class="meta">
+      <tr><td>Status</td><td>Draft baseline</td></tr>
+      <tr><td>Scope Type</td><td>Product / UX / Platform</td></tr>
+      <tr><td>Primary Domain</td><td><code>[domain or N/A]</code></td></tr>
+      <tr><td>Related Todo</td><td><code>todo/todo.md</code> item #[n]</td></tr>
+      <tr><td>Owner(s)</td><td>[team or person]</td></tr>
+      <tr><td>Last Updated</td><td>[YYYY-MM-DD]</td></tr>
+    </table>
+
+    <h2>1. Objectives</h2>
+    <ul>
+      <li>[Objective 1: user/business outcome]</li>
+      <li>[Objective 2: measurable success target]</li>
+      <li>[Objective 3: operational or reliability goal]</li>
+    </ul>
+
+    <h2>2. In Scope</h2>
+    <ul>
+      <li>[Feature area / workflow in scope]</li>
+      <li>[Route/surface in scope]</li>
+      <li>[Data/output artifacts in scope]</li>
+    </ul>
+
+    <h2>3. Out of Scope</h2>
+    <ul>
+      <li>[Explicitly excluded item 1]</li>
+      <li>[Explicitly excluded item 2]</li>
+      <li>[Deferred follow-up item]</li>
+    </ul>
+
+    <h2>4. Functional Requirements</h2>
+
+    <h3>4.1 [Functional Group Name]</h3>
+    <table>
+      <tr><th>ID</th><th>Requirement</th><th>Priority</th></tr>
+      <tr>
+        <td class="req-id">FR-AAA-01</td>
+        <td>[System behavior requirement]</td>
+        <td class="must">Must</td>
+      </tr>
+      <tr>
+        <td class="req-id">FR-AAA-02</td>
+        <td>[System behavior requirement]</td>
+        <td class="must">Must</td>
+      </tr>
+      <tr>
+        <td class="req-id">FR-AAA-03</td>
+        <td>[Ergonomic/maintainability preference requirement]</td>
+        <td class="should">Should</td>
+      </tr>
+    </table>
+
+    <h3>4.2 [Functional Group Name]</h3>
+    <table>
+      <tr><th>ID</th><th>Requirement</th><th>Priority</th></tr>
+      <tr>
+        <td class="req-id">FR-BBB-01</td>
+        <td>[URL state, routing, integration, or workflow requirement]</td>
+        <td class="must">Must</td>
+      </tr>
+      <tr>
+        <td class="req-id">FR-BBB-02</td>
+        <td>[Fallback/error handling requirement]</td>
+        <td class="must">Must</td>
+      </tr>
+      <tr>
+        <td class="req-id">FR-BBB-03</td>
+        <td>[Optional enhancement requirement]</td>
+        <td class="could">Could</td>
+      </tr>
+    </table>
+
+    <h3>4.3 [Functional Group Name]</h3>
+    <table>
+      <tr><th>ID</th><th>Requirement</th><th>Priority</th></tr>
+      <tr>
+        <td class="req-id">FR-CCC-01</td>
+        <td>[Generation/sync/deployment behavior requirement]</td>
+        <td class="must">Must</td>
+      </tr>
+      <tr>
+        <td class="req-id">FR-CCC-02</td>
+        <td>[Artifact consistency requirement]</td>
+        <td class="must">Must</td>
+      </tr>
+    </table>
+
+    <h2>5. Non-Functional Requirements</h2>
+    <table>
+      <tr><th>ID</th><th>Requirement</th><th>Priority</th></tr>
+      <tr>
+        <td class="req-id">NFR-UX-01</td>
+        <td>[Usability/readability/perceived quality requirement]</td>
+        <td class="must">Must</td>
+      </tr>
+      <tr>
+        <td class="req-id">NFR-OPS-01</td>
+        <td>[Operational reliability and workflow requirement]</td>
+        <td class="must">Must</td>
+      </tr>
+      <tr>
+        <td class="req-id">NFR-SEC-01</td>
+        <td>[Auth/privacy/indexing/security requirement]</td>
+        <td class="must">Must</td>
+      </tr>
+    </table>
+
+    <h2>6. Data and State Requirements</h2>
+    <table>
+      <tr><th>ID</th><th>Requirement</th><th>Priority</th></tr>
+      <tr>
+        <td class="req-id">DR-01</td>
+        <td>[State model, source of truth, and persistence behavior]</td>
+        <td class="must">Must</td>
+      </tr>
+      <tr>
+        <td class="req-id">DR-02</td>
+        <td>[Generated artifact format/location and update rules]</td>
+        <td class="should">Should</td>
+      </tr>
+    </table>
+
+    <h2>7. Acceptance Tests</h2>
+    <table>
+      <tr><th>ID</th><th>Test Scenario</th><th>Expected Result</th></tr>
+      <tr>
+        <td class="req-id">AT-01</td>
+        <td>[Happy path scenario on target route/workflow]</td>
+        <td>[Expected successful behavior]</td>
+      </tr>
+      <tr>
+        <td class="req-id">AT-02</td>
+        <td>[Invalid parameter/error scenario]</td>
+        <td>[Graceful fallback behavior]</td>
+      </tr>
+      <tr>
+        <td class="req-id">AT-03</td>
+        <td>[Regeneration + sync workflow scenario]</td>
+        <td>[Hosted artifacts updated and viewable]</td>
+      </tr>
+      <tr>
+        <td class="req-id">AT-04</td>
+        <td>[Security/indexing/auth scenario]</td>
+        <td>[Expected noindex/auth protection behavior]</td>
+      </tr>
+    </table>
+
+    <h2>8. Constraints and Assumptions</h2>
+    <ul>
+      <li><strong>Constraint:</strong> [Technical or process boundary]</li>
+      <li><strong>Constraint:</strong> [Resource/time boundary]</li>
+      <li><strong>Assumption:</strong> [Dependency assumption]</li>
+      <li><strong>Assumption:</strong> [Operational assumption]</li>
+    </ul>
+
+    <h2>9. Risks, Rollback, and Follow-Ups</h2>
+    <ul>
+      <li><strong>Risk:</strong> [Primary delivery or quality risk]</li>
+      <li><strong>Risk:</strong> [Operational/integration risk]</li>
+      <li><strong>Rollback:</strong> [How to revert safely if rollout fails]</li>
+      <li><strong>Follow-up:</strong> [Deferred enhancement or hardening item]</li>
+    </ul>
+
+    <h2>10. Authoring Definition of Done</h2>
+    <ul class="checklist">
+      <li>[ ] File saved as <code>docs/requirements/projects/[project-slug].html</code>.</li>
+      <li>[ ] Matching index item added to <code>docs/requirements/catalog.json</code>.</li>
+      <li>[ ] Project slug in catalog matches filename exactly.</li>
+      <li>[ ] Synced hosted docs: <code>bash scripts/sync_docs_card.sh</code>.</li>
+      <li>[ ] Verified outputs under <code>hosting/public/docs/requirements/</code>.</li>
+      <li>[ ] Verified shell behavior: <code>?tab=requirements</code>, <code>project=[slug]</code>, back-to-list, invalid-slug fallback.</li>
+      <li>[ ] Manually reviewed/finalized before PR/deploy.</li>
+    </ul>
+
+    <div class="note">
+      Replace all bracketed placeholders before publishing. Keep requirement IDs stable once referenced
+      in implementation notes, PRs, or acceptance evidence.
+    </div>
+
+    <p style="margin-top: 28px;">
+      <a href="__DOCS_BASE_PATH__/?tab=requirements">Back to all requirements</a>
+    </p>
+  </body>
+</html>

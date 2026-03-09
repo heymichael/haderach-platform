@@ -1,0 +1,10 @@
+{
+  "projects": [
+    {
+      "slug": "platform-control-plane-foundation",
+      "title": "Platform Control Plane Foundation",
+      "summary": "Requirements for the docs shell, generated docs workflow, and source-to-served documentation contract.",
+      "url": "/docs/requirements/projects/platform-control-plane-foundation.html"
+    }
+  ]
+}
