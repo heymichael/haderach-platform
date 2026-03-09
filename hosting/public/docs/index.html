@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <title>Haderach Platform Documents</title>
+    <link rel="stylesheet" href="/docs/shared/docs-shell.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section id="loading-view" hidden>
+        <h1>Loading</h1>
+        <p>Preparing documents...</p>
+      </section>
+
+      <section id="signed-out-view" hidden>
+        <h1>Haderach Platform Documents</h1>
+        <p>This page requires app access. Sign in with Google to continue.</p>
+        <button id="sign-in-button" type="button">Sign in with Google</button>
+      </section>
+
+      <section id="authorized-view">
+        <div class="docs-header">
+          <h1>Haderach Platform Documents</h1>
+          <p id="signed-in-email">platform docs</p>
+          <div class="tabs" role="tablist" aria-label="Platform docs tabs">
+            <button class="tab-button" role="tab" aria-selected="false" type="button" data-tab-key="test-status">Test Status</button>
+            <button class="tab-button" role="tab" aria-selected="false" type="button" data-tab-key="priorities">Priorities</button>
+            <button class="tab-button" role="tab" aria-selected="false" type="button" data-tab-key="requirements">Requirements</button>
+            <button class="tab-button" role="tab" aria-selected="false" type="button" data-tab-key="testing">Testing</button>
+            <button class="tab-button" role="tab" aria-selected="false" type="button" data-tab-key="architecture">Architecture</button>
+          </div>
+        </div>
+        <section class="tab-panel">
+          <div id="requirements-view" class="requirements-view" hidden>
+            <h2>Requirements</h2>
+            <ul id="requirements-list" class="requirements-list"></ul>
+          </div>
+          <div id="requirements-toolbar" class="requirements-toolbar" hidden>
+            <button id="requirements-back-button" type="button">
+              Back to all requirements
+            </button>
+          </div>
+          <div id="doc-content" class="doc-content" hidden></div>
+          <iframe id="docs-frame" class="tab-frame" title="Haderach documents" referrerpolicy="no-referrer"></iframe>
+          <div id="docs-fallback" class="tab-fallback" hidden></div>
+        </section>
+      </section>
+
+      <section id="error-view" hidden>
+        <h1>Authentication error</h1>
+        <p id="error-text" class="error"></p>
+      </section>
+    </main>
+
+    <script src="/docs/shared/docs-shell.js"></script>
+    <script>
+      (function () {
+        const inlineDocBaseStyle =
+          ".doc-root{padding:20px;box-sizing:border-box;color:#111;font-family:Arial,sans-serif;font-size:16px;line-height:1.45;}" +
+          ".doc-root h1{margin:0 0 10px;font-size:28px;line-height:1.25;}" +
+          ".doc-root h2{margin:20px 0 10px;font-size:22px;line-height:1.3;}" +
+          ".doc-root h3{margin:16px 0 8px;font-size:18px;line-height:1.3;}" +
+          ".doc-root p{margin:0 0 12px;}" +
+          ".doc-root p.test-lineup-meta{margin:0 0 2px;line-height:1.2;}" +
+          ".doc-root ul,.doc-root ol{margin:0 0 14px 22px;padding:0;}" +
+          ".doc-root li{margin:0 0 6px;}" +
+          ".doc-root code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-size:0.95em;}";
+
+        const baseDocsPath = "/docs";
+        const tabDefinitions = {
+          "test-status": {
+            mode: "catalog",
+            heading: "Test Status",
+            catalogUrl: baseDocsPath + "/test-status/catalog.json",
+            listField: "reports",
+            itemKey: "slug",
+            itemTitle: "title",
+            itemSummary: "summary",
+            itemUrl: "reportUrl",
+            backLabel: "Back to all test reports",
+            fallback: "no tests available",
+            metaFields: [
+              { key: "status", label: "Status", defaultValue: "missing" },
+              {
+                key: "lastRunUtc",
+                label: "Last run (UTC)",
+                defaultValue: "not run yet",
+              },
+              {
+                key: "environment",
+                label: "Environment",
+                defaultValue: "unknown",
+              },
+              {
+                key: "platforms",
+                label: "Platforms",
+                defaultValue: "not specified",
+              },
+              {
+                key: "trigger",
+                label: "Trigger",
+                defaultValue: "not configured",
+              },
+            ],
+          },
+          priorities: {
+            mode: "inline-page",
+            url: baseDocsPath + "/priorities/index.html",
+            fallback: "no priorities available",
+          },
+          requirements: {
+            mode: "catalog",
+            heading: "Requirements",
+            catalogUrl: baseDocsPath + "/requirements/catalog.json",
+            listField: "projects",
+            itemKey: "slug",
+            itemTitle: "title",
+            itemSummary: "summary",
+            itemUrl: "url",
+            backLabel: "Back to all requirements",
+            fallback: "no business requirements available",
+            inlineItemContent: true,
+          },
+          testing: {
+            mode: "catalog",
+            heading: "Testing",
+            catalogUrl: baseDocsPath + "/testing/catalog.json",
+            listField: "links",
+            itemKey: "slug",
+            itemTitle: "title",
+            itemSummary: "summary",
+            itemUrl: "url",
+            backLabel: "Back to all testing docs",
+            fallback: "no tests available",
+            inlineItemContent: true,
+          },
+          architecture: {
+            mode: "inline-page",
+            url: baseDocsPath + "/architecture.md",
+            fallback: "architecture document unavailable",
+          },
+        };
+
+        const shell = window.createDocsShell({
+          defaultTab: "priorities",
+          tabDefinitions,
+          tabItemParams: {
+            requirements: "project",
+            "test-status": "report",
+            testing: "doc",
+          },
+          inlineDocBaseStyle,
+          prioritiesHeading: "To Do List",
+          elements: {
+            frame: document.getElementById("docs-frame"),
+            fallback: document.getElementById("docs-fallback"),
+            requirementsView: document.getElementById("requirements-view"),
+            requirementsList: document.getElementById("requirements-list"),
+            requirementsHeading: document.querySelector("#requirements-view h2"),
+            requirementsToolbar: document.getElementById("requirements-toolbar"),
+            requirementsBackButton: document.getElementById(
+              "requirements-back-button"
+            ),
+            docContent: document.getElementById("doc-content"),
+            tabButtons: Array.from(
+              document.querySelectorAll(".tab-button[data-tab-key]")
+            ),
+          },
+        });
+
+        shell.init();
+      })();
+    </script>
+  </body>
+</html>

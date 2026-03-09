@@ -20,8 +20,15 @@ haderach-platform/
 │   └── workflows/
 │       └── deploy.yml
 ├── docs/
+│   ├── index.html
 │   ├── architecture.md
-│   └── app-registry.example.json
+│   ├── app-registry.example.json
+│   ├── priorities/
+│   │   └── index.html
+│   └── shared/
+│       ├── docs-shell.css
+│       ├── docs-shell-page.template.html
+│       └── docs-shell.js
 ├── hosting/
 │   └── public/
 │       ├── index.html
@@ -80,6 +87,7 @@ The platform never builds app source directly; it consumes app-published artifac
 
 - `haderach.ai/docs/`
 - Platform-level docs hub/shell route.
+- Implemented with shared docs-shell assets to keep UX consistent with app docs surfaces.
 
 ### App runtime
 
@@ -90,6 +98,7 @@ The platform never builds app source directly; it consumes app-published artifac
 
 - `haderach.ai/<app>/docs/`
 - Served from promoted docs artifact path for that app ID.
+- App repos should reuse the same docs-shell files/patterns used by platform docs for consistent tabs/layout.
 
 Route names are stable platform-facing identifiers and are decoupled from app repository names.
 
@@ -161,3 +170,11 @@ For local Hosting parity around platform docs/priorities:
 2. Sync `docs/` into `hosting/public/docs/` via `bash scripts/sync_docs_card.sh`.
 3. Run Hosting emulator from repo root:
    `firebase emulators:start --only hosting --project haderach-ai --config firebase.json`.
+
+## Docs UX Reuse Contract
+
+For consistent docs UI across platform and apps:
+
+- Canonical shell assets live in `docs/shared/docs-shell.css` and `docs/shared/docs-shell.js`.
+- Platform page at `docs/index.html` uses those shared assets for `/docs`.
+- App repos should use the same markup pattern (template: `docs/shared/docs-shell-page.template.html`) and only customize app-specific labels, route base path, and tab sources.

@@ -26,6 +26,7 @@ Application implementation, app CI, and app-local tests live in separate app rep
 - `.github/workflows/deploy.yml` - safe starter deploy workflow (manual, placeholder deploy).
 - `docs/architecture.md` - ownership boundaries, release flow, routing model.
 - `docs/app-registry.example.json` - app registry contract template.
+- `docs/index.html` + `docs/shared/` - reusable docs shell for `/docs` surfaces.
 - `scripts/` - docs generation and hosting sync helpers for local parity.
 
 ```text
@@ -41,8 +42,15 @@ haderach-platform/
 │   └── workflows/
 │       └── deploy.yml
 ├── docs/
+│   ├── index.html
 │   ├── architecture.md
-│   └── app-registry.example.json
+│   ├── app-registry.example.json
+│   ├── priorities/
+│   │   └── index.html
+│   └── shared/
+│       ├── docs-shell.css
+│       ├── docs-shell-page.template.html
+│       └── docs-shell.js
 ├── hosting/
 │   └── public/
 │       ├── index.html
@@ -83,6 +91,38 @@ firebase emulators:start --only hosting --project haderach-ai --config firebase.
 
 Each app repo publishes immutable artifacts + metadata manifest.
 Platform reads that manifest via the app registry contract and promotes a version per environment.
+
+## Shared docs shell
+
+The docs shell assets in `docs/shared/` are the canonical UI for all docs pages:
+
+- Platform docs: `haderach.ai/docs/` from `docs/index.html`.
+- App docs: `haderach.ai/<app>/docs/` in each app repo, reusing the same shell CSS/JS and template shape.
+
+Use `docs/shared/docs-shell-page.template.html` as the copy baseline for app repos, and set each app's `baseDocsPath` (for example `/card/docs`) so tabs resolve correctly.
+
+Canonical files to copy into each app repo:
+
+- `docs/index.html`
+- `docs/shared/docs-shell.css`
+- `docs/shared/docs-shell.js`
+- `docs/shared/docs-shell-page.template.html`
+
+Template replacement values per app:
+
+- `__APP_NAME__` (for example `Card`)
+- `__SIGNED_IN_LABEL__` (for example `card docs`)
+- `__DOCS_BASE_PATH__` (for example `/card/docs`)
+
+For strict tab parity, each app docs root should also include:
+
+- `<base>/test-status/catalog.json`
+- `<base>/priorities/index.html`
+- `<base>/requirements/catalog.json`
+- `<base>/testing/catalog.json`
+- `<base>/architecture.md`
+
+Architecture tab standard: `baseDocsPath + "/architecture.md"` for both platform and app docs shells.
 
 See:
 

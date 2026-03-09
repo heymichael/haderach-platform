@@ -16,7 +16,7 @@ alwaysApply: true
 - Keep **Why** focused on the outcome/problem, not just file changes.
 - In **Todo Mapping**, reference relevant items from `todo/todo_*.md` with file + item number.
 - In **Validation**, list only checks that were actually run.
-- If generated files are part of the workflow (for example `docs/haderach/tech-stack.html` from `docs/architecture.md`), include that in **Validation**.
+- If generated files are part of the workflow (for example `docs/haderach/architecture.md` from `docs/architecture.md`), include that in **Validation**.
 - If requirements docs changed, include requirements-specific validation in **Validation** (catalog regeneration, sync to hosting, and `tab=requirements`/`project=` behavior checks).
 - In **Deploy / Ops Notes**, explicitly call out Firebase Hosting, Cloud Run/docs, and any auth/IAP/secret implications.
 - Keep PRs small and single-purpose when possible.
