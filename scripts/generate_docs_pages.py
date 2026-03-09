@@ -6,6 +6,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+APP_DISPLAY_NAME = "Haderach Platform"
+
 try:
     import markdown
 except ImportError:
@@ -48,12 +50,12 @@ def main() -> int:
         (
             root / "todo" / "todo.md",
             root / "docs" / "priorities" / "index.html",
-            "Haderach Platform - Priorities",
+            f"{APP_DISPLAY_NAME} - Priorities",
         ),
         (
             root / "docs" / "architecture.md",
             root / "docs" / "architecture.html",
-            "Haderach Platform - Architecture",
+            f"{APP_DISPLAY_NAME} - Architecture",
         ),
     ]
 

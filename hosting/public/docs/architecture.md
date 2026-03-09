@@ -63,9 +63,9 @@ haderach-platform/
 │       ├── index.html
 │       └── robots.txt
 ├── scripts/
-│   ├── generate_priorities_docs.py
+│   ├── generate_docs_pages.py
 │   ├── requirements-docs.txt
-│   └── sync_docs_card.sh
+│   └── sync_docs.sh
 ├── todo/
 │   └── todo.md
 ├── .firebaserc
@@ -195,8 +195,8 @@ Additional baseline host headers should remain centrally managed in platform con
 
 For local Hosting parity around platform docs/priorities:
 
-1. Generate docs from `todo/todo.md` via `python3 scripts/generate_priorities_docs.py`.
-2. Sync `docs/` into `hosting/public/docs/` via `bash scripts/sync_docs_card.sh`.
+1. Generate docs from `todo/todo.md` via `python3 scripts/generate_docs_pages.py`.
+2. Sync `docs/` into `hosting/public/docs/` via `bash scripts/sync_docs.sh`.
 3. Run Hosting emulator from repo root:
    `firebase emulators:start --only hosting --project haderach-ai --config firebase.json`.
 

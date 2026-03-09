@@ -23,6 +23,6 @@ When working on a todo item: read the detail section for that number to get purp
 
 Regeneration requirement: Any change to `todo/todo.md` must regenerate priorities HTML before finishing:
 
-- Run `python scripts/generate_priorities_docs.py`
-- Run `bash scripts/sync_docs_card.sh` to copy regenerated docs into `hosting/public/docs/`
+- Run `python3 scripts/generate_docs_pages.py`
+- Run `bash scripts/sync_docs.sh` to copy regenerated docs into `hosting/public/docs/`
 - Verify the matching served file updates under `hosting/public/docs/priorities/index.html`

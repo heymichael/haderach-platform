@@ -27,21 +27,50 @@ It does not own app business logic. It owns shared hosting/routing/deployment or
 ├── docs/
 │   ├── index.html
 │   ├── architecture.md
+│   ├── architecture.html
 │   ├── app-registry.example.json
 │   ├── priorities/
 │   │   └── index.html
+│   ├── requirements/
+│   │   ├── catalog.json
+│   │   └── projects/
+│   │       └── requirements-project.template.html
+│   ├── test-status/
+│   │   ├── catalog.json
+│   │   ├── checks/
+│   │   │   ├── deploy-smoke-artifact-checks.html
+│   │   │   ├── deploy-smoke-contract-checks.html
+│   │   │   ├── nightly-e2e-regression-artifact-checks.html
+│   │   │   ├── nightly-e2e-regression-contract-checks.html
+│   │   │   ├── prod-monitor-artifact-checks.html
+│   │   │   └── prod-monitor-contract-checks.html
+│   │   ├── reports/
+│   │       ├── deploy-smoke.html
+│   │       ├── nightly-e2e-regression.html
+│   │       └── prod-monitor.html
+│   │   └── summaries/
+│   │       ├── deploy-smoke-summary.json
+│   │       ├── nightly-e2e-regression-summary.json
+│   │       └── prod-monitor-summary.json
+│   ├── testing/
+│   │   ├── catalog.json
+│   │   ├── test-lineup.html
+│   │   └── testing-infrastructure.html
 │   └── shared/
 │       ├── docs-shell.css
 │       ├── docs-shell-page.template.html
 │       └── docs-shell.js
 ├── hosting/
 │   └── public/
+│       ├── assets/
+│       │   └── landing/
+│       │       └── logo.svg
 │       ├── index.html
 │       └── robots.txt
 ├── scripts/
-│   ├── generate_priorities_docs.py
+│   ├── generate_docs_pages.py
 │   ├── requirements-docs.txt
-│   └── sync_docs_card.sh
+│   └── sync_docs.sh
 ├── todo/
 │   └── todo.md
 ├── .firebaserc
@@ -153,8 +182,8 @@ Fields intentionally decouple route naming from repository naming.</p>
 <h2 id="local-parity-prep">Local Parity Prep</h2>
 <p>For local Hosting parity around platform docs/priorities:</p>
 <ol>
-<li>Generate docs from <code>todo/todo.md</code> via <code>python3 scripts/generate_priorities_docs.py</code>.</li>
-<li>Sync <code>docs/</code> into <code>hosting/public/docs/</code> via <code>bash scripts/sync_docs_card.sh</code>.</li>
+<li>Generate docs from <code>todo/todo.md</code> via <code>python3 scripts/generate_docs_pages.py</code>.</li>
+<li>Sync <code>docs/</code> into <code>hosting/public/docs/</code> via <code>bash scripts/sync_docs.sh</code>.</li>
 <li>Run Hosting emulator from repo root:
    <code>firebase emulators:start --only hosting --project haderach-ai --config firebase.json</code>.</li>
 </ol>
@@ -164,6 +193,12 @@ Fields intentionally decouple route naming from repository naming.</p>
 <li>Canonical shell assets live in <code>docs/shared/docs-shell.css</code> and <code>docs/shared/docs-shell.js</code>.</li>
 <li>Platform page at <code>docs/index.html</code> uses those shared assets for <code>/docs</code>.</li>
 <li>App repos should use the same markup pattern (template: <code>docs/shared/docs-shell-page.template.html</code>) and only customize app-specific labels, route base path, and tab sources.</li>
+</ul>
+<p>For requirements docs, use the same source-&gt;served contract used by priorities:</p>
+<ul>
+<li>Authoring source of truth: <code>docs/requirements/projects/*.html</code> and <code>docs/requirements/catalog.json</code>.</li>
+<li>Served/deploy copy after sync: <code>hosting/public/docs/requirements/projects/*.html</code> and <code>hosting/public/docs/requirements/catalog.json</code>.</li>
+<li>Canonical project template: <code>docs/requirements/projects/requirements-project.template.html</code>.</li>
 </ul>
 </body>
 </html>

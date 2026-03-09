@@ -85,9 +85,9 @@ haderach-platform/
 │       ├── index.html
 │       └── robots.txt
 ├── scripts/
-│   ├── generate_priorities_docs.py
+│   ├── generate_docs_pages.py
 │   ├── requirements-docs.txt
-│   └── sync_docs_card.sh
+│   └── sync_docs.sh
 ├── todo/
 │   └── todo.md
 ├── .firebaserc
@@ -111,8 +111,8 @@ npm --version
 python3 --version
 firebase --version
 python3 -m pip install -r scripts/requirements-docs.txt
-python3 scripts/generate_priorities_docs.py
-bash scripts/sync_docs_card.sh
+python3 scripts/generate_docs_pages.py
+bash scripts/sync_docs.sh
 firebase emulators:start --only hosting --project haderach-ai --config firebase.json
 ```
 
@@ -132,8 +132,8 @@ Use `docs/shared/docs-shell-page.template.html` as the copy baseline for app rep
 
 Canonical files to copy into each app repo:
 
-- `scripts/generate_priorities_docs.py`
-- `scripts/sync_docs_card.sh`
+- `scripts/generate_docs_pages.py`
+- `scripts/sync_docs.sh`
 - `scripts/requirements-docs.txt`
 
 - `docs/index.html`
@@ -166,6 +166,29 @@ Requirements authoring/deploy contract (same pattern as priorities):
 Canonical requirements template:
 
 - `docs/requirements/projects/requirements-project.template.html`
+
+## Template Bootstrap Checklist
+
+When cloning this structure for a new app repository:
+
+1. Update app identity and routes:
+   - Set docs base path for the app (for example `/card/docs`) in `docs/index.html`.
+   - Update app display labels in docs pages/templates where appropriate.
+2. Normalize script identity:
+   - In `scripts/generate_docs_pages.py`, set `APP_DISPLAY_NAME` to your app name.
+3. Seed content sources:
+   - Add or update `docs/requirements/catalog.json` and project docs in `docs/requirements/projects/`.
+   - Add or update `docs/testing/catalog.json` + testing pages.
+   - Add or update `docs/test-status/catalog.json` + reports/checks/summaries placeholders.
+4. Generate and sync:
+   - `python3 scripts/generate_docs_pages.py`
+   - `bash scripts/sync_docs.sh`
+5. Verify shell behavior locally:
+   - Load docs root and each tab.
+   - Verify list/detail/back flows for requirements, testing, and test-status.
+   - Verify deep links (`?tab=...`, item params) and invalid-item fallbacks.
+6. Verify security/indexing defaults:
+   - Confirm `noindex, nofollow, noarchive` policy remains in meta + headers.
 
 See:
 
