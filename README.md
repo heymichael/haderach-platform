@@ -26,6 +26,8 @@ Application implementation, app CI, and app-local tests live in separate app rep
 - `.github/workflows/deploy.yml` - safe starter deploy workflow (manual, placeholder deploy).
 - `docs/architecture.md` - ownership boundaries, release flow, routing model.
 - `docs/app-registry.example.json` - app registry contract template.
+- `docs/artifact-manifest.schema.json` - canonical machine-readable artifact manifest schema.
+- `docs/artifact-manifest.example.json` - starter artifact manifest example.
 - `docs/index.html` + `docs/shared/` - reusable docs shell for `/docs` surfaces.
 - `scripts/` - docs generation and hosting sync helpers for local parity.
 
@@ -46,6 +48,8 @@ haderach-platform/
 │   ├── architecture.md
 │   ├── architecture.html
 │   ├── app-registry.example.json
+│   ├── artifact-manifest.schema.json
+│   ├── artifact-manifest.example.json
 │   ├── priorities/
 │   │   └── index.html
 │   ├── requirements/

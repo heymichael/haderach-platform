@@ -24,6 +24,8 @@ haderach-platform/
 │   ├── architecture.md
 │   ├── architecture.html
 │   ├── app-registry.example.json
+│   ├── artifact-manifest.schema.json
+│   ├── artifact-manifest.example.json
 │   ├── priorities/
 │   │   └── index.html
 │   ├── requirements/
@@ -158,6 +160,8 @@ Each app repo must publish immutable versioned artifacts plus metadata.
   }
 }
 ```
+
+See `docs/artifact-manifest.schema.json` for the canonical machine-readable schema.
 
 Platform consumes metadata and promotes specific versions by environment.
 
