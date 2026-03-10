@@ -1,0 +1,14 @@
+{
+  "app_id": "card",
+  "version": "0.1.0+build.1",
+  "commit_sha": "REPLACE_COMMIT_SHA",
+  "published_at": "2026-03-09T00:00:00Z",
+  "artifact": {
+    "runtime_uri": "gs://REPLACE_BUCKET/card/0.1.0/runtime.tar.gz",
+    "docs_uri": "gs://REPLACE_BUCKET/card/0.1.0/docs.tar.gz",
+    "checksum_sha256": "REPLACE_SHA256"
+  },
+  "compatibility": {
+    "platform_contract_version": "v1"
+  }
+}
