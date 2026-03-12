@@ -133,14 +133,78 @@ The platform never builds app source directly; it consumes app-published artifac
 
 Route names are stable platform-facing identifiers and are decoupled from app repository names.
 
+## Deploy Workflow
+
+The platform deploys app artifacts to Firebase Hosting via a manually-triggered
+GitHub Actions workflow (`.github/workflows/deploy.yml`).
+
+### Trigger
+
+Manual dispatch (`workflow_dispatch`) with two inputs:
+
+- `commit_sha`: the app commit SHA whose artifacts to deploy.
+- `target_env`: `staging` or `production`.
+
+### Flow
+
+1. Authenticate to GCP via Workload Identity Federation.
+2. Download `manifest.json`, `runtime.tar.gz`, `docs.tar.gz`, and `checksums.txt`
+   from `gs://haderach-app-artifacts/card/versions/<commit_sha>/`.
+3. Validate manifest (`app_id`, `platform_contract_version`, `commit_sha` match).
+4. Verify SHA-256 checksums against `checksums.txt`.
+5. Extract `runtime.tar.gz` into `hosting/public/card/`.
+6. Extract `docs.tar.gz` into `hosting/public/card/docs/`.
+7. Run `firebase deploy --only hosting --project haderach-ai`.
+
+### GCP Authentication
+
+- WIF pool: `projects/479571627322/locations/global/workloadIdentityPools/github-actions`
+- WIF provider: `.../providers/github-actions`
+- Service account: `haderach-platform-deployer@haderach-ai.iam.gserviceaccount.com`
+- Roles: `Storage Object Viewer` (artifact bucket), `Firebase Hosting Admin` (project).
+- Trust condition scoped to `heymichael/haderach-platform`.
+
+### Required GitHub repository variables
+
+| Variable | Purpose |
+|---|---|
+| `GCP_WORKLOAD_IDENTITY_PROVIDER` | WIF provider resource name |
+| `GCP_SERVICE_ACCOUNT` | GCP service account for deploy |
+| `GCS_ARTIFACT_BUCKET` | GCS bucket name (`haderach-app-artifacts`) |
+
+### Auth injection
+
+Not required. App and docs artifacts ship with auth config baked in at build time.
+The platform extracts and serves without modification.
+
+### Future evolution
+
+Current model is manual SHA dispatch. Planned evolution toward PR-promote
+(version file checked into repo, merge triggers deploy) or event-driven
+(card repo triggers platform via repository dispatch).
+
 ## Deployment Contract for App Repos
 
 Each app repo must publish immutable versioned artifacts plus metadata.
 
 ### Artifact format (minimal baseline)
 
-- Runtime artifact: static bundle directory (or tarball) suitable for hosting at `/<route_prefix>/`.
-- Docs artifact: static docs directory (or tarball) suitable for hosting at `/<route_prefix>/docs/`.
+- Runtime artifact: `runtime.tar.gz` — static bundle suitable for hosting at `/<route_prefix>/`.
+- Docs artifact: `docs.tar.gz` — static docs site suitable for hosting at `/<route_prefix>/docs/`.
+- Checksums: `checksums.txt` — SHA-256 checksums for both tarballs.
+- Metadata: `manifest.json` — machine-readable version and artifact metadata.
+
+### GCS artifact paths
+
+Immutable versioned artifacts are stored at:
+
+```text
+gs://haderach-app-artifacts/<app_id>/versions/<commit-sha>/
+  runtime.tar.gz
+  docs.tar.gz
+  checksums.txt
+  manifest.json
+```
 
 ### Required metadata (example shape)
 
@@ -151,8 +215,8 @@ Each app repo must publish immutable versioned artifacts plus metadata.
   "commit_sha": "abc123...",
   "published_at": "2026-03-05T12:00:00Z",
   "artifact": {
-    "runtime_uri": "gs://example-bucket/card/1.2.3/runtime.tar.gz",
-    "docs_uri": "gs://example-bucket/card/1.2.3/docs.tar.gz",
+    "runtime_uri": "gs://haderach-app-artifacts/card/versions/abc123.../runtime.tar.gz",
+    "docs_uri": "gs://haderach-app-artifacts/card/versions/abc123.../docs.tar.gz",
     "checksum_sha256": "..."
   },
   "compatibility": {
@@ -174,6 +238,12 @@ Fields intentionally decouple route naming from repository naming.
 - `route_prefix`: URL segment used at `haderach.ai/<route_prefix>/`.
 - `artifact_source`: where platform discovers published metadata/artifacts.
 - `docs_route`: explicit docs route (normally `/<route_prefix>/docs/`).
+
+### Onboarded apps
+
+| App ID | Route prefix | Docs route | Status |
+|---|---|---|---|
+| `card` | `/card/` | `/card/docs/` | First deploy |
 
 ## Smoke Test Ownership
 

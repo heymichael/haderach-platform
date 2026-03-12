@@ -3,7 +3,7 @@
 Platform control plane for `haderach.ai`.
 
 This repository owns shared hosting/routing/deploy orchestration and cross-app smoke checks.
-Application implementation, app CI, and app-local tests live in separate app repositories (for example `card_app`, `quote_app`, and future client app repos).
+Application implementation, app CI, and app-local tests live in separate app repositories (for example `card`, `quote`, and future app repos).
 
 ## What this repo is responsible for
 
@@ -19,12 +19,12 @@ Application implementation, app CI, and app-local tests live in separate app rep
 - Building app source from app repos.
 - App unit/integration test suites.
 
-## Repository layout (initial)
+## Repository layout
 
-- `hosting/public/` - platform-hosted static root content.
+- `hosting/public/` - platform-hosted static root content (app artifacts extracted here at deploy time).
 - `firebase.json` - hosting baseline and security/indexing defaults.
-- `.github/workflows/deploy.yml` - safe starter deploy workflow (manual, placeholder deploy).
-- `docs/architecture.md` - ownership boundaries, release flow, routing model.
+- `.github/workflows/deploy.yml` - deploy workflow (manual dispatch, WIF auth, artifact download, Firebase deploy).
+- `docs/architecture.md` - ownership boundaries, release flow, deploy workflow, routing model.
 - `docs/app-registry.example.json` - app registry contract template.
 - `docs/artifact-manifest.schema.json` - canonical machine-readable artifact manifest schema.
 - `docs/artifact-manifest.example.json` - starter artifact manifest example.
@@ -199,22 +199,34 @@ See:
 - `docs/architecture.md`
 - `docs/app-registry.example.json`
 
-## Promotion/deploy model options
+## Deploy workflow
 
-### Option A: Auto-promote
+The deploy workflow (`.github/workflows/deploy.yml`) is triggered manually via `workflow_dispatch`.
 
-- After app artifact publish, policy auto-selects latest passing version for staging.
-- Production promotion remains gated (manual approval recommended).
+Inputs:
 
-### Option B: PR-promote (recommended starter)
+- `commit_sha`: the app commit SHA whose published artifacts to deploy.
+- `target_env`: `staging` or `production`.
 
-- Promotion change is submitted as a platform PR (manifest/version bump).
-- Review + merge drives deployment workflow.
-- Clear audit trail and rollback simplicity.
+The workflow authenticates to GCP via Workload Identity Federation, downloads and verifies artifacts from `gs://haderach-app-artifacts/card/versions/<sha>/`, extracts them into `hosting/public/card/` and `hosting/public/card/docs/`, then runs `firebase deploy --only hosting`.
 
-## Migration plan for first app onboarding (short)
+Required GitHub repository variables:
 
-1. Define app registry entry:
-   - `app_id`, `route_prefix`, artifact manifest URI, docs route.
-2. Implement app repo artifact publish + metadata contract (`v1`).
-3. Promote first version in platform and deploy to staging, then run platform smoke checks.
+- `GCP_WORKLOAD_IDENTITY_PROVIDER`
+- `GCP_SERVICE_ACCOUNT`
+- `GCS_ARTIFACT_BUCKET`
+
+See `docs/architecture.md` for full deploy flow details and GCP auth setup.
+
+## Onboarded apps
+
+| App ID | Route | Docs Route | Artifact Bucket Path |
+|---|---|---|---|
+| `card` | `/card/` | `/card/docs/` | `card/versions/<sha>/` |
+
+## Promotion/deploy model evolution
+
+Current model is manual SHA dispatch. Planned evolution:
+
+- **PR-promote**: version file checked into repo, merge triggers deploy (audit trail + rollback).
+- **Event-driven**: app repo triggers platform via repository dispatch after artifact publish.

@@ -3,21 +3,21 @@
   "apps": [
     {
       "app_id": "card",
-      "route_prefix": "cards",
+      "route_prefix": "card",
       "artifact_source": {
         "type": "manifest_uri",
         "value": "gs://REPLACE_BUCKET/card/releases/latest.json"
       },
-      "docs_route": "/cards/docs/"
+      "docs_route": "/card/docs/"
     },
     {
       "app_id": "quote",
-      "route_prefix": "quotes",
+      "route_prefix": "quote",
       "artifact_source": {
         "type": "manifest_uri",
         "value": "gs://REPLACE_BUCKET/quote/releases/latest.json"
       },
-      "docs_route": "/quotes/docs/"
+      "docs_route": "/quote/docs/"
     }
   ]
 }
