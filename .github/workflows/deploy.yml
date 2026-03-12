@@ -3,6 +3,10 @@ name: platform-deploy
 on:
   workflow_dispatch:
     inputs:
+      commit_sha:
+        description: "Card app commit SHA to deploy"
+        required: true
+        type: string
       target_env:
         description: "Deployment target environment"
         required: true
@@ -10,10 +14,6 @@ on:
         options:
           - staging
           - production
-      release_ref:
-        description: "Platform release reference (tag/sha/manifest id)"
-        required: true
-        type: string
 
 permissions:
   contents: read
@@ -23,25 +23,89 @@ concurrency:
   group: platform-deploy-${{ inputs.target_env }}
   cancel-in-progress: false
 
+env:
+  APP_ID: card
+  GCS_PATH: card/versions/${{ inputs.commit_sha }}
+
 jobs:
-  validate:
-    name: Validate deployment request
+  download-and-verify:
+    name: Download and verify artifacts
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Authenticate to GCP via WIF
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
-      - name: Display requested deployment
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Download artifacts from GCS
         run: |
-          echo "target_env=${{ inputs.target_env }}"
-          echo "release_ref=${{ inputs.release_ref }}"
+          mkdir -p artifacts
+          gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ env.GCS_PATH }}/manifest.json" artifacts/
+          gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ env.GCS_PATH }}/runtime.tar.gz" artifacts/
+          gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ env.GCS_PATH }}/docs.tar.gz" artifacts/
+          gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ env.GCS_PATH }}/checksums.txt" artifacts/
 
-      - name: Verify firebase config exists
-        run: test -f firebase.json && test -f .firebaserc
+      - name: Validate manifest
+        run: |
+          echo "--- manifest.json ---"
+          cat artifacts/manifest.json
+          echo ""
+
+          MANIFEST_APP_ID=$(jq -r '.app_id' artifacts/manifest.json)
+          CONTRACT_VERSION=$(jq -r '.compatibility.platform_contract_version' artifacts/manifest.json)
+          MANIFEST_SHA=$(jq -r '.commit_sha' artifacts/manifest.json)
+
+          if [ "$MANIFEST_APP_ID" != "${{ env.APP_ID }}" ]; then
+            echo "ERROR: manifest app_id '$MANIFEST_APP_ID' does not match expected '${{ env.APP_ID }}'"
+            exit 1
+          fi
+
+          if [ "$CONTRACT_VERSION" != "v1" ]; then
+            echo "ERROR: unsupported contract version '$CONTRACT_VERSION'"
+            exit 1
+          fi
+
+          if [ "$MANIFEST_SHA" != "${{ inputs.commit_sha }}" ]; then
+            echo "ERROR: manifest commit_sha '$MANIFEST_SHA' does not match requested '${{ inputs.commit_sha }}'"
+            exit 1
+          fi
+
+          echo "Manifest validation passed."
+
+      - name: Verify checksums
+        working-directory: artifacts
+        run: |
+          echo "--- checksums.txt ---"
+          cat checksums.txt
+          echo ""
+
+          echo "Verifying checksums..."
+          sha256sum -c checksums.txt
+          echo "Checksum verification passed."
+
+      - name: Inspect tarball contents
+        run: |
+          echo "--- runtime.tar.gz contents ---"
+          tar -tzf artifacts/runtime.tar.gz | head -20
+          echo ""
+          echo "--- docs.tar.gz contents ---"
+          tar -tzf artifacts/docs.tar.gz | head -20
+
+      - name: Upload verified artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-artifacts
+          path: artifacts/
+          retention-days: 1
 
   deploy:
-    name: Deploy (placeholder)
-    needs: validate
+    name: Deploy to Firebase Hosting
+    needs: download-and-verify
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.target_env }}
@@ -49,8 +113,41 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Placeholder deploy step
+      - name: Download verified artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: verified-artifacts
+          path: artifacts/
+
+      - name: Extract app runtime
         run: |
-          echo "Deploy is intentionally placeholder."
-          echo "Wire OIDC + Firebase/GCP auth before enabling real deploy."
-          echo "Requested ref: ${{ inputs.release_ref }}"
+          mkdir -p hosting/public/card
+          tar -xzf artifacts/runtime.tar.gz -C hosting/public/card
+          echo "--- hosting/public/card/ contents ---"
+          ls -la hosting/public/card/
+
+      - name: Extract app docs
+        run: |
+          mkdir -p hosting/public/card/docs
+          tar -xzf artifacts/docs.tar.gz -C hosting/public/card/docs
+          echo "--- hosting/public/card/docs/ contents ---"
+          ls -la hosting/public/card/docs/
+
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Deploy to Firebase Hosting
+        run: npx firebase-tools deploy --only hosting --project haderach-ai
+
+      - name: Log deployment summary
+        run: |
+          echo "============================================"
+          echo "Deployment complete"
+          echo "  App:         ${{ env.APP_ID }}"
+          echo "  Commit SHA:  ${{ inputs.commit_sha }}"
+          echo "  Environment: ${{ inputs.target_env }}"
+          echo "  Version:     $(jq -r '.version' artifacts/manifest.json)"
+          echo "============================================"

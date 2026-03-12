@@ -29,6 +29,8 @@ It does not own app business logic. It owns shared hosting/routing/deployment or
 │   ├── architecture.md
 │   ├── architecture.html
 │   ├── app-registry.example.json
+│   ├── artifact-manifest.schema.json
+│   ├── artifact-manifest.example.json
 │   ├── priorities/
 │   │   └── index.html
 │   ├── requirements/
@@ -130,13 +132,81 @@ It does not own app business logic. It owns shared hosting/routing/deployment or
 <li>App repos should reuse the same docs-shell files/patterns used by platform docs for consistent tabs/layout.</li>
 </ul>
 <p>Route names are stable platform-facing identifiers and are decoupled from app repository names.</p>
+<h2 id="deploy-workflow">Deploy Workflow</h2>
+<p>The platform deploys app artifacts to Firebase Hosting via a manually-triggered
+GitHub Actions workflow (<code>.github/workflows/deploy.yml</code>).</p>
+<h3 id="trigger">Trigger</h3>
+<p>Manual dispatch (<code>workflow_dispatch</code>) with two inputs:</p>
+<ul>
+<li><code>commit_sha</code>: the app commit SHA whose artifacts to deploy.</li>
+<li><code>target_env</code>: <code>staging</code> or <code>production</code>.</li>
+</ul>
+<h3 id="flow">Flow</h3>
+<ol>
+<li>Authenticate to GCP via Workload Identity Federation.</li>
+<li>Download <code>manifest.json</code>, <code>runtime.tar.gz</code>, <code>docs.tar.gz</code>, and <code>checksums.txt</code>
+   from <code>gs://haderach-app-artifacts/card/versions/&lt;commit_sha&gt;/</code>.</li>
+<li>Validate manifest (<code>app_id</code>, <code>platform_contract_version</code>, <code>commit_sha</code> match).</li>
+<li>Verify SHA-256 checksums against <code>checksums.txt</code>.</li>
+<li>Extract <code>runtime.tar.gz</code> into <code>hosting/public/card/</code>.</li>
+<li>Extract <code>docs.tar.gz</code> into <code>hosting/public/card/docs/</code>.</li>
+<li>Run <code>firebase deploy --only hosting --project haderach-ai</code>.</li>
+</ol>
+<h3 id="gcp-authentication">GCP Authentication</h3>
+<ul>
+<li>WIF pool: <code>projects/479571627322/locations/global/workloadIdentityPools/github-actions</code></li>
+<li>WIF provider: <code>.../providers/github-actions</code></li>
+<li>Service account: <code>haderach-platform-deployer@haderach-ai.iam.gserviceaccount.com</code></li>
+<li>Roles: <code>Storage Object Viewer</code> (artifact bucket), <code>Firebase Hosting Admin</code> (project).</li>
+<li>Trust condition scoped to <code>heymichael/haderach-platform</code>.</li>
+</ul>
+<h3 id="required-github-repository-variables">Required GitHub repository variables</h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GCP_WORKLOAD_IDENTITY_PROVIDER</code></td>
+<td>WIF provider resource name</td>
+</tr>
+<tr>
+<td><code>GCP_SERVICE_ACCOUNT</code></td>
+<td>GCP service account for deploy</td>
+</tr>
+<tr>
+<td><code>GCS_ARTIFACT_BUCKET</code></td>
+<td>GCS bucket name (<code>haderach-app-artifacts</code>)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="auth-injection">Auth injection</h3>
+<p>Not required. App and docs artifacts ship with auth config baked in at build time.
+The platform extracts and serves without modification.</p>
+<h3 id="future-evolution">Future evolution</h3>
+<p>Current model is manual SHA dispatch. Planned evolution toward PR-promote
+(version file checked into repo, merge triggers deploy) or event-driven
+(card repo triggers platform via repository dispatch).</p>
 <h2 id="deployment-contract-for-app-repos">Deployment Contract for App Repos</h2>
 <p>Each app repo must publish immutable versioned artifacts plus metadata.</p>
 <h3 id="artifact-format-minimal-baseline">Artifact format (minimal baseline)</h3>
 <ul>
-<li>Runtime artifact: static bundle directory (or tarball) suitable for hosting at <code>/&lt;route_prefix&gt;/</code>.</li>
-<li>Docs artifact: static docs directory (or tarball) suitable for hosting at <code>/&lt;route_prefix&gt;/docs/</code>.</li>
+<li>Runtime artifact: <code>runtime.tar.gz</code> — static bundle suitable for hosting at <code>/&lt;route_prefix&gt;/</code>.</li>
+<li>Docs artifact: <code>docs.tar.gz</code> — static docs site suitable for hosting at <code>/&lt;route_prefix&gt;/docs/</code>.</li>
+<li>Checksums: <code>checksums.txt</code> — SHA-256 checksums for both tarballs.</li>
+<li>Metadata: <code>manifest.json</code> — machine-readable version and artifact metadata.</li>
 </ul>
+<h3 id="gcs-artifact-paths">GCS artifact paths</h3>
+<p>Immutable versioned artifacts are stored at:</p>
+<pre><code class="language-text">gs://haderach-app-artifacts/&lt;app_id&gt;/versions/&lt;commit-sha&gt;/
+  runtime.tar.gz
+  docs.tar.gz
+  checksums.txt
+  manifest.json
+</code></pre>
 <h3 id="required-metadata-example-shape">Required metadata (example shape)</h3>
 <pre><code class="language-json">{
   &quot;app_id&quot;: &quot;card&quot;,
@@ -144,8 +214,8 @@ It does not own app business logic. It owns shared hosting/routing/deployment or
   &quot;commit_sha&quot;: &quot;abc123...&quot;,
   &quot;published_at&quot;: &quot;2026-03-05T12:00:00Z&quot;,
   &quot;artifact&quot;: {
-    &quot;runtime_uri&quot;: &quot;gs://example-bucket/card/1.2.3/runtime.tar.gz&quot;,
-    &quot;docs_uri&quot;: &quot;gs://example-bucket/card/1.2.3/docs.tar.gz&quot;,
+    &quot;runtime_uri&quot;: &quot;gs://haderach-app-artifacts/card/versions/abc123.../runtime.tar.gz&quot;,
+    &quot;docs_uri&quot;: &quot;gs://haderach-app-artifacts/card/versions/abc123.../docs.tar.gz&quot;,
     &quot;checksum_sha256&quot;: &quot;...&quot;
   },
   &quot;compatibility&quot;: {
@@ -153,6 +223,7 @@ It does not own app business logic. It owns shared hosting/routing/deployment or
   }
 }
 </code></pre>
+<p>See <code>docs/artifact-manifest.schema.json</code> for the canonical machine-readable schema.</p>
 <p>Platform consumes metadata and promotes specific versions by environment.</p>
 <h2 id="app-registry-contract">App Registry Contract</h2>
 <p>Registry lives at <code>docs/app-registry.example.json</code> (template).
@@ -163,6 +234,25 @@ Fields intentionally decouple route naming from repository naming.</p>
 <li><code>artifact_source</code>: where platform discovers published metadata/artifacts.</li>
 <li><code>docs_route</code>: explicit docs route (normally <code>/&lt;route_prefix&gt;/docs/</code>).</li>
 </ul>
+<h3 id="onboarded-apps">Onboarded apps</h3>
+<table>
+<thead>
+<tr>
+<th>App ID</th>
+<th>Route prefix</th>
+<th>Docs route</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>card</code></td>
+<td><code>/card/</code></td>
+<td><code>/card/docs/</code></td>
+<td>First deploy</td>
+</tr>
+</tbody>
+</table>
 <h2 id="smoke-test-ownership">Smoke Test Ownership</h2>
 <p>Platform owns post-deploy smoke tests that validate:</p>
 <ul>

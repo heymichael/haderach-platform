@@ -24,3 +24,6 @@ firebase-debug.log
 tmp/
 dist/
 build/
+
+# Deploy-time app artifacts (extracted in CI, not checked in)
+hosting/public/card/
