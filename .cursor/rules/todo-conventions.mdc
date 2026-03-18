@@ -1,22 +1,58 @@
 ---
-description: Todo file structure and lifecycle conventions
+description: Centralized task management conventions using taskmd
 alwaysApply: true
 ---
 
-# Todo Conventions
+# Task Management (taskmd)
 
-Location: Root-level `todo/` folder; single file: `todo.md`.
+This platform repo is the **single source of truth** for all task management across all apps (card, stocks, platform). Tasks live in `tasks/` as individual markdown files with YAML frontmatter. Managed via [taskmd](https://github.com/driangle/taskmd).
 
-Structure:
+## Reading tasks for context
 
-- Open items (heading at top) - Single numbered list sorted by priority in this order: `[High]`, then `[Med]`, then `[Low]`. Renumber sequentially after any reorder so numbering is always `1..N`. Format: `N. [High] <item name>`.
-- Completed items (section below open items) - Use bullets (no numbering), keep completion date in brackets, and include PR status. Format: `- [YYYY-MM-DD] <item name> (PR #123)` or `- [YYYY-MM-DD] <item name> (no PR)`. Sort in descending order by date (newest first). If there are none, use `_(none)_`.
-- Detail sections (below the lists) - Include detail sections only for open numbered items, with enough Purpose and Approach so that later instructions like "work on todo item 3" can be executed with full context.
+When looking for work or understanding project priorities, only read tasks where `status` is `pending` or `in-progress`. Ignore `completed`, `cancelled`, and `blocked` tasks unless specifically asked about them.
 
-When adding a todo: add the line to Open items with the appropriate tag (`[High]`, `[Med]`, or `[Low]`), then place it in priority order and renumber the open list. Add a matching detail section (Purpose + Approach) below.
+## Task file format
 
-When completing a todo: move the line from Open items to Completed items, convert it to completed format with PR status (e.g. `- [2025-03-01] Point card app... (PR #123)` or `... (no PR)`), sort Completed items descending by date, and renumber the open list. Remove the completed item's detail section.
+Each task is a standalone `.md` file with YAML frontmatter:
 
-If a completed item included a `[BUG]` tag in Open items, preserve `[BUG]` in the Completed item text (e.g. `- [2026-03-04] [BUG] Fix ... (PR #123)`).
+```yaml
+---
+id: "001"
+title: "Short descriptive title"
+status: pending          # pending | in-progress | in-review | completed | blocked | cancelled
+group: card              # card | stocks | platform  (REQUIRED — which app this task belongs to)
+phase: card              # must match group — shows in the PHASE column of the list view
+priority: medium         # low | medium | high | critical
+type: feature            # feature | bug | improvement | chore | docs
+tags: [relevant, tags]
+dependencies: ["003"]    # optional: IDs of tasks that must complete first
+effort: medium           # optional: small | medium | large
+created: YYYY-MM-DD
+---
+```
 
-When working on a todo item: read the detail section for that number to get purpose and approach before implementing.
+The `group` and `phase` fields are required on every task and must have the same value. Valid values: `card`, `stocks`, `platform`. `group` enables "Group by: Group" in the Board view. `phase` shows the app in the PHASE column of the list view and enables the Phases view for per-app progress tracking.
+
+The markdown body should include Purpose/Objective and Approach/Acceptance Criteria sections.
+
+## Creating a task
+
+Use descriptive filenames: `ID-short-slug.md` (e.g., `007-add-caching-layer.md`). Use sequential IDs zero-padded to 3 digits. Always set both the `group` and `phase` fields to the same app value. If the app association is ambiguous (e.g., cross-cutting work), prompt the user to specify.
+
+## Completing a task
+
+Set `status: completed` in the frontmatter. Do not delete the file.
+
+## Spinning up the task dashboard
+
+To start the taskmd web dashboard:
+
+```sh
+taskmd web start --dir tasks/ --open --port 4173
+```
+
+Run this from the platform repo root (`haderach-platform/`). The binary is installed at `~/bin/taskmd`. The dashboard opens at `http://localhost:4173`.
+
+## Cross-repo task creation
+
+When working in an app repo (card, stocks) and a task needs to be created, write the task file to the platform repo at `../haderach-platform/tasks/`. Set the `group` field to match the app being worked on. The sibling layout under `haderach_site/` is relied upon: `haderach_site/{card,stocks,haderach-platform}`.

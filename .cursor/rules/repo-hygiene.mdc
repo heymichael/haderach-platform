@@ -17,7 +17,7 @@ This repository is the control plane for hosting, routing, deployment orchestrat
   - `README.md`
   - `docs/architecture.md`
   - `docs/learnings.md`
-  - `todo/todo.md` when work priority/state changes
+  - `tasks/` when work priority/state changes (taskmd format)
 - Preserve security/indexing defaults:
   - default `noindex` / `nofollow`
   - only allow indexing with explicit approval path documented
