@@ -117,8 +117,7 @@ jobs:
 
       - name: Extract app runtime
         run: |
-          mkdir -p hosting/public/card
-          tar -xzf artifacts/runtime.tar.gz -C hosting/public/card
+          tar -xzf artifacts/runtime.tar.gz -C hosting/public
           echo "--- hosting/public/card/ contents ---"
           ls -la hosting/public/card/
 
