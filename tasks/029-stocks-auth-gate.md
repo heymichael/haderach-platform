@@ -1,7 +1,7 @@
 ---
 id: "029"
 title: "Add Firebase Auth gate to stocks app"
-status: pending
+status: completed
 group: stocks
 phase: stocks
 priority: medium
