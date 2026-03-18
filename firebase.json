@@ -31,6 +31,13 @@
     ],
     "rewrites": [
       {
+        "source": "/stocks/api/**",
+        "run": {
+          "serviceId": "stocks-api",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "/",
         "destination": "/index.html"
       }

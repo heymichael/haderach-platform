@@ -47,7 +47,6 @@ jobs:
           mkdir -p artifacts
           gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ env.GCS_PATH }}/manifest.json" artifacts/
           gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ env.GCS_PATH }}/runtime.tar.gz" artifacts/
-          gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ env.GCS_PATH }}/docs.tar.gz" artifacts/
           gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ env.GCS_PATH }}/checksums.txt" artifacts/
 
       - name: Validate manifest
@@ -92,9 +91,6 @@ jobs:
         run: |
           echo "--- runtime.tar.gz contents ---"
           tar -tzf artifacts/runtime.tar.gz | head -20
-          echo ""
-          echo "--- docs.tar.gz contents ---"
-          tar -tzf artifacts/docs.tar.gz | head -20
 
       - name: Upload verified artifacts
         uses: actions/upload-artifact@v4
@@ -121,16 +117,10 @@ jobs:
 
       - name: Extract app runtime
         run: |
-          tar -xzf artifacts/runtime.tar.gz -C hosting/public
+          mkdir -p hosting/public/card
+          tar -xzf artifacts/runtime.tar.gz -C hosting/public/card
           echo "--- hosting/public/card/ contents ---"
           ls -la hosting/public/card/
-
-      - name: Extract app docs
-        run: |
-          mkdir -p hosting/public/card/docs
-          tar -xzf artifacts/docs.tar.gz -C hosting/public/card/docs
-          echo "--- hosting/public/card/docs/ contents ---"
-          ls -la hosting/public/card/docs/
 
       - name: Authenticate to GCP via WIF
         uses: google-github-actions/auth@v2
