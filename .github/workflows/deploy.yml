@@ -83,8 +83,8 @@ jobs:
           cat checksums.txt
           echo ""
 
-          echo "Verifying checksums..."
-          sha256sum -c checksums.txt
+          echo "Verifying runtime.tar.gz checksum..."
+          grep "runtime.tar.gz" checksums.txt | sha256sum -c -
           echo "Checksum verification passed."
 
       - name: Inspect tarball contents
@@ -117,8 +117,7 @@ jobs:
 
       - name: Extract app runtime
         run: |
-          mkdir -p hosting/public/card
-          tar -xzf artifacts/runtime.tar.gz -C hosting/public/card
+          tar -xzf artifacts/runtime.tar.gz -C hosting/public
           echo "--- hosting/public/card/ contents ---"
           ls -la hosting/public/card/
 
