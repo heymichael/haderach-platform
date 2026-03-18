@@ -1,9 +1,0 @@
-{
-  "suite": "deploy-smoke",
-  "status": "placeholder",
-  "lastRunUtc": "not run yet",
-  "notes": [
-    "Placeholder summary until first automated deploy smoke run is wired.",
-    "Use this location for machine-readable suite summaries."
-  ]
-}

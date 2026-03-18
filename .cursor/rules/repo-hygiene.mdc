@@ -16,9 +16,8 @@ This repository is the control plane for hosting, routing, deployment orchestrat
 - Use or update docs when behavior/contracts change:
   - `README.md`
   - `docs/architecture.md`
-  - app registry contract docs/config
+  - `docs/learnings.md`
   - `todo/todo.md` when work priority/state changes
-  - keep repository ASCII trees in `README.md` and `docs/architecture.md` synchronized with actual repo structure
 - Preserve security/indexing defaults:
   - default `noindex` / `nofollow`
   - only allow indexing with explicit approval path documented

@@ -25,5 +25,10 @@ tmp/
 dist/
 build/
 
+# Terraform
+infra/.terraform/
+*.tfstate
+*.tfstate.backup
+
 # Deploy-time app artifacts (extracted in CI, not checked in)
 hosting/public/card/

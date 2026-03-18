@@ -20,9 +20,3 @@ When completing a todo: move the line from Open items to Completed items, conver
 If a completed item included a `[BUG]` tag in Open items, preserve `[BUG]` in the Completed item text (e.g. `- [2026-03-04] [BUG] Fix ... (PR #123)`).
 
 When working on a todo item: read the detail section for that number to get purpose and approach before implementing.
-
-Regeneration requirement: Any change to `todo/todo.md` must regenerate priorities HTML before finishing:
-
-- Run `python3 scripts/generate_docs_pages.py`
-- Run `bash scripts/sync_docs.sh` to copy regenerated docs into `hosting/public/docs/`
-- Verify the matching served file updates under `hosting/public/docs/priorities/index.html`
