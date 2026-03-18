@@ -9,6 +9,8 @@ This platform repo is the **single source of truth** for all task management acr
 
 ## Reading tasks for context
 
+When the user references a task by number (e.g., "task 29", "task #029"), look it up in `tasks/` by matching the `id` field or filename prefix (e.g., `029-*.md`).
+
 When looking for work or understanding project priorities, only read tasks where `status` is `pending` or `in-progress`. Ignore `completed`, `cancelled`, and `blocked` tasks unless specifically asked about them.
 
 ## Task file format

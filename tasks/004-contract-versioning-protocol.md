@@ -18,4 +18,4 @@ Document how app manifest contract versions evolve over time so app/platform beh
 
 ## Approach
 
-After first deploy, update platform `docs/architecture.md` with a Contract Versioning Protocol section (breaking vs non-breaking changes, bump process, compatibility guarantees, and deprecation window), then add a concise pointer in this app repo's `docs/architecture.md`/`README.md` to that platform-owned protocol as the source of truth.
+After first deploy, update platform `docs/architecture.md` with a Contract Versioning Protocol section (breaking vs non-breaking changes, bump process, compatibility guarantees, and deprecation window), then add a concise pointer in the card repo's `docs/architecture.md`/`README.md` to that platform-owned protocol as the source of truth.
