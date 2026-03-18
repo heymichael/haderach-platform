@@ -36,6 +36,13 @@ resource "google_service_account_iam_member" "card_wif_binding" {
   member             = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/github-actions/attribute.repository/heymichael/card"
 }
 
+# heymichael/stocks repo can impersonate stocks-artifact-publisher
+resource "google_service_account_iam_member" "stocks_wif_binding" {
+  service_account_id = google_service_account.stocks_artifact_publisher.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/github-actions/attribute.repository/heymichael/stocks"
+}
+
 # heymichael/haderach-platform repo can impersonate platform-deployer
 resource "google_service_account_iam_member" "platform_wif_binding" {
   service_account_id = google_service_account.platform_deployer.name

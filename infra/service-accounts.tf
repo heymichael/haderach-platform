@@ -10,6 +10,12 @@ resource "google_service_account" "card_artifact_publisher" {
   project      = var.project_id
 }
 
+resource "google_service_account" "stocks_artifact_publisher" {
+  account_id   = "stocks-artifact-publisher"
+  display_name = "stocks-artifact-publisher"
+  project      = var.project_id
+}
+
 resource "google_service_account" "platform_deployer" {
   account_id   = "haderach-platform-deployer"
   display_name = "haderach-platform-deployer"
