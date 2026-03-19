@@ -1,7 +1,7 @@
 ---
 id: "003"
 title: "Standardize technical documentation"
-status: pending
+status: cancelled
 group: card
 phase: card
 priority: low

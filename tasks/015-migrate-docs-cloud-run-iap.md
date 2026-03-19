@@ -1,7 +1,7 @@
 ---
 id: "015"
 title: "Migrate private docs delivery to Cloud Run + IAP"
-status: pending
+status: cancelled
 group: platform
 phase: platform
 priority: low

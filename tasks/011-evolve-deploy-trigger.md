@@ -1,7 +1,7 @@
 ---
 id: "011"
 title: "Evolve deploy trigger to PR-promote or event-driven"
-status: pending
+status: cancelled
 group: platform
 phase: platform
 priority: medium

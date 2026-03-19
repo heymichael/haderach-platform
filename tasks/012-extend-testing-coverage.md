@@ -1,7 +1,7 @@
 ---
 id: "012"
 title: "Extend automatic testing coverage to all apps"
-status: pending
+status: completed
 group: platform
 phase: platform
 priority: medium
