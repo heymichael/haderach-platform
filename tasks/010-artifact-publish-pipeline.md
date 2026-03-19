@@ -1,7 +1,7 @@
 ---
 id: "010"
 title: "Add artifact publish pipeline"
-status: pending
+status: completed
 group: stocks
 phase: stocks
 priority: high
