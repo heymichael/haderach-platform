@@ -1,7 +1,7 @@
 ---
 id: "002"
 title: "Create automated authentication testing plan"
-status: pending
+status: cancelled
 group: card
 phase: card
 priority: medium

@@ -1,7 +1,7 @@
 ---
 id: "018"
 title: "Amend Root routing section after homepage app onboarding"
-status: pending
+status: cancelled
 group: platform
 phase: platform
 priority: low

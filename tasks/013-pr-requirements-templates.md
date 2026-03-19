@@ -1,7 +1,7 @@
 ---
 id: "013"
 title: "Add PR process/template and requirements process/template"
-status: pending
+status: cancelled
 group: platform
 phase: platform
 priority: medium
