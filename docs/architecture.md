@@ -31,12 +31,15 @@ haderach-platform/
 │       ├── index.html
 │       └── robots.txt
 ├── infra/
-│   └── (terraform modules)
-├── todo/
-│   └── todo.md
+│   └── (terraform modules, including firestore.tf)
+├── scripts/
+│   └── seed-allowlists.py
+├── tasks/
+│   └── (taskmd task files)
 ├── .firebaserc
 ├── .gitignore
 ├── firebase.json
+├── firestore.rules
 └── README.md
 ```
 
@@ -49,6 +52,7 @@ haderach-platform/
 - Environment deployment orchestration (staging/production).
 - Cross-app smoke tests after deployment.
 - Security defaults at host/platform level (headers, indexing defaults).
+- Centralized allowlist data in Firestore (see [Allowlist Management](#allowlist-management)).
 
 ### App repos own
 
@@ -227,6 +231,52 @@ Platform owns post-deploy smoke tests that validate:
 - Cross-app routing integrity (no collisions/regressions).
 
 App repos own deep app behavior tests; platform only verifies deploy/routing health.
+
+## Allowlist Management
+
+User access to individual apps is controlled via a centralized allowlist stored in
+Firestore, replacing the hardcoded email/domain arrays previously in each app's source.
+
+### Firestore collection: `allowlists`
+
+One document per app, keyed by app ID:
+
+```text
+allowlists/card     → surfaces.default.{emails, domains}
+allowlists/stocks   → surfaces.default.{emails, domains}
+```
+
+Both apps use a single flat surface (`default`).
+
+### How apps consume the allowlist
+
+Each app's `accessPolicy.ts` fetches its allowlist document from Firestore at runtime
+using the Firebase JS SDK. The fetch happens after Firebase Auth confirms the user's
+identity but before granting access.
+
+### Fail-closed behavior
+
+If the Firestore read fails (network error, missing document, permission denied),
+apps return an empty policy — all users are denied access until Firestore is reachable.
+
+### Managing the allowlist
+
+Edit documents directly in the [Firebase Console](https://console.firebase.google.com)
+under the `haderach-ai` project → Firestore Database → `allowlists` collection.
+Changes take effect immediately without app redeployment.
+
+### Security rules
+
+Defined in `firestore.rules` and deployed via `firebase deploy`:
+
+- **Read**: any authenticated Firebase user (required so the auth gate can check the list).
+- **Write**: denied from client SDKs. Admin writes go through the Firebase Console or
+  Admin SDK scripts.
+
+### Infrastructure
+
+- Firestore Native mode is provisioned via `infra/firestore.tf`.
+- Initial data was seeded using `scripts/seed-allowlists.py`.
 
 ## Security and Indexing Defaults
 

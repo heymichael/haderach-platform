@@ -1,7 +1,7 @@
 ---
 id: "031"
 title: "Centralize allowlist management at platform level"
-status: pending
+status: in-progress
 group: platform
 phase: platform
 priority: high
