@@ -33,6 +33,7 @@ concurrency:
 env:
   APP_ID: ${{ inputs.app_id }}
   GCS_PATH: ${{ inputs.app_id }}/versions/${{ inputs.commit_sha }}
+  ALL_APP_IDS: "card stocks"
 
 jobs:
   download-and-verify:
@@ -134,8 +135,39 @@ jobs:
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Restore other apps from latest deployed artifacts
+        run: |
+          for app in ${{ env.ALL_APP_IDS }}; do
+            if [ "$app" = "${{ inputs.app_id }}" ]; then
+              echo "Skipping $app (being deployed now)"
+              continue
+            fi
+
+            echo "Checking for latest-deployed marker for $app..."
+            MARKER="gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${app}/latest-deployed.json"
+            if gsutil -q stat "$MARKER" 2>/dev/null; then
+              SHA=$(gsutil cat "$MARKER" | jq -r '.commit_sha')
+              echo "Restoring $app at commit $SHA"
+              gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${app}/versions/${SHA}/runtime.tar.gz" "/tmp/${app}-runtime.tar.gz"
+              tar -xzf "/tmp/${app}-runtime.tar.gz" -C hosting/public
+              echo "Restored hosting/public/${app}/"
+              ls -la "hosting/public/${app}/"
+            else
+              echo "No deployed marker found for $app, skipping"
+            fi
+          done
+
       - name: Deploy to Firebase Hosting
         run: npx firebase-tools deploy --only hosting --project haderach-ai
+
+      - name: Write latest-deployed marker to GCS
+        run: |
+          echo '{"commit_sha":"${{ inputs.commit_sha }}","deployed_at":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}' \
+            | gsutil cp - "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ inputs.app_id }}/latest-deployed.json"
+          echo "Wrote latest-deployed marker for ${{ inputs.app_id }}"
 
       - name: Log deployment summary
         run: |
