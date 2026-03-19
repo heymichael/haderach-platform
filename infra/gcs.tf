@@ -44,9 +44,9 @@ resource "google_storage_bucket_iam_member" "deployer_viewer" {
   member = "serviceAccount:${google_service_account.platform_deployer.email}"
 }
 
-# Bucket IAM: platform-deployer can write objects (latest-deployed markers)
-resource "google_storage_bucket_iam_member" "deployer_creator" {
+# Bucket IAM: platform-deployer can read/write/overwrite objects (latest-deployed markers)
+resource "google_storage_bucket_iam_member" "deployer_admin" {
   bucket = google_storage_bucket.app_artifacts.name
-  role   = "roles/storage.objectCreator"
+  role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.platform_deployer.email}"
 }
