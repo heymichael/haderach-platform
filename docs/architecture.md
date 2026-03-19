@@ -18,7 +18,8 @@ haderach-platform/
 │       └── todo-conventions.mdc
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml
+│       ├── deploy.yml
+│       └── deploy-platform.yml
 ├── docs/
 │   ├── architecture.md
 │   └── learnings.md
@@ -83,34 +84,76 @@ The platform never builds app source directly; it consumes app-published artifac
 
 Route names are stable platform-facing identifiers and are decoupled from app repository names.
 
-## Deploy Workflow
+## Deploy Workflows
 
-The platform deploys app artifacts to Firebase Hosting via a manually-triggered
-GitHub Actions workflow (`.github/workflows/deploy.yml`).
+### App Deploy (`.github/workflows/deploy.yml`)
 
-### Trigger
+Deploys an app artifact to Firebase Hosting via manual dispatch.
 
-Manual dispatch (`workflow_dispatch`) with two inputs:
+#### Trigger
 
+Manual dispatch (`workflow_dispatch`) with inputs:
+
+- `app_id`: which app to deploy (`card` or `stocks`).
 - `commit_sha`: the app commit SHA whose artifacts to deploy.
 - `target_env`: `staging` or `production`.
 
-### Flow
+#### Flow
 
 1. Authenticate to GCP via Workload Identity Federation.
 2. Download `manifest.json`, `runtime.tar.gz`, and `checksums.txt`
-   from `gs://haderach-app-artifacts/card/versions/<commit_sha>/`.
+   from `gs://haderach-app-artifacts/<app_id>/versions/<commit_sha>/`.
 3. Validate manifest (`app_id`, `platform_contract_version`, `commit_sha` match).
 4. Verify SHA-256 checksums against `checksums.txt`.
-5. Extract `runtime.tar.gz` into `hosting/public/card/`.
-6. Run `firebase deploy --only hosting --project haderach-ai`.
+5. Extract `runtime.tar.gz` into `hosting/public/<app_id>/`.
+6. Restore all other onboarded apps from their latest deployed artifacts
+   (reads `latest-deployed.json` markers from GCS; see below).
+7. Run `firebase deploy --only hosting --project haderach-ai`.
+8. Write a `latest-deployed.json` marker to GCS for the deployed app.
+
+### Platform Hosting Deploy (`.github/workflows/deploy-platform.yml`)
+
+Deploys platform-owned hosting assets (homepage, robots.txt, logo) independently
+of any app artifact. Useful when platform assets change without an app deploy.
+
+#### Trigger
+
+Manual dispatch (`workflow_dispatch`) with one input:
+
+- `target_env`: `staging` or `production`.
+
+#### Flow
+
+1. Check out `main` (gets current platform assets in `hosting/public/`).
+2. Authenticate to GCP via Workload Identity Federation.
+3. For each onboarded app, read its `latest-deployed.json` marker from GCS.
+   If present, download and extract that version's `runtime.tar.gz` into
+   `hosting/public/<app_id>/`.
+4. Run `firebase deploy --only hosting --project haderach-ai`.
+
+### GCS Deploy Markers
+
+Because Firebase Hosting deploys are atomic (the entire `hosting/public/`
+directory is replaced), each deploy must reconstruct the full hosted state.
+Both workflows use GCS marker files to track which app version was last deployed:
+
+```text
+gs://haderach-app-artifacts/<app_id>/latest-deployed.json
+```
+
+```json
+{ "commit_sha": "<sha>", "deployed_at": "<ISO-8601>" }
+```
+
+The app deploy workflow writes this marker after a successful deploy.
+Both workflows read these markers to restore other apps' artifacts before deploying.
 
 ### GCP Authentication
 
 - WIF pool: `projects/479571627322/locations/global/workloadIdentityPools/github-actions`
 - WIF provider: `.../providers/github-actions`
 - Service account: `haderach-platform-deployer@haderach-ai.iam.gserviceaccount.com`
-- Roles: `Storage Object Viewer` (artifact bucket), `Firebase Hosting Admin` (project).
+- Roles: `Storage Object Viewer` and `Storage Object Creator` (artifact bucket), `Firebase Hosting Admin` (project).
 - Trust condition scoped to `heymichael/haderach-platform`.
 
 ### Required GitHub repository variables
@@ -172,7 +215,8 @@ Platform consumes metadata and promotes specific versions by environment.
 
 | App ID | Route prefix | Status |
 |---|---|---|
-| `card` | `/card/` | First deploy |
+| `card` | `/card/` | Deployed |
+| `stocks` | `/stocks/` | Deployed |
 
 ## Smoke Test Ownership
 

@@ -43,3 +43,10 @@ resource "google_storage_bucket_iam_member" "deployer_viewer" {
   role   = "roles/storage.objectViewer"
   member = "serviceAccount:${google_service_account.platform_deployer.email}"
 }
+
+# Bucket IAM: platform-deployer can write objects (latest-deployed markers)
+resource "google_storage_bucket_iam_member" "deployer_creator" {
+  bucket = google_storage_bucket.app_artifacts.name
+  role   = "roles/storage.objectCreator"
+  member = "serviceAccount:${google_service_account.platform_deployer.email}"
+}
