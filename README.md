@@ -8,6 +8,7 @@ Application implementation, app CI, and app-local tests live in separate app rep
 ## What this repo is responsible for
 
 - Shared host and routing topology for `haderach.ai`.
+- Platform-level authentication and RBAC (sign-in page, Firestore user/role management).
 - Promotion of app-published artifacts into deployable platform state.
 - Environment deploy orchestration.
 - Platform-level smoke checks across app routes.
@@ -21,12 +22,15 @@ Application implementation, app CI, and app-local tests live in separate app rep
 
 ## Repository layout
 
-- `hosting/public/` - platform-hosted static root content (app artifacts extracted here at deploy time).
+- `hosting/public/` - platform-hosted static root content (landing page, sign-in; app artifacts extracted here at deploy time).
 - `firebase.json` - hosting baseline and security/indexing defaults.
-- `.github/workflows/deploy.yml` - deploy workflow (manual dispatch, WIF auth, artifact download, Firebase deploy).
-- `docs/architecture.md` - ownership boundaries, release flow, deploy workflow, routing model.
+- `firestore.rules` - Firestore security rules (users collection, allowlists).
+- `.github/workflows/deploy.yml` - app deploy workflow (manual dispatch, WIF auth, artifact download, Firebase deploy).
+- `.github/workflows/deploy-platform.yml` - platform hosting deploy workflow (deploys platform assets without app artifacts).
+- `scripts/seed-users.py` - seed Firestore `users` collection with RBAC role assignments.
+- `docs/architecture.md` - ownership boundaries, release flow, deploy workflow, routing model, auth/RBAC.
 - `docs/learnings.md` - reusable implementation patterns.
-- `todo/todo.md` - work priorities and tracking.
+- `tasks/` - per-task markdown files managed by [taskmd](https://github.com/driangle/taskmd).
 - `infra/` - Terraform modules for GCP infrastructure.
 
 ```text
@@ -40,7 +44,8 @@ haderach-platform/
 │       └── todo-conventions.mdc
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml
+│       ├── deploy.yml
+│       └── deploy-platform.yml
 ├── docs/
 │   ├── architecture.md
 │   └── learnings.md
@@ -53,11 +58,15 @@ haderach-platform/
 │       └── robots.txt
 ├── infra/
 │   └── (terraform modules)
-├── todo/
-│   └── todo.md
+├── scripts/
+│   ├── seed-allowlists.py
+│   └── seed-users.py
+├── tasks/
+│   └── *.md (one file per task, managed by taskmd)
 ├── .firebaserc
 ├── .gitignore
 ├── firebase.json
+├── firestore.rules
 └── README.md
 ```
 
@@ -103,7 +112,7 @@ See `docs/architecture.md` for full deploy flow details and GCP auth setup.
 | App ID | Route | Artifact Bucket Path |
 |---|---|---|
 | `card` | `/card/` | `card/versions/<sha>/` |
-| `stocks` | `/stocks/` | N/A (Cloud Run) |
+| `stocks` | `/stocks/` | `stocks/versions/<sha>/` |
 
 ## Promotion/deploy model evolution
 
