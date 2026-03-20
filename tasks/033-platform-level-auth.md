@@ -1,7 +1,7 @@
 ---
 id: "033"
 title: "Centralize authentication at platform level with per-app permissions"
-status: pending
+status: in-progress
 group: platform
 phase: platform
 priority: high
