@@ -10,8 +10,8 @@ description: >-
 
 ## When to use
 
-When the user asks for the latest artifact SHA for an app (card, stocks), or
-needs the commit hash to trigger a deploy workflow.
+When the user asks for the latest artifact SHA for an app (home, card, stocks),
+or needs the commit hash to trigger a deploy workflow.
 
 ## How to fetch
 
@@ -20,6 +20,7 @@ Run the script from the platform repo:
 ```bash
 cd /Users/michaelmader_1/haderach_org/haderach_site/haderach-platform
 ./scripts/latest-artifact-sha.sh          # all apps
+./scripts/latest-artifact-sha.sh home     # single app
 ./scripts/latest-artifact-sha.sh card     # single app
 ./scripts/latest-artifact-sha.sh stocks   # single app
 ```
@@ -32,8 +33,9 @@ and returns the most recent commit SHA.
 ## Output format
 
 ```
-card: abc123def456...
-stocks: 789xyz...
+home: abc123def456...
+card: 789xyz...
+stocks: def987...
 ```
 
 ## Using the SHA for deploys

@@ -37,6 +37,19 @@ resource "google_storage_bucket_iam_member" "stocks_publisher_viewer" {
   member = "serviceAccount:${google_service_account.stocks_artifact_publisher.email}"
 }
 
+# Bucket IAM: home-artifact-publisher can create and view objects
+resource "google_storage_bucket_iam_member" "home_publisher_creator" {
+  bucket = google_storage_bucket.app_artifacts.name
+  role   = "roles/storage.objectCreator"
+  member = "serviceAccount:${google_service_account.home_artifact_publisher.email}"
+}
+
+resource "google_storage_bucket_iam_member" "home_publisher_viewer" {
+  bucket = google_storage_bucket.app_artifacts.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_service_account.home_artifact_publisher.email}"
+}
+
 # Bucket IAM: platform-deployer can view objects (download artifacts)
 resource "google_storage_bucket_iam_member" "deployer_viewer" {
   bucket = google_storage_bucket.app_artifacts.name

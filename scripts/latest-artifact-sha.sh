@@ -5,19 +5,30 @@
 #
 # Usage:
 #   ./scripts/latest-artifact-sha.sh          # all apps
+#   ./scripts/latest-artifact-sha.sh home     # single app
 #   ./scripts/latest-artifact-sha.sh card     # single app
 #   ./scripts/latest-artifact-sha.sh stocks   # single app
 
 set -eo pipefail
 
+if ! gcloud auth print-access-token &>/dev/null; then
+  echo "ERROR: gcloud auth expired. Run: gcloud auth login" >&2
+  exit 1
+fi
+
 BUCKET="haderach-app-artifacts"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SITE_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
-APPS=("card" "stocks")
+APPS=("home" "card" "stocks")
 
 get_app_dir() {
-  echo "${SITE_DIR}/$1"
+  local app_id="$1"
+  if [[ "$app_id" == "home" ]]; then
+    echo "${SITE_DIR}/haderach-home"
+  else
+    echo "${SITE_DIR}/${app_id}"
+  fi
 }
 
 fetch_latest() {

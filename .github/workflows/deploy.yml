@@ -8,6 +8,7 @@ on:
         required: true
         type: choice
         options:
+          - home
           - card
           - stocks
       commit_sha:
@@ -33,7 +34,7 @@ concurrency:
 env:
   APP_ID: ${{ inputs.app_id }}
   GCS_PATH: ${{ inputs.app_id }}/versions/${{ inputs.commit_sha }}
-  ALL_APP_IDS: "card stocks"
+  ALL_APP_IDS: "home card stocks"
 
 jobs:
   download-and-verify:
@@ -126,8 +127,13 @@ jobs:
       - name: Extract app runtime
         run: |
           tar -xzf artifacts/runtime.tar.gz -C hosting/public
-          echo "--- hosting/public/${{ inputs.app_id }}/ contents ---"
-          ls -la "hosting/public/${{ inputs.app_id }}/"
+          if [ "${{ inputs.app_id }}" = "home" ]; then
+            echo "--- hosting/public/ (home extracts at root) ---"
+            ls -la hosting/public/
+          else
+            echo "--- hosting/public/${{ inputs.app_id }}/ contents ---"
+            ls -la "hosting/public/${{ inputs.app_id }}/"
+          fi
 
       - name: Authenticate to GCP via WIF
         uses: google-github-actions/auth@v2
@@ -153,8 +159,12 @@ jobs:
               echo "Restoring $app at commit $SHA"
               gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${app}/versions/${SHA}/runtime.tar.gz" "/tmp/${app}-runtime.tar.gz"
               tar -xzf "/tmp/${app}-runtime.tar.gz" -C hosting/public
-              echo "Restored hosting/public/${app}/"
-              ls -la "hosting/public/${app}/"
+              if [ "$app" = "home" ]; then
+                echo "Restored home app (root-level files in hosting/public/)"
+              else
+                echo "Restored hosting/public/${app}/"
+                ls -la "hosting/public/${app}/"
+              fi
             else
               echo "No deployed marker found for $app, skipping"
             fi
