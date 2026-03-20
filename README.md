@@ -29,7 +29,6 @@ Application implementation, app CI, and app-local tests live in separate app rep
 - `.github/workflows/deploy-platform.yml` - platform hosting deploy workflow (deploys platform assets without app artifacts).
 - `scripts/seed-users.py` - seed Firestore `users` collection with RBAC role assignments.
 - `docs/architecture.md` - ownership boundaries, release flow, deploy workflow, routing model, auth/RBAC.
-- `docs/learnings.md` - reusable implementation patterns.
 - `tasks/` - per-task markdown files managed by [taskmd](https://github.com/driangle/taskmd).
 - `infra/` - Terraform modules for GCP infrastructure.
 
@@ -47,8 +46,7 @@ haderach-platform/
 │       ├── deploy.yml
 │       └── deploy-platform.yml
 ├── docs/
-│   ├── architecture.md
-│   └── learnings.md
+│   └── architecture.md
 ├── hosting/
 │   └── public/
 │       ├── assets/

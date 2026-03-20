@@ -16,7 +16,6 @@ This repository is the control plane for hosting, routing, deployment orchestrat
 - Use or update docs when behavior/contracts change:
   - `README.md`
   - `docs/architecture.md`
-  - `docs/learnings.md`
   - `tasks/` when work priority/state changes (taskmd format)
 - Preserve security/indexing defaults:
   - default `noindex` / `nofollow`

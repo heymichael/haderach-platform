@@ -21,8 +21,7 @@ haderach-platform/
 │       ├── deploy.yml
 │       └── deploy-platform.yml
 ├── docs/
-│   ├── architecture.md
-│   └── learnings.md
+│   └── architecture.md
 ├── hosting/
 │   └── public/
 │       ├── assets/
