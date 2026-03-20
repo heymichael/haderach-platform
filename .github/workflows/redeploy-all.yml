@@ -1,4 +1,4 @@
-name: platform-hosting-deploy
+name: redeploy-all
 
 on:
   workflow_dispatch:
@@ -20,11 +20,11 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  ALL_APP_IDS: "card stocks"
+  ALL_APP_IDS: "home card stocks"
 
 jobs:
   deploy:
-    name: Deploy platform hosting assets
+    name: Redeploy all apps from latest artifacts
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.target_env }}
@@ -41,6 +41,11 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Prepare hosting directory
+        run: |
+          rm -rf hosting/public/*
+          mkdir -p hosting/public
+
       - name: Restore all apps from latest deployed artifacts
         run: |
           for app in ${{ env.ALL_APP_IDS }}; do
@@ -51,8 +56,12 @@ jobs:
               echo "Restoring $app at commit $SHA"
               gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${app}/versions/${SHA}/runtime.tar.gz" "/tmp/${app}-runtime.tar.gz"
               tar -xzf "/tmp/${app}-runtime.tar.gz" -C hosting/public
-              echo "Restored hosting/public/${app}/"
-              ls -la "hosting/public/${app}/"
+              if [ "$app" = "home" ]; then
+                echo "Restored home app (root-level files in hosting/public/)"
+              else
+                echo "Restored hosting/public/${app}/"
+                ls -la "hosting/public/${app}/"
+              fi
             else
               echo "No deployed marker found for $app, skipping"
             fi
@@ -64,7 +73,7 @@ jobs:
       - name: Log deployment summary
         run: |
           echo "============================================"
-          echo "Platform hosting deploy complete"
+          echo "Redeploy-all complete"
           echo "  Environment: ${{ inputs.target_env }}"
           echo "  Ref:         ${{ github.sha }}"
           echo "============================================"

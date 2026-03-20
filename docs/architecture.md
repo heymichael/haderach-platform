@@ -19,16 +19,12 @@ haderach-platform/
 ├── .github/
 │   └── workflows/
 │       ├── deploy.yml
-│       └── deploy-platform.yml
+│       └── redeploy-all.yml
 ├── docs/
 │   └── architecture.md
 ├── hosting/
 │   └── public/
-│       ├── assets/
-│       │   └── landing/
-│       │       └── logo.svg
-│       ├── index.html
-│       └── robots.txt
+│       └── .gitkeep          # deploy-time-only; all content from app artifacts
 ├── infra/
 │   └── (terraform modules, including firestore.tf)
 ├── scripts/
@@ -79,7 +75,7 @@ The platform never builds app source directly; it consumes app-published artifac
 ### Root
 
 - `haderach.ai/`
-- Platform landing/status page.
+- Served from the `home` app artifact (haderach-home repo).
 
 ### App runtime
 
@@ -98,7 +94,7 @@ Deploys an app artifact to Firebase Hosting via manual dispatch.
 
 Manual dispatch (`workflow_dispatch`) with inputs:
 
-- `app_id`: which app to deploy (`card` or `stocks`).
+- `app_id`: which app to deploy (`home`, `card`, or `stocks`).
 - `commit_sha`: the app commit SHA whose artifacts to deploy.
 - `target_env`: `staging` or `production`.
 
@@ -109,16 +105,19 @@ Manual dispatch (`workflow_dispatch`) with inputs:
    from `gs://haderach-app-artifacts/<app_id>/versions/<commit_sha>/`.
 3. Validate manifest (`app_id`, `platform_contract_version`, `commit_sha` match).
 4. Verify SHA-256 checksums against `checksums.txt`.
-5. Extract `runtime.tar.gz` into `hosting/public/<app_id>/`.
+5. Extract `runtime.tar.gz` into `hosting/public/` (home extracts at root level;
+   other apps extract into `hosting/public/<app_id>/`).
 6. Restore all other onboarded apps from their latest deployed artifacts
    (reads `latest-deployed.json` markers from GCS; see below).
 7. Run `firebase deploy --only hosting --project haderach-ai`.
 8. Write a `latest-deployed.json` marker to GCS for the deployed app.
 
-### Platform Hosting Deploy (`.github/workflows/deploy-platform.yml`)
+### Redeploy All (`.github/workflows/redeploy-all.yml`)
 
-Deploys platform-owned hosting assets (homepage, robots.txt, logo) independently
-of any app artifact. Useful when platform assets change without an app deploy.
+Reconstructs the full hosting state from latest-deployed artifact markers and
+redeploys. No new app versions are deployed — this uses whatever each app last
+deployed. Useful for applying `firebase.json` config changes (headers, rewrites)
+or performing a clean rebuild of the hosting state.
 
 #### Trigger
 
@@ -128,12 +127,11 @@ Manual dispatch (`workflow_dispatch`) with one input:
 
 #### Flow
 
-1. Check out `main` (gets current platform assets in `hosting/public/`).
-2. Authenticate to GCP via Workload Identity Federation.
-3. For each onboarded app, read its `latest-deployed.json` marker from GCS.
+1. Authenticate to GCP via Workload Identity Federation.
+2. For each onboarded app, read its `latest-deployed.json` marker from GCS.
    If present, download and extract that version's `runtime.tar.gz` into
-   `hosting/public/<app_id>/`.
-4. Run `firebase deploy --only hosting --project haderach-ai`.
+   `hosting/public/`.
+3. Run `firebase deploy --only hosting --project haderach-ai`.
 
 ### GCS Deploy Markers
 
@@ -181,6 +179,8 @@ Each app repo must publish immutable versioned artifacts plus metadata.
 ### Artifact format
 
 - Runtime artifact: `runtime.tar.gz` — static bundle suitable for hosting at `/<route_prefix>/`.
+  The `home` app is a special case: its tarball contains root-level files (not nested
+  under a subdirectory) because it is served at `/`.
 - Checksums: `checksums.txt` — SHA-256 checksum for the tarball.
 - Metadata: `manifest.json` — machine-readable version and artifact metadata.
 
@@ -217,10 +217,11 @@ Platform consumes metadata and promotes specific versions by environment.
 
 ## Onboarded Apps
 
-| App ID | Route prefix | Status |
-|---|---|---|
-| `card` | `/card/` | Deployed |
-| `stocks` | `/stocks/` | Deployed |
+| App ID | Route prefix | Repo | Status |
+|---|---|---|---|
+| `home` | `/` | `haderach-home` | Deployed |
+| `card` | `/card/` | `card` | Deployed |
+| `stocks` | `/stocks/` | `stocks` | Deployed |
 
 ## Smoke Test Ownership
 
@@ -243,9 +244,9 @@ Authentication is centralized at the platform level. Users sign in once at
 2. App's `AuthGate` checks for an existing Firebase Auth session (shared via
    same-origin IndexedDB persistence).
 3. If no session exists, the app redirects to `/?returnTo=/card/`.
-4. The platform landing page (`hosting/public/index.html`) handles Google sign-in
+4. The home app (`haderach-home`, served at `/`) handles Google sign-in
    via Firebase Auth.
-5. After sign-in, the platform fetches the user's roles from Firestore and either
+5. After sign-in, the home app fetches the user's roles from Firestore and either
    redirects to `returnTo` (if the user has access) or shows an app directory.
 
 ### Role-based access control
@@ -306,8 +307,8 @@ Defined in `firestore.rules` and deployed via `firebase deploy`:
 ### Forward compatibility
 
 The `APP_GRANTING_ROLES` mapping is currently duplicated in each app and the
-platform landing page. When a global nav is introduced, the mapping should be
-extracted to a single shared location (shared package or Firestore config document).
+home app. When a global nav is introduced, the mapping should be extracted to a
+single shared location (shared package or Firestore config document).
 
 ### Legacy: allowlists collection
 
