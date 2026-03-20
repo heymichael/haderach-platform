@@ -4,7 +4,7 @@ title: "Define full local parity contract for multi-app platform testing"
 status: pending
 group: platform
 phase: platform
-priority: medium
+priority: low
 type: docs
 tags: [testing, local-dev]
 created: 2026-03-03

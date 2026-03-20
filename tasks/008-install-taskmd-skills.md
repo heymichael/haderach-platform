@@ -1,7 +1,7 @@
 ---
 id: "008"
 title: "Install taskmd skills and MCP server"
-status: pending
+status: cancelled
 group: platform
 phase: platform
 priority: low

@@ -1,7 +1,7 @@
 ---
 id: "028"
 title: "Support task creation from workspaces without platform repo open"
-status: pending
+status: cancelled
 group: platform
 phase: platform
 priority: low
