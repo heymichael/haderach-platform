@@ -33,7 +33,8 @@ haderach-platform/
 ├── infra/
 │   └── (terraform modules, including firestore.tf)
 ├── scripts/
-│   └── seed-allowlists.py
+│   ├── seed-allowlists.py
+│   └── seed-users.py
 ├── tasks/
 │   └── (taskmd task files)
 ├── .firebaserc
@@ -52,7 +53,7 @@ haderach-platform/
 - Environment deployment orchestration (staging/production).
 - Cross-app smoke tests after deployment.
 - Security defaults at host/platform level (headers, indexing defaults).
-- Centralized allowlist data in Firestore (see [Allowlist Management](#allowlist-management)).
+- Platform-level authentication and RBAC (see [Authentication & RBAC](#authentication--rbac)).
 
 ### App repos own
 
@@ -232,51 +233,87 @@ Platform owns post-deploy smoke tests that validate:
 
 App repos own deep app behavior tests; platform only verifies deploy/routing health.
 
-## Allowlist Management
+## Authentication & RBAC
 
-User access to individual apps is controlled via a centralized allowlist stored in
-Firestore, replacing the hardcoded email/domain arrays previously in each app's source.
+Authentication is centralized at the platform level. Users sign in once at
+`haderach.ai/` and the session carries across all app routes on the same origin.
 
-### Firestore collection: `allowlists`
+### Sign-in flow
 
-One document per app, keyed by app ID:
+1. User navigates to an app route (e.g., `/card/`).
+2. App's `AuthGate` checks for an existing Firebase Auth session (shared via
+   same-origin IndexedDB persistence).
+3. If no session exists, the app redirects to `/?returnTo=/card/`.
+4. The platform landing page (`hosting/public/index.html`) handles Google sign-in
+   via Firebase Auth.
+5. After sign-in, the platform fetches the user's roles from Firestore and either
+   redirects to `returnTo` (if the user has access) or shows an app directory.
+
+### Role-based access control
+
+User access is controlled via roles stored in Firestore `users/{email}` documents.
+Roles are global (not per-app) and a user can hold multiple roles.
+
+#### Roles
+
+| Role | Grants access to | Notes |
+|------|------------------|-------|
+| `admin` | All apps | Future: management privileges |
+| `member` | All apps | General access |
+| `card_member` | Card only | |
+| `stocks_member` | Stocks only | |
+
+#### Permission resolution
+
+Each app defines an `APP_GRANTING_ROLES` mapping in code. Access is granted if the
+user holds any role that grants access to that app. Role-to-permission mapping is
+intentionally in code (not Firestore) — the role set is small and well-defined.
+
+#### Firestore schema
 
 ```text
-allowlists/card     → surfaces.default.{emails, domains}
-allowlists/stocks   → surfaces.default.{emails, domains}
+users/{normalizedEmail}
+  roles: string[]        // e.g., ["admin"] or ["card_member", "stocks_member"]
+  createdAt: string      // ISO timestamp
 ```
 
-Both apps use a single flat surface (`default`).
+### Managing users
 
-### How apps consume the allowlist
+Edit user documents directly in the [Firebase Console](https://console.firebase.google.com)
+under the `haderach-ai` project → Firestore Database → `users` collection.
+Changes take effect immediately without app redeployment.
 
-Each app's `accessPolicy.ts` fetches its allowlist document from Firestore at runtime
-using the Firebase JS SDK. The fetch happens after Firebase Auth confirms the user's
-identity but before granting access.
+Initial data is seeded using `scripts/seed-users.py`.
 
 ### Fail-closed behavior
 
 If the Firestore read fails (network error, missing document, permission denied),
-apps return an empty policy — all users are denied access until Firestore is reachable.
-
-### Managing the allowlist
-
-Edit documents directly in the [Firebase Console](https://console.firebase.google.com)
-under the `haderach-ai` project → Firestore Database → `allowlists` collection.
-Changes take effect immediately without app redeployment.
+apps return an empty roles array — the user is denied access until Firestore is
+reachable.
 
 ### Security rules
 
 Defined in `firestore.rules` and deployed via `firebase deploy`:
 
-- **Read**: any authenticated Firebase user (required so the auth gate can check the list).
-- **Write**: denied from client SDKs. Admin writes go through the Firebase Console or
-  Admin SDK scripts.
+- `users/{email}`: read allowed if authenticated; writes denied from client SDKs.
+- `allowlists/{appId}`: retained for backward compatibility during migration.
+- Admin writes go through the Firebase Console or Admin SDK scripts.
 
 ### Infrastructure
 
 - Firestore Native mode is provisioned via `infra/firestore.tf`.
-- Initial data was seeded using `scripts/seed-allowlists.py`.
+- User data is seeded using `scripts/seed-users.py`.
+
+### Forward compatibility
+
+The `APP_GRANTING_ROLES` mapping is currently duplicated in each app and the
+platform landing page. When a global nav is introduced, the mapping should be
+extracted to a single shared location (shared package or Firestore config document).
+
+### Legacy: allowlists collection
+
+The `allowlists` collection and its Firestore rules remain in place for rollback
+safety. It can be removed once all apps are confirmed stable on the RBAC model.
 
 ## Security and Indexing Defaults
 
