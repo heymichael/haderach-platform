@@ -11,42 +11,24 @@ resource "google_storage_bucket" "app_artifacts" {
   uniform_bucket_level_access = true
 }
 
-# Bucket IAM: card-artifact-publisher can create and view objects
-resource "google_storage_bucket_iam_member" "card_publisher_creator" {
+# Bucket IAM: card-artifact-publisher can manage objects (create, view, overwrite)
+resource "google_storage_bucket_iam_member" "card_publisher_admin" {
   bucket = google_storage_bucket.app_artifacts.name
-  role   = "roles/storage.objectCreator"
+  role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.card_artifact_publisher.email}"
 }
 
-resource "google_storage_bucket_iam_member" "card_publisher_viewer" {
+# Bucket IAM: stocks-artifact-publisher can manage objects (create, view, overwrite)
+resource "google_storage_bucket_iam_member" "stocks_publisher_admin" {
   bucket = google_storage_bucket.app_artifacts.name
-  role   = "roles/storage.objectViewer"
-  member = "serviceAccount:${google_service_account.card_artifact_publisher.email}"
-}
-
-# Bucket IAM: stocks-artifact-publisher can create and view objects
-resource "google_storage_bucket_iam_member" "stocks_publisher_creator" {
-  bucket = google_storage_bucket.app_artifacts.name
-  role   = "roles/storage.objectCreator"
+  role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.stocks_artifact_publisher.email}"
 }
 
-resource "google_storage_bucket_iam_member" "stocks_publisher_viewer" {
+# Bucket IAM: home-artifact-publisher can manage objects (create, view, overwrite)
+resource "google_storage_bucket_iam_member" "home_publisher_admin" {
   bucket = google_storage_bucket.app_artifacts.name
-  role   = "roles/storage.objectViewer"
-  member = "serviceAccount:${google_service_account.stocks_artifact_publisher.email}"
-}
-
-# Bucket IAM: home-artifact-publisher can create and view objects
-resource "google_storage_bucket_iam_member" "home_publisher_creator" {
-  bucket = google_storage_bucket.app_artifacts.name
-  role   = "roles/storage.objectCreator"
-  member = "serviceAccount:${google_service_account.home_artifact_publisher.email}"
-}
-
-resource "google_storage_bucket_iam_member" "home_publisher_viewer" {
-  bucket = google_storage_bucket.app_artifacts.name
-  role   = "roles/storage.objectViewer"
+  role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.home_artifact_publisher.email}"
 }
 
