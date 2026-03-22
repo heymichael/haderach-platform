@@ -1,3 +1,8 @@
+output "vendors_api_url" {
+  description = "URL of the vendors-api Cloud Run service"
+  value       = google_cloud_run_v2_service.vendors_api.uri
+}
+
 output "stocks_api_url" {
   description = "URL of the stocks-api Cloud Run service"
   value       = google_cloud_run_v2_service.stocks_api.uri

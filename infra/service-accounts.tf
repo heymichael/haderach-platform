@@ -16,6 +16,12 @@ resource "google_service_account" "stocks_artifact_publisher" {
   project      = var.project_id
 }
 
+resource "google_service_account" "vendors_artifact_publisher" {
+  account_id   = "vendors-artifact-publisher"
+  display_name = "vendors-artifact-publisher"
+  project      = var.project_id
+}
+
 resource "google_service_account" "home_artifact_publisher" {
   account_id   = "home-artifact-publisher"
   display_name = "home-artifact-publisher"

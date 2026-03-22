@@ -1,7 +1,7 @@
 ---
 id: "032"
 title: "Add global header across all apps with logo and home navigation"
-status: pending
+status: done
 group: platform
 phase: platform
 priority: high
