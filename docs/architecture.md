@@ -94,7 +94,7 @@ Deploys an app artifact to Firebase Hosting via manual dispatch.
 
 Manual dispatch (`workflow_dispatch`) with inputs:
 
-- `app_id`: which app to deploy (`home`, `card`, or `stocks`).
+- `app_id`: which app to deploy (`home`, `card`, `stocks`, or `vendors`).
 - `commit_sha`: the app commit SHA whose artifacts to deploy.
 - `target_env`: `staging` or `production`.
 
@@ -222,6 +222,7 @@ Platform consumes metadata and promotes specific versions by environment.
 | `home` | `/` | `haderach-home` | Deployed |
 | `card` | `/card/` | `card` | Deployed |
 | `stocks` | `/stocks/` | `stocks` | Deployed |
+| `vendors` | `/vendors/` | `vendors` | Deployed |
 
 ## Smoke Test Ownership
 
@@ -262,6 +263,7 @@ Roles are global (not per-app) and a user can hold multiple roles.
 | `member` | All apps | General access |
 | `card_member` | Card only | |
 | `stocks_member` | Stocks only | |
+| `vendors_member` | Vendors only | |
 
 #### Permission resolution
 

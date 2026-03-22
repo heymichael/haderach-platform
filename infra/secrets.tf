@@ -32,7 +32,17 @@ resource "google_secret_manager_secret" "mixpanel_bigquery_sa_api" {
   }
 }
 
-# NEW: for stocks app Cloud Run service
+# For vendors app Cloud Run service (AWS billing API credentials as JSON blob)
+resource "google_secret_manager_secret" "vendor_aws_billing_credentials" {
+  secret_id = "VENDOR_AWS_BILLING_CREDENTIALS"
+  project   = var.project_id
+
+  replication {
+    auto {}
+  }
+}
+
+# For stocks app Cloud Run service
 resource "google_secret_manager_secret" "massive_api_key" {
   secret_id = "MASSIVE_API_KEY"
   project   = var.project_id

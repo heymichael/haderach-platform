@@ -1,7 +1,7 @@
 ---
 id: "035"
 title: "Bridge card app design tokens into Tailwind theme"
-status: pending
+status: done
 group: card
 phase: card
 priority: low
@@ -22,10 +22,10 @@ Map card's existing custom CSS variables into Tailwind's `@theme` so Tailwind ut
 
 ## Tasks
 
-- [ ] Add all card design tokens from `colors.css` to the `@theme` block in `index.css`
-- [ ] Evaluate incremental migration of `App.css` styles to Tailwind utilities
-- [ ] Update `check-color-tokens.mjs` to handle Tailwind token references
-- [ ] Verify card renders correctly after changes
+- [x] Add all card design tokens from `colors.css` to the `@theme` block in `index.css`
+- [x] Evaluate incremental migration of `App.css` styles to Tailwind utilities — deferred, `App.css` already uses `var()` tokens throughout; migration to utility classes is optional and can be done incrementally
+- [x] Update `check-color-tokens.mjs` to handle Tailwind token references
+- [x] Verify card renders correctly after changes
 
 ## Notes
 

@@ -4,7 +4,7 @@ title: Refresh CROSS_REPO_PAT before expiry
 group: platform
 phase: platform
 status: pending
-priority: high
+priority: low
 depends_on: []
 due: 2026-05-31
 ---

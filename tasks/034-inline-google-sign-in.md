@@ -1,7 +1,7 @@
 ---
 id: "034"
 title: "Replace sign-in popup with inline Google Identity Services"
-status: pending
+status: cancelled
 group: platform
 phase: platform
 priority: medium

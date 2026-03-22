@@ -8,6 +8,7 @@
 #   ./scripts/latest-artifact-sha.sh home     # single app
 #   ./scripts/latest-artifact-sha.sh card     # single app
 #   ./scripts/latest-artifact-sha.sh stocks   # single app
+#   ./scripts/latest-artifact-sha.sh vendors  # single app
 
 set -eo pipefail
 
@@ -20,7 +21,7 @@ BUCKET="haderach-app-artifacts"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SITE_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
-APPS=("home" "card" "stocks")
+APPS=("home" "card" "stocks" "vendors")
 
 get_app_dir() {
   local app_id="$1"

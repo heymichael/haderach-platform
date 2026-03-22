@@ -25,6 +25,13 @@ resource "google_storage_bucket_iam_member" "stocks_publisher_admin" {
   member = "serviceAccount:${google_service_account.stocks_artifact_publisher.email}"
 }
 
+# Bucket IAM: vendors-artifact-publisher can manage objects (create, view, overwrite)
+resource "google_storage_bucket_iam_member" "vendors_publisher_admin" {
+  bucket = google_storage_bucket.app_artifacts.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.vendors_artifact_publisher.email}"
+}
+
 # Bucket IAM: home-artifact-publisher can manage objects (create, view, overwrite)
 resource "google_storage_bucket_iam_member" "home_publisher_admin" {
   bucket = google_storage_bucket.app_artifacts.name
