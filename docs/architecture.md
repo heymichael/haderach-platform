@@ -10,13 +10,17 @@ It does not own app business logic. It owns shared hosting/routing/deployment or
 ```text
 haderach-platform/
 ├── .cursor/
-│   └── rules/
-│       ├── architecture-pointer.mdc
-│       ├── branch-safety-reminder.mdc
-│       ├── pr-conventions.mdc
-│       ├── repo-hygiene.mdc
-│       └── todo-conventions.mdc
+│   ├── rules/
+│   │   ├── architecture-pointer.mdc
+│   │   ├── branch-safety-reminder.mdc
+│   │   ├── pr-conventions.mdc
+│   │   ├── repo-hygiene.mdc
+│   │   └── todo-conventions.mdc
+│   └── skills/
+│       └── fetch-artifact-sha/
+│           └── SKILL.md
 ├── .github/
+│   ├── pull_request_template.md
 │   └── workflows/
 │       ├── deploy.yml
 │       └── redeploy-all.yml
@@ -28,12 +32,14 @@ haderach-platform/
 ├── infra/
 │   └── (terraform modules, including firestore.tf)
 ├── scripts/
+│   ├── latest-artifact-sha.sh
 │   ├── seed-allowlists.py
 │   └── seed-users.py
 ├── tasks/
 │   └── (taskmd task files)
 ├── .firebaserc
 ├── .gitignore
+├── .taskmd.yaml
 ├── firebase.json
 ├── firestore.rules
 └── README.md
