@@ -304,6 +304,7 @@ reachable.
 Defined in `firestore.rules` and deployed via `firebase deploy`:
 
 - `users/{email}`: read allowed if authenticated; writes denied from client SDKs.
+- `vendors/{vendorId}`: read allowed if authenticated; writes denied from client SDKs. Writes are performed via Admin SDK (seed script, future agent service).
 - `allowlists/{appId}`: retained for backward compatibility during migration.
 - Admin writes go through the Firebase Console or Admin SDK scripts.
 
