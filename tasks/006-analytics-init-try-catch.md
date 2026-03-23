@@ -1,7 +1,7 @@
 ---
 id: "006"
 title: "Add defensive try-catch around analytics initialization"
-status: pending
+status: cancelled
 group: card
 phase: card
 priority: low

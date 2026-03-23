@@ -1,7 +1,7 @@
 ---
 id: "042"
 title: "Enable Firestore point-in-time recovery"
-status: pending
+status: cancelled
 group: platform
 phase: platform
 priority: medium

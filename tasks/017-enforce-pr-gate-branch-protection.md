@@ -1,7 +1,7 @@
 ---
 id: "017"
 title: "Enforce Required PR Gate via branch protection on main"
-status: pending
+status: cancelled
 group: platform
 phase: platform
 priority: low

@@ -3,7 +3,7 @@ id: 37
 title: Fix card app smoke tests in CI
 group: card
 phase: card
-status: pending
+status: cancelled
 priority: medium
 depends_on: []
 ---

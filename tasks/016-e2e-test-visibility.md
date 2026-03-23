@@ -1,7 +1,7 @@
 ---
 id: "016"
 title: "Improve deploy-time E2E test visibility in GitHub Actions"
-status: pending
+status: cancelled
 group: platform
 phase: platform
 priority: low

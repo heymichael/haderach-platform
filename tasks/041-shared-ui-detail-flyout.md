@@ -3,7 +3,7 @@ id: 41
 title: Move detail fly-out panel to shared-ui
 group: home
 phase: home
-status: pending
+status: cancelled
 priority: low
 depends_on: []
 ---
