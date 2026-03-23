@@ -35,6 +35,12 @@ resource "google_service_account" "platform_deployer" {
   project      = var.project_id
 }
 
+resource "google_service_account" "agent_artifact_publisher" {
+  account_id   = "agent-artifact-publisher"
+  display_name = "agent-artifact-publisher"
+  project      = var.project_id
+}
+
 resource "google_service_account" "mixpanel_bigquery_reader" {
   account_id   = "mixpanel-bigquery-reader"
   display_name = "mixpanel-bigquery-reader"

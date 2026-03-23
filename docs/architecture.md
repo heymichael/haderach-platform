@@ -230,6 +230,18 @@ Platform consumes metadata and promotes specific versions by environment.
 | `stocks` | `/stocks/` | `stocks` | Deployed |
 | `vendors` | `/vendors/` | `vendors` | Deployed |
 
+## Backend Services (Cloud Run)
+
+| Service | Route | Repo | Purpose |
+|---|---|---|---|
+| `vendors-api` | `/vendors/api/**` | `vendors` | Vendor spend data (AWS billing) |
+| `stocks-api` | `/stocks/api/**` | `stocks` | Stock market data (Massive API) |
+| `agent-api` | `/agent/api/**` | `agent` | Shared chat agent (OpenAI tool-calling, Firestore CRUD) |
+
+All backend services run on Cloud Run (us-central1) and are fronted by Firebase
+Hosting rewrites. The default compute service account is used at runtime; each
+service's secrets are injected via Secret Manager env var mounts.
+
 ## Smoke Test Ownership
 
 Platform owns post-deploy smoke tests that validate:
@@ -304,7 +316,7 @@ reachable.
 Defined in `firestore.rules` and deployed via `firebase deploy`:
 
 - `users/{email}`: read allowed if authenticated; writes denied from client SDKs.
-- `vendors/{vendorId}`: read allowed if authenticated; writes denied from client SDKs. Writes are performed via Admin SDK (seed script, future agent service).
+- `vendors/{vendorId}`: read allowed if authenticated; writes denied from client SDKs. Writes are performed via Admin SDK (seed script, agent service).
 - `allowlists/{appId}`: retained for backward compatibility during migration.
 - Admin writes go through the Firebase Console or Admin SDK scripts.
 

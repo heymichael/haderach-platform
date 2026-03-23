@@ -51,3 +51,15 @@ resource "google_secret_manager_secret" "massive_api_key" {
     auto {}
   }
 }
+
+# For agent service Cloud Run (OpenAI tool-calling).
+# This secret already exists in Secret Manager -- after adding this resource,
+# run:  terraform import google_secret_manager_secret.openai_api_key projects/haderach-ai/secrets/OPENAI_API_KEY
+resource "google_secret_manager_secret" "openai_api_key" {
+  secret_id = "OPENAI_API_KEY"
+  project   = var.project_id
+
+  replication {
+    auto {}
+  }
+}

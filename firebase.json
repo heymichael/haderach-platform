@@ -34,6 +34,13 @@
     ],
     "rewrites": [
       {
+        "source": "/agent/api/**",
+        "run": {
+          "serviceId": "agent-api",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "/vendors/api/**",
         "run": {
           "serviceId": "vendors-api",
