@@ -32,7 +32,7 @@ resource "google_secret_manager_secret" "mixpanel_bigquery_sa_api" {
   }
 }
 
-# For vendors app Cloud Run service (AWS billing API credentials as JSON blob)
+# AWS billing API credentials (JSON blob) — used by vendors-api and agent-api
 resource "google_secret_manager_secret" "vendor_aws_billing_credentials" {
   secret_id = "VENDOR_AWS_BILLING_CREDENTIALS"
   project   = var.project_id

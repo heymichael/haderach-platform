@@ -86,6 +86,16 @@ resource "google_cloud_run_v2_service" "agent_api" {
         }
       }
 
+      env {
+        name = "VENDOR_AWS_BILLING_CREDENTIALS"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.vendor_aws_billing_credentials.secret_id
+            version = "latest"
+          }
+        }
+      }
+
       resources {
         limits = {
           cpu    = "1"
@@ -102,6 +112,7 @@ resource "google_cloud_run_v2_service" "agent_api" {
 
   depends_on = [
     google_secret_manager_secret_iam_member.agent_api_secret_access,
+    google_secret_manager_secret_iam_member.vendors_api_secret_access,
   ]
 }
 
