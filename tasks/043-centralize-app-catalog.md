@@ -1,7 +1,7 @@
 ---
 id: "43"
 title: "Centralize APP_CATALOG and APP_GRANTING_ROLES into shared-ui"
-status: pending
+status: done
 group: platform
 phase: platform
 priority: medium
