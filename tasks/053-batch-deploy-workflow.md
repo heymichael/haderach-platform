@@ -1,7 +1,7 @@
 ---
 id: "53"
 title: "Add batch-deploy workflow for multi-app promotion in a single Firebase deploy"
-status: pending
+status: done
 group: platform
 phase: platform
 priority: high
