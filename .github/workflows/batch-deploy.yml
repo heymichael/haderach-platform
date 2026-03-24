@@ -1,0 +1,272 @@
+name: batch-deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_all_latest:
+        description: "Deploy latest published artifact for all apps"
+        required: false
+        type: boolean
+        default: false
+      home_sha:
+        description: "home commit SHA (leave empty to skip)"
+        required: false
+        type: string
+      card_sha:
+        description: "card commit SHA (leave empty to skip)"
+        required: false
+        type: string
+      stocks_sha:
+        description: "stocks commit SHA (leave empty to skip)"
+        required: false
+        type: string
+      vendors_sha:
+        description: "vendors commit SHA (leave empty to skip)"
+        required: false
+        type: string
+      target_env:
+        description: "Deployment target environment"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: platform-deploy-${{ inputs.target_env }}
+  cancel-in-progress: false
+
+env:
+  ALL_APP_IDS: "home card stocks vendors"
+
+jobs:
+  resolve:
+    name: Resolve deployment SHAs
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.resolve.outputs.matrix }}
+      deploy_apps: ${{ steps.resolve.outputs.deploy_apps }}
+      has_apps: ${{ steps.resolve.outputs.has_apps }}
+    steps:
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Resolve SHAs
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.CROSS_REPO_PAT }}
+          DEPLOY_ALL: ${{ inputs.deploy_all_latest }}
+          HOME_SHA: ${{ inputs.home_sha }}
+          CARD_SHA: ${{ inputs.card_sha }}
+          STOCKS_SHA: ${{ inputs.stocks_sha }}
+          VENDORS_SHA: ${{ inputs.vendors_sha }}
+          BUCKET: ${{ vars.GCS_ARTIFACT_BUCKET }}
+        run: |
+          declare -A APP_REPOS=([home]=haderach-home [card]=card [stocks]=stocks [vendors]=vendors)
+          declare -A APP_SHAS=([home]="$HOME_SHA" [card]="$CARD_SHA" [stocks]="$STOCKS_SHA" [vendors]="$VENDORS_SHA")
+
+          MATRIX_ENTRIES=()
+          DEPLOY_JSON="{}"
+
+          for app in home card stocks vendors; do
+            sha="${APP_SHAS[$app]}"
+
+            if [[ -z "$sha" && "$DEPLOY_ALL" == "true" ]]; then
+              repo="${APP_REPOS[$app]}"
+              echo "Looking up latest main SHA for $app (repo: $repo)..."
+              if [[ -z "$GH_TOKEN" ]]; then
+                echo "ERROR: deploy_all_latest requires CROSS_REPO_PAT secret"
+                exit 1
+              fi
+              sha=$(gh api "repos/heymichael/${repo}/commits/main" --jq '.sha' 2>/dev/null || echo "")
+              if [[ -z "$sha" ]]; then
+                echo "ERROR: could not resolve SHA for $app"
+                exit 1
+              fi
+            fi
+
+            if [[ -n "$sha" ]]; then
+              echo "Verifying artifact exists for $app at $sha..."
+              if ! gsutil -q stat "gs://${BUCKET}/${app}/versions/${sha}/manifest.json" 2>/dev/null; then
+                echo "ERROR: artifact not found for $app at $sha — publish may still be running"
+                exit 1
+              fi
+              echo "  $app: $sha"
+              MATRIX_ENTRIES+=("{\"app_id\":\"${app}\",\"sha\":\"${sha}\"}")
+              DEPLOY_JSON=$(echo "$DEPLOY_JSON" | jq --arg k "$app" --arg v "$sha" '. + {($k): $v}')
+            else
+              echo "  $app: skipped"
+            fi
+          done
+
+          if [[ ${#MATRIX_ENTRIES[@]} -eq 0 ]]; then
+            echo "ERROR: no apps to deploy. Provide at least one SHA or enable deploy_all_latest."
+            exit 1
+          fi
+
+          MATRIX_JSON="{\"include\":[$(IFS=,; echo "${MATRIX_ENTRIES[*]}")]}"
+          echo "matrix=${MATRIX_JSON}" >> "$GITHUB_OUTPUT"
+          echo "deploy_apps=${DEPLOY_JSON}" >> "$GITHUB_OUTPUT"
+          echo "has_apps=true" >> "$GITHUB_OUTPUT"
+
+          echo ""
+          echo "=== Resolved deployments ==="
+          echo "$DEPLOY_JSON" | jq .
+
+  verify:
+    name: "Verify ${{ matrix.app_id }}"
+    needs: resolve
+    if: needs.resolve.outputs.has_apps == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix: ${{ fromJSON(needs.resolve.outputs.matrix) }}
+    steps:
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Download artifacts from GCS
+        run: |
+          mkdir -p artifacts
+          gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ matrix.app_id }}/versions/${{ matrix.sha }}/manifest.json" artifacts/
+          gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ matrix.app_id }}/versions/${{ matrix.sha }}/runtime.tar.gz" artifacts/
+          gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ matrix.app_id }}/versions/${{ matrix.sha }}/checksums.txt" artifacts/
+
+      - name: Validate manifest
+        run: |
+          echo "--- ${{ matrix.app_id }} manifest.json ---"
+          cat artifacts/manifest.json
+          echo ""
+
+          MANIFEST_APP_ID=$(jq -r '.app_id' artifacts/manifest.json)
+          CONTRACT_VERSION=$(jq -r '.compatibility.platform_contract_version' artifacts/manifest.json)
+          MANIFEST_SHA=$(jq -r '.commit_sha' artifacts/manifest.json)
+
+          if [ "$MANIFEST_APP_ID" != "${{ matrix.app_id }}" ]; then
+            echo "ERROR: manifest app_id '$MANIFEST_APP_ID' does not match expected '${{ matrix.app_id }}'"
+            exit 1
+          fi
+
+          if [ "$CONTRACT_VERSION" != "v1" ]; then
+            echo "ERROR: unsupported contract version '$CONTRACT_VERSION'"
+            exit 1
+          fi
+
+          if [ "$MANIFEST_SHA" != "${{ matrix.sha }}" ]; then
+            echo "ERROR: manifest commit_sha '$MANIFEST_SHA' does not match requested '${{ matrix.sha }}'"
+            exit 1
+          fi
+
+          echo "Manifest validation passed."
+
+      - name: Verify checksums
+        working-directory: artifacts
+        run: |
+          echo "Verifying runtime.tar.gz checksum..."
+          grep "runtime.tar.gz" checksums.txt | sha256sum -c -
+          echo "Checksum verification passed."
+
+      - name: Upload verified artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-${{ matrix.app_id }}
+          path: artifacts/
+          retention-days: 1
+
+  deploy:
+    name: Deploy to Firebase Hosting
+    needs: [resolve, verify]
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.target_env }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all verified artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: verified-*
+          path: verified/
+
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Assemble hosting directory
+        env:
+          DEPLOY_APPS: ${{ needs.resolve.outputs.deploy_apps }}
+        run: |
+          for dir in verified/verified-*/; do
+            [ -d "$dir" ] || continue
+            app_id=$(basename "$dir" | sed 's/^verified-//')
+            echo "Extracting $app_id from verified artifacts..."
+            tar -xzf "${dir}/runtime.tar.gz" -C hosting/public
+            echo "  Extracted $app_id"
+          done
+
+          DEPLOYED_APPS=$(echo "$DEPLOY_APPS" | jq -r 'keys[]')
+          for app in ${{ env.ALL_APP_IDS }}; do
+            if echo "$DEPLOYED_APPS" | grep -qx "$app"; then
+              continue
+            fi
+            echo "Restoring $app from latest-deployed marker..."
+            MARKER="gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${app}/latest-deployed.json"
+            if gsutil -q stat "$MARKER" 2>/dev/null; then
+              SHA=$(gsutil cat "$MARKER" | jq -r '.commit_sha')
+              echo "  Restoring $app at $SHA"
+              gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${app}/versions/${SHA}/runtime.tar.gz" "/tmp/${app}-runtime.tar.gz"
+              tar -xzf "/tmp/${app}-runtime.tar.gz" -C hosting/public
+            else
+              echo "  No deployed marker for $app, skipping"
+            fi
+          done
+
+      - name: Deploy to Firebase Hosting
+        run: npx firebase-tools deploy --only hosting --project haderach-ai
+
+      - name: Write latest-deployed markers
+        env:
+          DEPLOY_APPS: ${{ needs.resolve.outputs.deploy_apps }}
+        run: |
+          NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          for app in $(echo "$DEPLOY_APPS" | jq -r 'keys[]'); do
+            sha=$(echo "$DEPLOY_APPS" | jq -r --arg k "$app" '.[$k]')
+            echo "{\"commit_sha\":\"${sha}\",\"deployed_at\":\"${NOW}\"}" \
+              | gsutil cp - "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${app}/latest-deployed.json"
+            echo "Wrote latest-deployed marker for $app"
+          done
+
+      - name: Log deployment summary
+        env:
+          DEPLOY_APPS: ${{ needs.resolve.outputs.deploy_apps }}
+        run: |
+          echo "============================================"
+          echo "Batch deployment complete"
+          echo "  Environment: ${{ inputs.target_env }}"
+          for app in $(echo "$DEPLOY_APPS" | jq -r 'keys[]'); do
+            sha=$(echo "$DEPLOY_APPS" | jq -r --arg k "$app" '.[$k]')
+            echo "  ${app}: ${sha}"
+          done
+          echo "============================================"

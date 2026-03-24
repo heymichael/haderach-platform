@@ -22,6 +22,7 @@ haderach-platform/
 ├── .github/
 │   ├── pull_request_template.md
 │   └── workflows/
+│       ├── batch-deploy.yml
 │       ├── deploy.yml
 │       └── redeploy-all.yml
 ├── docs/
@@ -117,6 +118,46 @@ Manual dispatch (`workflow_dispatch`) with inputs:
    (reads `latest-deployed.json` markers from GCS; see below).
 7. Run `firebase deploy --only hosting --project haderach-ai`.
 8. Write a `latest-deployed.json` marker to GCS for the deployed app.
+
+### Batch Deploy (`.github/workflows/batch-deploy.yml`)
+
+Deploys multiple app artifacts in a single Firebase Hosting deploy via manual
+dispatch. Verifies each artifact in parallel, assembles the full hosting state
+once, and does one atomic deploy.
+
+#### Trigger
+
+Manual dispatch (`workflow_dispatch`) with inputs:
+
+- `deploy_all_latest`: boolean — resolve latest main SHA for all apps automatically.
+- `home_sha`, `card_sha`, `stocks_sha`, `vendors_sha`: optional per-app SHAs.
+  Explicit SHA always overrides `deploy_all_latest` for that app.
+- `target_env`: `staging` or `production`.
+
+#### Flow
+
+1. **Resolve**: for each app, use explicit SHA if provided, else look up latest
+   main SHA via GitHub API (requires `CROSS_REPO_PAT` secret) if
+   `deploy_all_latest` is true, else skip. Verify each resolved artifact exists
+   in GCS.
+2. **Verify** (parallel matrix): download, validate manifest, and verify checksums
+   for each resolved app artifact.
+3. **Deploy**: extract all verified artifacts into `hosting/public/`, restore
+   non-deployed apps from `latest-deployed.json` markers, run one
+   `firebase deploy`, and write updated markers for all deployed apps.
+
+#### Usage patterns
+
+- **Deploy everything new**: check `deploy_all_latest`, leave SHA fields blank.
+- **Deploy specific apps**: paste SHAs for the apps to promote, leave others blank.
+- **Deploy all latest except pin one app**: check `deploy_all_latest`, paste an
+  older SHA for the app to pin.
+
+#### Required secrets
+
+| Secret | Purpose |
+|---|---|
+| `CROSS_REPO_PAT` | GitHub PAT with read access to app repos (only needed for `deploy_all_latest`) |
 
 ### Redeploy All (`.github/workflows/redeploy-all.yml`)
 
@@ -327,9 +368,10 @@ Defined in `firestore.rules` and deployed via `firebase deploy`:
 
 ### Forward compatibility
 
-The `APP_GRANTING_ROLES` mapping is currently duplicated in each app and the
-home app. When a global nav is introduced, the mapping should be extracted to a
-single shared location (shared package or Firestore config document).
+`APP_CATALOG` and `APP_GRANTING_ROLES` are centralized in `@haderach/shared-ui`
+(`haderach-home/packages/shared-ui/src/auth/app-catalog.ts`). All app repos
+import from this single source of truth. When onboarding a new app, update the
+catalog and role mapping there — no per-app copies to maintain.
 
 ### Legacy: allowlists collection
 
