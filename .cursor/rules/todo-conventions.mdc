@@ -9,7 +9,7 @@ This platform repo is the **single source of truth** for all task management acr
 
 ## Reading tasks for context
 
-When the user references a task by number (e.g., "task 29", "task #029"), look it up in `tasks/` by matching the `id` field or filename prefix (e.g., `029-*.md`).
+When the user references a task by number (e.g., "task 29"), look it up in `tasks/` by matching the `id` field or filename prefix (e.g., `29-*.md`).
 
 When looking for work or understanding project priorities, only read tasks where `status` is `pending` or `in-progress`. Ignore `completed`, `cancelled`, and `blocked` tasks unless specifically asked about them.
 
@@ -19,7 +19,7 @@ Each task is a standalone `.md` file with YAML frontmatter:
 
 ```yaml
 ---
-id: "001"
+id: "1"
 title: "Short descriptive title"
 status: pending          # pending | in-progress | in-review | completed | blocked | cancelled
 group: card              # card | stocks | platform  (REQUIRED — which app this task belongs to)
@@ -27,7 +27,7 @@ phase: card              # must match group — shows in the PHASE column of the
 priority: medium         # low | medium | high | critical
 type: feature            # feature | bug | improvement | chore | docs
 tags: [relevant, tags]
-dependencies: ["003"]    # optional: IDs of tasks that must complete first
+dependencies: ["3"]      # optional: IDs of tasks that must complete first
 effort: medium           # optional: small | medium | large
 created: YYYY-MM-DD
 ---
@@ -39,7 +39,7 @@ The markdown body should include Purpose/Objective and Approach/Acceptance Crite
 
 ## Creating a task
 
-Use descriptive filenames: `ID-short-slug.md` (e.g., `007-add-caching-layer.md`). Use sequential IDs zero-padded to 3 digits. Always set both the `group` and `phase` fields to the same app value. If the app association is ambiguous (e.g., cross-cutting work), prompt the user to specify.
+Use descriptive filenames: `ID-short-slug.md` (e.g., `7-add-caching-layer.md`). Use plain integer IDs with no leading zeros (e.g., `"7"` not `"007"`). Check existing files in `tasks/` to determine the next available ID. Always set both the `group` and `phase` fields to the same app value. If the app association is ambiguous (e.g., cross-cutting work), prompt the user to specify.
 
 ## Completing a task
 

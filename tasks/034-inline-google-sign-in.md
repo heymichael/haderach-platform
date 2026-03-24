@@ -1,5 +1,5 @@
 ---
-id: "034"
+id: "34"
 title: "Replace sign-in popup with inline Google Identity Services"
 status: cancelled
 group: platform
@@ -7,7 +7,7 @@ phase: platform
 priority: medium
 type: improvement
 tags: [auth, ux, platform]
-dependencies: ["033"]
+dependencies: ["33"]
 effort: small
 created: 2026-03-19
 ---

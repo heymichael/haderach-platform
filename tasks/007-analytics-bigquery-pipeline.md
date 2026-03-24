@@ -1,5 +1,5 @@
 ---
-id: "007"
+id: "7"
 title: "Enable analytics export to BigQuery"
 status: completed
 group: card

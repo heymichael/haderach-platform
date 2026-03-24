@@ -1,5 +1,5 @@
 ---
-id: "003"
+id: "3"
 title: "Standardize technical documentation"
 status: cancelled
 group: card

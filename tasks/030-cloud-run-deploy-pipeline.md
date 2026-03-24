@@ -1,5 +1,5 @@
 ---
-id: "030"
+id: "30"
 title: "Add Cloud Run deploy pipeline for stocks-api"
 status: completed
 group: stocks
@@ -7,7 +7,7 @@ phase: stocks
 priority: high
 type: feature
 tags: [ci, deploy, cloud-run, docker]
-dependencies: ["010"]
+dependencies: ["10"]
 effort: medium
 created: 2026-03-18
 ---

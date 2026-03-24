@@ -1,5 +1,5 @@
 ---
-id: "029"
+id: "29"
 title: "Add Firebase Auth gate to stocks app"
 status: completed
 group: stocks

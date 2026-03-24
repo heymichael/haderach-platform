@@ -1,5 +1,5 @@
 ---
-id: "022"
+id: "22"
 title: "Document local GitHub PR tooling setup"
 status: completed
 group: platform

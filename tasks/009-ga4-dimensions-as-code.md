@@ -1,5 +1,5 @@
 ---
-id: "009"
+id: "9"
 title: "Manage GA4 custom dimensions programmatically"
 status: cancelled
 group: card

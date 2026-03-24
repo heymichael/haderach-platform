@@ -1,5 +1,5 @@
 ---
-id: "031"
+id: "31"
 title: "Centralize allowlist management at platform level"
 status: completed
 group: platform

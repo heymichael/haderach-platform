@@ -1,5 +1,5 @@
 ---
-id: "001"
+id: "1"
 title: "Logout from unauthorized screen does not reset auth state"
 status: completed
 group: card

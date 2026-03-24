@@ -1,5 +1,5 @@
 ---
-id: "042"
+id: "42"
 title: "Enable Firestore point-in-time recovery"
 status: cancelled
 group: platform

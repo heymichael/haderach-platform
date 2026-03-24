@@ -1,5 +1,5 @@
 ---
-id: "012"
+id: "12"
 title: "Extend automatic testing coverage to all apps"
 status: completed
 group: platform

@@ -1,5 +1,5 @@
 ---
-id: "016"
+id: "16"
 title: "Improve deploy-time E2E test visibility in GitHub Actions"
 status: cancelled
 group: platform

@@ -1,5 +1,5 @@
 ---
-id: "010"
+id: "10"
 title: "Add artifact publish pipeline"
 status: completed
 group: stocks

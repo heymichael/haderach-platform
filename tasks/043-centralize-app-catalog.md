@@ -1,5 +1,5 @@
 ---
-id: "043"
+id: "43"
 title: "Centralize APP_CATALOG and APP_GRANTING_ROLES into shared-ui"
 status: pending
 group: platform
@@ -24,3 +24,7 @@ Centralizing these into `@haderach/shared-ui` (or a new `@haderach/auth-policy` 
 3. Update each app's `accessPolicy.ts` / `roles.ts` to import from the shared package instead of maintaining a local copy.
 4. Keep app-specific constants (e.g. `APP_ID`, `APP_PATH`) local to each app.
 5. Verify the Applications dropdown shows the correct apps in all three deployed apps.
+
+## Plan
+
+`haderach-home/.cursor/plans/centralize_app_catalog_a09fe4b6.plan.md`

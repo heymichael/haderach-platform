@@ -1,5 +1,5 @@
 ---
-id: "023"
+id: "23"
 title: "Improve PR conventions rule for commit-to-PR approval workflow"
 status: completed
 group: platform

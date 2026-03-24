@@ -1,5 +1,5 @@
 ---
-id: "032"
+id: "32"
 title: "Add global header across all apps with logo and home navigation"
 status: done
 group: platform

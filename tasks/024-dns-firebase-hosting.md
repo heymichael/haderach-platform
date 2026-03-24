@@ -1,5 +1,5 @@
 ---
-id: "024"
+id: "24"
 title: "Point haderach.ai DNS to Firebase Hosting"
 status: completed
 group: platform

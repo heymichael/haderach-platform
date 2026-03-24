@@ -1,5 +1,5 @@
 ---
-id: "033"
+id: "33"
 title: "Centralize authentication at platform level with per-app permissions"
 status: completed
 group: platform
@@ -7,7 +7,7 @@ phase: platform
 priority: high
 type: feature
 tags: [auth, platform, cross-app, permissions]
-dependencies: ["031"]
+dependencies: ["31"]
 effort: large
 created: 2026-03-19
 ---

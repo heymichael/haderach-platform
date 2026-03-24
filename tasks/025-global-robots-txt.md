@@ -1,5 +1,5 @@
 ---
-id: "025"
+id: "25"
 title: "Add global robots.txt to block crawling"
 status: completed
 group: platform

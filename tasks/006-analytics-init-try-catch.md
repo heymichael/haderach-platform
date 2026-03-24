@@ -1,5 +1,5 @@
 ---
-id: "006"
+id: "6"
 title: "Add defensive try-catch around analytics initialization"
 status: cancelled
 group: card

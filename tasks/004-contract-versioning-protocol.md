@@ -1,5 +1,5 @@
 ---
-id: "004"
+id: "4"
 title: "Add contract versioning protocol docs alignment with platform"
 status: pending
 group: card

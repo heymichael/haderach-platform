@@ -1,5 +1,5 @@
 ---
-id: "005"
+id: "5"
 title: "Enforce docs source-to-served sync in CI"
 status: cancelled
 group: card

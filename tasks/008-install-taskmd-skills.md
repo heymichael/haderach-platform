@@ -1,5 +1,5 @@
 ---
-id: "008"
+id: "8"
 title: "Install taskmd skills and MCP server"
 status: cancelled
 group: platform
