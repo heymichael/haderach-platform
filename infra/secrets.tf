@@ -52,6 +52,16 @@ resource "google_secret_manager_secret" "massive_api_key" {
   }
 }
 
+# Bill.com API credentials (JSON blob) — used by agent-api
+resource "google_secret_manager_secret" "vendor_bill_credentials" {
+  secret_id = "VENDOR_BILL_CREDENTIALS"
+  project   = var.project_id
+
+  replication {
+    auto {}
+  }
+}
+
 # For agent service Cloud Run (OpenAI tool-calling).
 # This secret already exists in Secret Manager -- after adding this resource,
 # run:  terraform import google_secret_manager_secret.openai_api_key projects/haderach-ai/secrets/OPENAI_API_KEY

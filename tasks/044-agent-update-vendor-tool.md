@@ -1,7 +1,7 @@
 ---
 id: "44"
 title: "Add update_vendor tool to agent service"
-status: pending
+status: completed
 group: vendors
 phase: vendors
 priority: medium
