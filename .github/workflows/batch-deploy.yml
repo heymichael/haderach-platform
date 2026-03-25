@@ -103,7 +103,7 @@ jobs:
               fi
               echo "  $app: $sha"
               MATRIX_ENTRIES+=("{\"app_id\":\"${app}\",\"sha\":\"${sha}\"}")
-              DEPLOY_JSON=$(echo "$DEPLOY_JSON" | jq --arg k "$app" --arg v "$sha" '. + {($k): $v}')
+              DEPLOY_JSON=$(echo "$DEPLOY_JSON" | jq -c --arg k "$app" --arg v "$sha" '. + {($k): $v}')
             else
               echo "  $app: skipped"
             fi
