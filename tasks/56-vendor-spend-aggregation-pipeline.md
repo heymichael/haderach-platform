@@ -52,52 +52,93 @@ GCP billing data is in `arcade-prod` (separate project/billing account), not `ha
 - "What was the total amount Rhonda Bender charged in 2024?" — annual aggregation ($46,060.50)
 - AWS Cost Explorer queries continue to work as before
 
-### Phase 2 — Firestore schema
+### Phase 2 — Unified Firestore schema + nightly sync ✅ (PR pending)
 
-- Add `dataSource`/`apiHint`/`credentialKey` fields on vendor docs
-- Add `vendor_spend` subcollection for monthly summaries
+Replaced the separate `billcom_vendors` concept with a **unified `vendors` collection**. All vendors live in one place — Bill.com vendors are synced nightly, non-Bill.com vendors (AWS, manual) coexist with `toolCall` routing.
 
-### Phase 3 — Agent routing + `max_rounds` bump ⬅️ NEXT PRIORITY
+**Schema — synced from Bill.com (nightly job writes these):**
+- `id`, `name`, `billcomId` — the `009...` Bill.com vendor ID (also used as doc ID for synced vendors)
+- `nameLower` — lowercase name for token-based fuzzy search
+- `paymentMethod` — from `paymentInformation.payByType`
+- `accountType` — Business / Individual
+- `track1099` — boolean
+- `toolCall` — set to `"billcom"` by sync job (other values: `"aws"`, `"gcp"`, `"manual"`)
+- `lastSyncedAt` — ISO timestamp
 
-The agent currently has 5 tools: `add_vendor`, `delete_vendor`, `get_vendor`, `modify_vendor` (all Firestore-backed) plus `execute_python` (sandbox for AWS/Bill.com). The LLM sometimes wastes rounds calling `get_vendor` (Firestore) before falling back to `execute_python` (Bill.com), exhausting the 5-round tool-call limit.
+**Schema — app-managed (human-entered, never overwritten by sync):**
+- `owner`, `secondaryOwner`, `department`, `purpose`, `spendType`
 
-**Immediate fixes:**
+**Schema — contract fields (created empty, filled in later):**
+- `contractStartDate`, `contractEndDate`, `contractLengthMonths`
+- `autoRenew`, `renewalRate`, `renewalNoticeDays`
+- `billingFrequency`, `terminationTerms`
 
-- Bump `max_rounds` from 5 → 10 in `app.py`
-- Add routing guidance to the system prompt so the LLM knows when to use each tool:
-  - `get_vendor` / `modify_vendor` / `add_vendor` / `delete_vendor` → for managing vendors in the **app's local registry** (Firestore)
-  - `execute_python` → for querying **Bill.com API** (bills, vendor data, payment info, 1099 status) or **AWS Cost Explorer** (cloud spend)
-- Make clear that Bill.com vendors and Firestore vendors are **separate data stores** — a vendor existing in one doesn't mean it exists in the other
+**NO PII stored** — no email, phone, address, taxId. Agent queries Bill.com live for those.
 
-**Future (after Phase 4 daily sync):** Add a `query_billcom_vendors` tool that reads from the synced `billcom_vendors` Firestore collection with filters, eliminating the need to paginate the Bill.com API for metadata queries.
+**Nightly sync script** (`service/sync_billcom.py`):
+- Paginates Bill.com `GET /v3/vendors` (926 vendors, ~100s)
+- Batch writes to Firestore with `merge=True` (only synced fields, ~12s for 926 docs)
+- Total sync time: ~110s
+- Run manually via `python -m service.sync_billcom`, Cloud Scheduler setup deferred
 
-### Phase 4 — Daily sync job (vendor metadata + spend aggregation)
+### Phase 3 — Agent routing + search_vendors tool ✅ (PR pending)
 
-Cloud Run Job on Cloud Scheduler that syncs vendor metadata and spend data from Bill.com into Firestore.
+Replaced `get_vendor` (single Firestore lookup) with `search_vendors` (token-based fuzzy search, field filters, group_by aggregation). The agent now follows a Firestore-first routing pattern:
 
-**4a. Vendor metadata sync (Bill.com → Firestore)**
+**Routing rules (in system prompt):**
+1. Always call `search_vendors` first for any vendor question
+2. If the answer is in the Firestore result (metadata), stop — do not call external APIs
+3. If transactional data is needed (bills, spend, PII), use `execute_python` with the `billcomId` from the Firestore result
+4. Cross-source joins (e.g. "group February spend by billing frequency") → tell user not supported yet
 
-- Paginate `GET /v3/vendors` (~926 active vendors, 100/page, ~16s total)
-- Transform nested fields to top-level booleans/strings:
-  - `additionalInfo.track1099` → `track1099: true`
-  - `additionalInfo.taxId` → `taxId: "..."`
-  - `additionalInfo.combinePayments` → `combinePayments: true`
-  - `additionalInfo.companyName` → `companyName: "..."`
-- Upsert into Firestore `billcom_vendors/{vendorId}`
-- This enables fast Firestore queries for vendor attribute filtering (1099 status, etc.)
+**search_vendors tool supports:**
+- `query` — token-based fuzzy name match ("Michael Mader" matches "Michael D Mader")
+- `filters` — exact-match on any field (`{"track1099": true}`, `{"paymentMethod": "Check"}`)
+- `group_by` — aggregate counts by field (returns `{counts: {...}, total: N}`)
 
-**4b. Spend/bill aggregation (Bill.com → Firestore)**
+**Also in this phase (branch: `fix/agent-routing-and-truncation`, merged):**
+- Tool-result truncation at 20K chars to prevent context bloat / Cloud Run 502s
+- `max_rounds` bumped from 5 → 10
+- Tool descriptions updated to clarify Firestore vs external API scope
 
-- Paginate `GET /v3/bills` with date filters for the current/recent months
-- Aggregate by vendor + month → write to `vendor_spend` subcollection
-- Same pattern for AWS CE monthly summaries
+**Tested and working:**
+- "Look up Michael Mader" → `search_vendors` fuzzy match → Michael D Mader found (no Bill.com API call)
+- "How many vendors by payment type?" → `search_vendors` with `group_by` → instant Firestore result
+- "How many 1099 vendors?" → `search_vendors` with filter → 150 vendors (instant)
+- "What did Rhonda Bender bill us in February 2026?" → `search_vendors` (get billcomId) → `execute_python` (exact bill query) → $5,231.25
 
-**Why this is needed:** The Bill.com API does not support server-side filtering on `additionalInfo` fields (like `track1099`). The only filterable vendor fields are: `id`, `name`, `archived`, `accountType`, `address.country`, `billCurrency`, `paymentStatus`, `createdTime`, `updatedTime`. Any query that requires scanning vendor attributes (e.g. "list all 1099 vendors") must paginate the entire vendor list (~16s for 926 vendors, within 120s sandbox timeout but slow).
+### Deletion guard for synced vendors ✅ (done — see task 60)
+
+Backend guard enforced in both `delete_vendor` tool handler and `DELETE /vendors/{id}` REST endpoint. Bill.com-synced vendors (docs with `billcomId`) return an error with a message suggesting `hide_vendor` instead. A `hide` boolean on vendor docs excludes them from `search_vendors` and `query_spend` results. See task 60 for full details.
+
+### Phase 4 — Spend aggregation (Bill.com bills → Firestore) ✅
+
+**What was built (branch: `feat/billcom-spend-aggregation` in agent repo):**
+
+- `service/billcom_auth.py` — shared Bill.com login helper (extracted from sync_billcom.py)
+- `service/sync_billcom_spend.py` — paginates all Bill.com bills (~1,943), aggregates by vendor + month (~1,244 buckets), denormalizes vendor metadata, batch-writes to top-level `vendor_spend` Firestore collection. Run via `python -m service.sync_billcom_spend` (~200–270s)
+- `vendor_spend` doc schema: `vendorId`, `vendorName`, `month` (YYYY-MM), `totalAmount`, `billCount`, `toolCall`, `lastSyncedAt`, plus denormalized fields: `paymentMethod`, `billingFrequency`, `department`, `owner`, `track1099`, `accountType`, `purpose`, `spendType`, `hide`
+- `query_spend` tool — queries `vendor_spend` directly with month filters, vendor name substring, and `group_by` aggregation (sums totalAmount/billCount/vendorCount per group). Excludes hidden vendors via live lookup.
+- `search_vendors` extended with `include_spend` param — attaches per-vendor monthly spend array from Firestore
+- Fuzzy vendor resolution added to system prompt (acronym/abbreviation expansion — see task 47)
+- Sub-monthly granularity warning in prompt for Bill.com vendors
+- Cross-source joins now supported (e.g. "group spend by billing frequency")
+- AWS CE spend aggregation deferred to a future phase
+
+**Tested and working:**
+
+- "Total spend in February by payment type" → `query_spend` with `group_by: paymentMethod` → instant Firestore result ($817K across 4 payment methods)
+- "Spend since mid-2025 by 1099 vs non-1099" → `query_spend` with date range + `group_by: track1099` → $2.1M (1099) vs $4.8M (non-1099)
+- "How much did Rhonda Bender spend?" → `search_vendors` with `include_spend: true` → 6 months of spend history from Firestore
+- "Top vendors Q1 2026" → `query_spend` with date range, sorted by amount
+- All-time spend by account type → $18.4M across 1,244 vendor-month docs
 
 ### Phase 5 — Frontend
 
-- Chart reads from Firestore `vendor_spend` via `onSnapshot`
-- Vendor metadata table powered by synced `billcom_vendors` collection
+- Update `VendorInfo` type, table columns, and edit modal to match the new unified schema
+- Table needs: name, toolCall, paymentMethod, track1099, owner, department, billingFrequency
+- Modal needs: all app-managed and contract fields as editable, synced fields as read-only
+- Current frontend was built for the old schema and needs redesign
 
 ### Phase 6 — Vendor onboarding validation
 

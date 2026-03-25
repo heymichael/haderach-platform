@@ -1,7 +1,7 @@
 ---
 id: "47"
 title: "Add fuzzy vendor resolution to agent system prompt"
-status: pending
+status: completed
 group: home
 phase: home
 priority: medium
