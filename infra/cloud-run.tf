@@ -96,6 +96,16 @@ resource "google_cloud_run_v2_service" "agent_api" {
         }
       }
 
+      env {
+        name = "VENDOR_BILL_CREDENTIALS"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.vendor_bill_credentials.secret_id
+            version = "latest"
+          }
+        }
+      }
+
       resources {
         limits = {
           cpu    = "1"
@@ -112,6 +122,7 @@ resource "google_cloud_run_v2_service" "agent_api" {
 
   depends_on = [
     google_secret_manager_secret_iam_member.agent_api_secret_access,
+    google_secret_manager_secret_iam_member.agent_api_bill_secret_access,
     google_secret_manager_secret_iam_member.vendors_api_secret_access,
   ]
 }
@@ -126,6 +137,13 @@ resource "google_cloud_run_v2_service_iam_member" "agent_api_public" {
 
 resource "google_secret_manager_secret_iam_member" "agent_api_secret_access" {
   secret_id = google_secret_manager_secret.openai_api_key.secret_id
+  project   = var.project_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_secret_manager_secret_iam_member" "agent_api_bill_secret_access" {
+  secret_id = google_secret_manager_secret.vendor_bill_credentials.secret_id
   project   = var.project_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
