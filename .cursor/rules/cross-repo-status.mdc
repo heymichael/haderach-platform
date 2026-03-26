@@ -1,0 +1,41 @@
+---
+description: Cross-repo status table showing branch, sync, and PR state for all workspace repos
+alwaysApply: false
+---
+
+# Cross-Repo Status Table
+
+When the user asks for a status overview, repo table, or cross-repo summary, produce a table covering **all** site repositories:
+
+| Repo | Branch | Sync | PR |
+|------|--------|------|----|
+
+## Repositories
+
+The full set of repos lives under the parent directory `../` (relative to this platform repo):
+
+- haderach-home
+- vendors
+- stocks
+- haderach-platform
+- card
+- admin-system
+- agent
+
+## Columns
+
+1. **Repo** — repository name.
+2. **Branch** — current local branch (`git branch --show-current`).
+3. **Sync** — whether local and remote are in sync. Fetch first (`git fetch origin --quiet`), then check `git status -sb`. If no ahead/behind indicator appears, the value is `true`; otherwise report the delta (e.g., `ahead 2`, `behind 1`).
+4. **PR** — open pull request on that branch. Use `gh pr list --state open` and match the current branch. Show `#<number> — <title>` or `None`.
+
+## Procedure
+
+1. Run all seven repo checks in parallel (one shell call per repo) to minimize latency.
+2. For each repo, run `git fetch origin --quiet && git status -sb` and `gh pr list --state open` together.
+3. Assemble the table and present it.
+
+## Notes
+
+- If a repo directory does not exist, mark all columns as `N/A`.
+- Flag any untracked or uncommitted changes beneath the table as a footnote when present.
