@@ -20,11 +20,15 @@ from firebase_admin import credentials, firestore
 PROJECT_ID = "haderach-ai"
 
 USERS = {
-    "michael@haderachi.ai": ["admin"],
-    "michael@heretic.fund": ["admin"],
-    "mariam@heretic.fund": ["admin"],
-    "mariam@heretic.ventures": ["admin"],
-    "alexmader@gmail.com": ["admin"],
+    "michael@haderach.ai": ["admin", "finance_admin"],
+    "michael@heretic.fund": ["admin", "finance_admin"],
+    "huy@heretic.fund": ["admin", "finance_admin"],
+    "mariam@heretic.fund": ["admin", "finance_admin"],
+    "mariam@heretic.ventures": ["admin", "finance_admin"],
+    "alexmader@gmail.com": ["haderach_user"],
+    "binamader@gmail.com": ["haderach_user"],
+    "suman@heretic.fund": ["admin"],
+    "michael.d.mader@gmail.com": ["user"],
 }
 
 
@@ -35,16 +39,18 @@ def main():
 
     now = datetime.now(timezone.utc).isoformat()
 
-    for email, roles in USERS.items():
+    for email, new_roles in USERS.items():
         doc_id = email.strip().lower()
         doc_ref = db.collection("users").document(doc_id)
         existing = doc_ref.get()
         if existing.exists:
-            doc_ref.update({"roles": roles})
-            print(f"Updated users/{doc_id} -> roles={roles}")
+            old_roles = existing.to_dict().get("roles", [])
+            merged = sorted(set(old_roles) | set(new_roles))
+            doc_ref.update({"roles": merged})
+            print(f"Updated users/{doc_id} -> roles={merged}  (was {old_roles})")
         else:
-            doc_ref.set({"roles": roles, "createdAt": now})
-            print(f"Created users/{doc_id} -> roles={roles}")
+            doc_ref.set({"roles": new_roles, "createdAt": now})
+            print(f"Created users/{doc_id} -> roles={new_roles}")
 
     print("Done.")
 

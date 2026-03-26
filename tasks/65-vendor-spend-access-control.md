@@ -47,12 +47,15 @@ Add Firebase ID token verification to the agent service so that all endpoints ha
 
 Deployed to prod and verified: authenticated requests succeed, unauthenticated requests are rejected.
 
-### 1. Shared auth infrastructure
+### 1. Shared auth infrastructure — COMPLETED 2025-03-25
 
-- Revise `app-catalog.ts` in shared-ui: update `APP_GRANTING_ROLES` with new role names, add `ADMIN_CATALOG` and `ADMIN_GRANTING_ROLES`
-- Add `getAccessibleAdminApps(roles)` helper
-- Update all consumer apps (haderach-home, vendors, stocks) for new role names
-- Update seed script with new roles
+- [x] Revise `app-catalog.ts` in shared-ui: update `APP_GRANTING_ROLES` with new role names, add `ADMIN_CATALOG` and `ADMIN_GRANTING_ROLES`
+- [x] Add `getAccessibleAdminApps(roles)` helper
+- [x] Update all consumer apps (haderach-home, vendors, stocks, card) for new role names
+- [x] Update seed script with new roles (merge strategy — preserves old roles for safe cutover)
+- [x] Seed Firestore with new roles for all 9 users
+
+Code changes on `feat/rbac-roles-admin-nav` across haderach-home, vendors, stocks, card, and haderach-platform. Not yet deployed — old role names preserved in Firestore for backward compatibility.
 
 ### 2. GlobalNav admin section
 
@@ -60,47 +63,43 @@ Deployed to prod and verified: authenticated requests succeed, unauthenticated r
 - Render Admin dropdown when user has `admin` or `finance_admin` role
 - Links to `/admin/system/` and `/admin/finance/`
 
-### 3. Vendors app — spend filtering
+### 3. System Administration SPA and agent endpoints
 
-- Add `allowedVendorIds` and `isFinanceAdmin` to `AuthUser` context
-- Filter spend data in `fetchVendorSpend.ts` by `allowedVendorIds`
-- Filter vendor multi-select in spending view to only show allowed vendors
-- Pass `userEmail` (and ID token) from ChatPanel to agent service
+- **System Administration SPA** — new Vite + React SPA at `/admin/system/`
+  - List users, create users, assign `user`/`admin` roles
+  - Auth-gated: requires `admin` role
+- **Agent service endpoints**
+  - `GET /users` — list all users (or filter by role)
+  - `POST /users` — create user doc (requires `admin`)
+  - `PATCH /users/{email}` — update roles (requires `admin`)
+- **Platform config**
+  - Firebase hosting rewrite for `/admin/system/**`
 
-### 4. System Administration SPA
+### 4. Vendor spend filtering, Finance Administration SPA, and related endpoints
 
-- New Vite + React SPA at `/admin/system/`
-- List users, create users, assign `user`/`admin` roles
-- Auth-gated: requires `admin` role
-
-### 5. Finance Administration SPA
-
-- New Vite + React SPA at `/admin/finance/`
-- List users, manage `allowed_vendor_ids` per user via vendor multi-select
-- Auth-gated: requires `finance_admin` role
-
-### 6. Agent service endpoints
-
-- `GET /users` — list all users (or filter by role)
-- `POST /users` — create user doc (requires `admin`)
-- `PATCH /users/{email}` — update roles (requires `admin`) and/or `allowed_vendor_ids` (requires `finance_admin`)
-- `GET /vendors` — list vendor IDs/names for admin picker
-- `/chat` — use verified caller identity to load `allowed_vendor_ids`, filter spend tools
-
-### 7. Platform config and docs
-
-- Firebase hosting rewrites for `/admin/system/**` and `/admin/finance/**`
+- **Finance Administration SPA** — new Vite + React SPA at `/admin/finance/`
+  - List users, manage `allowed_vendor_ids` per user via vendor multi-select
+  - Auth-gated: requires `finance_admin` role
+- **Agent service endpoints for vendor filtering**
+  - `PATCH /users/{email}` — update `allowed_vendor_ids` (requires `finance_admin`)
+  - `GET /vendors` — list vendor IDs/names for admin picker
+  - `/chat` — use verified caller identity to load `allowed_vendor_ids`, filter spend tools
+- **Vendors app spend filtering**
+  - Add `allowedVendorIds` and `isFinanceAdmin` to `AuthUser` context
+  - Filter spend data in `fetchVendorSpend.ts` by `allowedVendorIds`
+  - Filter vendor multi-select in spending view to only show allowed vendors
+  - Pass `userEmail` (and ID token) from ChatPanel to agent service
+- **Platform config**
+  - Firebase hosting rewrite for `/admin/finance/**`
 - Update architecture docs in platform and vendors repos
 
 ## Implementation order
 
-1. Workstream 0 (agent auth foundation) — prerequisite for everything
-2. Workstream 1 (shared auth / role model) — foundation
-3. Workstream 2 (GlobalNav) — admin navigation
-4. Workstream 3 (vendors spend filtering) — testable with manual Firestore edits
-5. Workstream 6 (agent API endpoints) — backend for admin SPAs
-6. Workstreams 4 + 5 (admin SPAs) — can be built in parallel
-7. Workstream 7 (platform config + docs) — finalize
+1. Workstream 0 (agent auth foundation) — DONE
+2. Workstream 1 (shared auth / role model) — DONE
+3. Workstream 2 (GlobalNav admin navigation)
+4. Workstream 3 (System Administration SPA + agent endpoints + platform config)
+5. Workstream 4 (vendor spend filtering + Finance Administration SPA + related endpoints)
 
 ## Decided questions
 
