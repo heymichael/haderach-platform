@@ -1,0 +1,27 @@
+# Backend API authentication policy
+
+All Haderach backend services exposed via Firebase Hosting rewrites or public Cloud Run URLs must authenticate callers on every request.
+
+## Requirements
+
+- Every API endpoint must verify the caller's identity via a **Firebase ID token** passed in the `Authorization: Bearer <token>` header.
+- The only exception is **health check endpoints** (`/health`) used by Cloud Run or load balancer probes.
+- Token verification must happen **server-side** using the Firebase Admin SDK — never trust client-supplied identity fields (e.g., email in a request body or context object).
+- Unauthenticated requests must receive a `401 Unauthorized` response.
+- The verified identity (email, uid) from the decoded token is the **sole source of truth** for determining who the caller is.
+
+## Authorization pattern
+
+After verifying identity, the service should load the caller's roles and permissions from their Firestore user document (`users/{email}`) and enforce endpoint-specific access rules:
+
+- Read-only data endpoints: require a valid token (any authenticated user).
+- Mutation endpoints (create/update/delete users, modify roles): require specific roles on the caller.
+- Spend-related endpoints: filter results based on the caller's `allowed_vendor_ids` unless the caller has a bypass role.
+
+## When building a new backend service
+
+1. Add `firebase-admin` as a dependency.
+2. Create an auth module with a token verification function/middleware.
+3. Apply the auth middleware to all endpoints except health checks.
+4. Document which roles are required for each endpoint in the service's architecture docs.
+5. Add a basic CI test: hit each endpoint without a token, assert `401`.

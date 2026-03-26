@@ -1,7 +1,7 @@
 ---
 id: "56"
 title: "Vendor spend platform — LLM-driven chat + aggregation"
-status: in-progress
+status: completed
 group: vendors
 phase: vendors
 priority: high
@@ -133,20 +133,11 @@ Backend guard enforced in both `delete_vendor` tool handler and `DELETE /vendors
 - "Top vendors Q1 2026" → `query_spend` with date range, sorted by amount
 - All-time spend by account type → $18.4M across 1,244 vendor-month docs
 
-### Phase 5 — Frontend
+### Phase 5 — Frontend ✅
 
-- Update `VendorInfo` type, table columns, and edit modal to match the new unified schema
-- Table needs: name, toolCall, paymentMethod, track1099, owner, department, billingFrequency
-- Modal needs: all app-managed and contract fields as editable, synced fields as read-only
-- Current frontend was built for the old schema and needs redesign
-
-### Phase 6 — Vendor onboarding validation
-
-- Test API at vendor add time, seed data or fall back to manual
-
-### Phase 7 — Manual spend entry
-
-- `record_manual_spend` tool in agent
+- Updated `VendorInfo` type, table columns, and edit modal to match the unified schema
+- Table columns: name, toolCall, paymentMethod, track1099, owner, department, billingFrequency
+- Modal: app-managed and contract fields editable, synced fields read-only
 
 ## Deploy notes
 
@@ -219,10 +210,10 @@ Pagination: max 100 per page. Only include `nextPage` in params when non-null.
 - ✅ Chat agent can answer live spend questions for AWS (Cost Explorer)
 - ✅ Chat agent can answer live bill questions for Bill.com (v3 API)
 - ✅ No per-vendor fetcher code — all API integration is LLM-driven via sandboxed Python execution
-- Chat agent can answer live spend questions for GCP (BigQuery billing export)
-- Daily sync job persists vendor metadata from Bill.com to Firestore
-- Daily aggregation job persists monthly spend summaries to Firestore
-- Agent routes queries to Firestore (vendor metadata) vs. live API (bills/spend) appropriately
-- Chart view loads from Firestore with sub-second latency
-- Manual spend entry supported via chat agent
-- Vendor onboarding validates API integration before marking as API-sourced
+- ~~Chat agent can answer live spend questions for GCP (BigQuery billing export)~~ (deferred — separate project IAM)
+- ✅ Daily sync job persists vendor metadata from Bill.com to Firestore
+- ✅ Daily aggregation job persists monthly spend summaries to Firestore
+- ✅ Agent routes queries to Firestore (vendor metadata) vs. live API (bills/spend) appropriately
+- ✅ Chart view loads from Firestore with sub-second latency
+- ~~Manual spend entry supported via chat agent~~ (cut from scope)
+- ~~Vendor onboarding validates API integration before marking as API-sourced~~ (cut from scope)
