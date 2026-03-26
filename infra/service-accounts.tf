@@ -42,7 +42,7 @@ resource "google_service_account" "agent_artifact_publisher" {
 }
 
 resource "google_service_account" "admin_system_artifact_publisher" {
-  account_id   = "admin-system-artifact-publisher"
+  account_id   = "admin-sys-artifact-publisher"
   display_name = "admin-system-artifact-publisher"
   project      = var.project_id
 }
