@@ -39,6 +39,16 @@ New SPA at `/admin/` with simpler layout (GlobalNav + fixed left nav, no collaps
 
 Auth: Settings link always visible; SPA itself gates by `admin` or `finance_admin` role.
 
+## Prerequisite: Standardize app-level UI patterns
+
+Before onboarding more SPAs, establish consistent Tier 2 conventions so new apps don't splinter visually:
+
+- **DataTable as default** — new apps should use the shared `DataTable` component (TanStack Table wrapper) for all tabular data, not raw Table primitives. Ensures sortable headers, consistent density, and uniform styling across apps.
+- **Tier 2 color palette convention** — define whether admin/platform SPAs share a palette (e.g., home's dark navy) or each app picks its own. Document the decision so new apps don't arbitrarily diverge.
+- **Page layout baseline** — establish a standard page shell pattern (header + content area, optional sidebar) that new SPAs follow. Currently vendors/stocks use `SidebarProvider` while admin-system uses a flat layout.
+
+This doesn't block task 67 itself, but should be resolved before the Finance Administration SPA (task 65 workstream 4) or any additional SPAs are scaffolded.
+
 ## Acceptance criteria
 
 - Avatar dropdown replaces Admin dropdown + avatar + sign-out in GlobalNav across all apps

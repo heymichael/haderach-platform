@@ -270,6 +270,7 @@ Platform consumes metadata and promotes specific versions by environment.
 | `card` | `/card/` | `card` | Deployed |
 | `stocks` | `/stocks/` | `stocks` | Deployed |
 | `vendors` | `/vendors/` | `vendors` | Deployed |
+| `admin-system` | `/admin/system/` | `admin-system` | Deployed |
 
 ## Backend Services (Cloud Run)
 
@@ -311,38 +312,55 @@ Authentication is centralized at the platform level. Users sign in once at
 
 ### Role-based access control
 
-User access is controlled via roles stored in Firestore `users/{email}` documents.
+User access is controlled via four stackable roles stored in Firestore `users/{email}` documents.
 Roles are global (not per-app) and a user can hold multiple roles.
 
 #### Roles
 
-| Role | Grants access to | Notes |
-|------|------------------|-------|
-| `admin` | All apps | Future: management privileges |
-| `member` | All apps | General access |
-| `card_member` | Card only | |
-| `stocks_member` | Stocks only | |
-| `vendors_member` | Vendors only | |
+| Role | Regular apps | Vendor spend | Admin capabilities | Assigned by |
+|------|-------------|-------------|-------------------|-------------|
+| `user` | stocks, vendors | Only `allowed_vendor_ids` | None | `admin` via System Admin UI |
+| `admin` | stocks, vendors | Only `allowed_vendor_ids` | Create users, grant `user`/`admin` roles | `admin` via System Admin UI |
+| `finance_admin` | None (needs `user`/`admin` too) | All spend (bypasses filtering) | Grant `allowed_vendor_ids` to users | Manual Firestore |
+| `haderach_user` | card | N/A | None | Manual Firestore |
+
+#### Admin apps
+
+| App | Route | Required role |
+|-----|-------|--------------|
+| System Administration | `/admin/system/` | `admin` |
+| Finance Administration | `/admin/finance/` | `finance_admin` |
+
+Admin app access is defined in `ADMIN_CATALOG` and `ADMIN_GRANTING_ROLES` in
+`@haderach/shared-ui` (`haderach-home/packages/shared-ui/src/auth/app-catalog.ts`).
 
 #### Permission resolution
 
-Each app defines an `APP_GRANTING_ROLES` mapping in code. Access is granted if the
-user holds any role that grants access to that app. Role-to-permission mapping is
-intentionally in code (not Firestore) — the role set is small and well-defined.
+Each app defines an `APP_GRANTING_ROLES` mapping in code. Admin apps use a separate
+`ADMIN_GRANTING_ROLES` mapping. Access is granted if the user holds any role that
+grants access to that app. Role-to-permission mapping is intentionally in code
+(not Firestore) — the role set is small and well-defined.
 
 #### Firestore schema
 
 ```text
 users/{normalizedEmail}
-  roles: string[]        // e.g., ["admin"] or ["card_member", "stocks_member"]
-  createdAt: string      // ISO timestamp
+  roles: string[]              // e.g., ["admin", "finance_admin"]
+  allowed_vendor_ids: string[] // vendor doc IDs for spend filtering
+  first_name: string
+  last_name: string
+  createdAt: string            // ISO timestamp
 ```
 
 ### Managing users
 
-Edit user documents directly in the [Firebase Console](https://console.firebase.google.com)
-under the `haderach-ai` project → Firestore Database → `users` collection.
-Changes take effect immediately without app redeployment.
+Users with the `admin` role can manage users via the System Administration app
+at `/admin/system/`. This app supports creating users, assigning `user`/`admin`
+roles, and deleting users.
+
+`finance_admin` and `haderach_user` roles are assigned manually in the
+[Firebase Console](https://console.firebase.google.com) under the `haderach-ai`
+project → Firestore Database → `users` collection.
 
 Initial data is seeded using `scripts/seed-users.py`.
 

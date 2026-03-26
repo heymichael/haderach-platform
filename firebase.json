@@ -55,6 +55,10 @@
         }
       },
       {
+        "source": "/admin/system/**",
+        "destination": "/admin/system/index.html"
+      },
+      {
         "source": "/",
         "destination": "/index.html"
       }
