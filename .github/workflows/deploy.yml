@@ -12,6 +12,7 @@ on:
           - card
           - stocks
           - vendors
+          - admin-system
       commit_sha:
         description: "App commit SHA to deploy"
         required: true
@@ -35,7 +36,7 @@ concurrency:
 env:
   APP_ID: ${{ inputs.app_id }}
   GCS_PATH: ${{ inputs.app_id }}/versions/${{ inputs.commit_sha }}
-  ALL_APP_IDS: "home card stocks vendors"
+  ALL_APP_IDS: "home card stocks vendors admin-system"
 
 jobs:
   download-and-verify:

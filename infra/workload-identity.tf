@@ -64,6 +64,13 @@ resource "google_service_account_iam_member" "agent_wif_binding" {
   member             = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/github-actions/attribute.repository/heymichael/agent"
 }
 
+# heymichael/system-admin repo can impersonate admin-system-artifact-publisher
+resource "google_service_account_iam_member" "admin_system_wif_binding" {
+  service_account_id = google_service_account.admin_system_artifact_publisher.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/github-actions/attribute.repository/heymichael/system-admin"
+}
+
 # heymichael/haderach-platform repo can impersonate platform-deployer
 resource "google_service_account_iam_member" "platform_wif_binding" {
   service_account_id = google_service_account.platform_deployer.name
