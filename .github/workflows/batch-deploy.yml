@@ -77,7 +77,7 @@ jobs:
           ADMIN_SYSTEM_SHA: ${{ inputs.admin_system_sha }}
           BUCKET: ${{ vars.GCS_ARTIFACT_BUCKET }}
         run: |
-          declare -A APP_REPOS=([home]=haderach-home [card]=card [stocks]=stocks [vendors]=vendors [admin-system]=admin-system)
+          declare -A APP_REPOS=([home]=haderach-home [card]=card [stocks]=stocks [vendors]=vendors [admin-system]=system-admin)
           declare -A APP_SHAS=([home]="$HOME_SHA" [card]="$CARD_SHA" [stocks]="$STOCKS_SHA" [vendors]="$VENDORS_SHA" [admin-system]="$ADMIN_SYSTEM_SHA")
 
           MATRIX_ENTRIES=()
