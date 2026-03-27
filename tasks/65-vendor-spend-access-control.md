@@ -27,12 +27,12 @@ Implementation details, file-level changes, code examples, and decided questions
 
 | Role | Regular apps | Vendor spend | Admin capabilities | Assigned by |
 |---|---|---|---|---|
-| `user` | stocks, vendors | Only `allowed_vendor_ids` | None | `admin` via UI |
-| `admin` | stocks, vendors | Only `allowed_vendor_ids` | Create users, grant `user`/`admin` | `admin` via UI |
-| `finance_admin` | None (needs `user`/`admin` too) | All spend (bypasses filtering) | Grant `allowed_vendor_ids` | Manual Firestore |
+| `user` | stocks, vendors | Filtered by `allowed_departments` + `allowed_vendor_ids` - `denied_vendor_ids` | None | `admin` via UI |
+| `admin` | stocks, vendors | Filtered by `allowed_departments` + `allowed_vendor_ids` - `denied_vendor_ids` | Create users, grant `user`/`admin` | `admin` via UI |
+| `finance_admin` | None (needs `user`/`admin` too) | All spend (bypasses filtering) | Manage vendor access fields per user | Manual Firestore |
 | `haderach_user` | card | N/A | None | Manual Firestore |
 
-Roles are stackable. `admin` with no `allowed_vendor_ids` sees zero vendor spend. Only `finance_admin` bypasses filtering.
+Roles are stackable. `admin` with no access fields sees zero vendor spend when filtering is enabled. Only `finance_admin` bypasses filtering.
 
 ## Workstreams
 
@@ -86,23 +86,65 @@ Deployed to prod. Old `stocks_member`/`vendors_member`/`card_member` roles clean
 
 ### 4. Vendor spend filtering, Finance Administration SPA, and related endpoints
 
-- **Finance Administration SPA** — new Vite + React SPA at `/admin/finance/`
-  - List users, manage `allowed_vendor_ids` per user via vendor multi-select
-  - Auth-gated: requires `finance_admin` role
-- **Agent service endpoints for vendor filtering**
-  - `PATCH /users/{email}` — update `allowed_vendor_ids` (requires `finance_admin`)
-  - `GET /vendors` — list vendor IDs/names for admin picker
-  - `/chat` — use verified caller identity to load `allowed_vendor_ids`, filter spend tools
-- **Vendors app spend filtering**
-  - Add `allowedVendorIds` and `isFinanceAdmin` to `AuthUser` context
-  - Filter spend data in `fetchVendorSpend.ts` by `allowedVendorIds`
-  - Filter vendor multi-select in spending view to only show allowed vendors
-  - Pass `userEmail` (and ID token) from ChatPanel to agent service
-- **Platform config**
-  - Firebase hosting rewrite for `/admin/finance/**`
-- Update architecture docs in platform and vendors repos
+**Access model:** Two-tier — department-level grants + vendor-level overrides (include/exclude). Resolution: (vendors in `allowed_departments` UNION `allowed_vendor_ids`) MINUS `denied_vendor_ids`. Deny always wins. Vendors with no department are invisible unless explicitly granted. `finance_admin` bypasses all filtering.
 
-**MCP server integration note:** The vendor analytics MCP server (being built separately) already accepts a `caller_context` parameter on all spend tool handlers with `allowed_vendor_ids` and `is_finance_admin`. When this workstream is implemented, the production agent tool wrappers in `service/tools.py` should populate `caller_context` from the verified caller's Firestore user doc before calling MCP tool functions. The MCP tools will filter spend results to `allowed_vendor_ids` (or bypass for `finance_admin`). Vendor-specific spend queries for unauthorized vendors should return `not_authorized` status; aggregate queries should silently scope to allowed vendors.
+**Feature flag:** `config/feature_flags.enforce_spend_filtering` in Firestore controls activation. When `false` (default), spend filtering is disabled. Flip to `true` to enable — no deploy required.
+
+#### 4a. Agent service — access resolution and endpoints — COMPLETED 2025-03-27
+
+- [x] Implement `_build_caller_context` with Firestore feature flag for safe rollout
+- [x] Add `resolve_effective_vendor_ids` helper (department resolution + include/exclude)
+- [x] Add `get_user_access_context` lightweight user doc reader
+- [x] Add `get_feature_flag` reader for `config/feature_flags`
+- [x] `GET /vendors` — authed (any role), returns full vendor field set including department
+- [x] `PATCH /users/{email}` — `finance_admin` can modify `allowedDepartments`, `allowedVendorIds`, `deniedVendorIds`
+- [x] `GET /users` and `GET /users/{email}` — include access fields in responses
+- [x] Add `list_vendors` to firestore_client
+
+Deployed to prod. Filtering disabled via feature flag (safe default).
+
+#### 4b. Shared-UI admin components
+
+- [ ] `AdminModal` — generic modal shell (extracted from admin-system's duplicate modal pattern)
+- [ ] `MultiSelect` — searchable multi-select popover with custom item rendering
+- [ ] `UserTable` — configurable user list table built on DataTable
+- [ ] `TagBadge` — reusable pill/badge for roles, departments, vendor names
+- [ ] `agentFetch` — shared authenticated fetch utility (deduplicate from admin-system and vendors)
+
+#### 4c. System Admin SPA refactor
+
+- [ ] Refactor admin-system to consume shared-ui admin components (AdminModal, UserTable, TagBadge, agentFetch)
+- [ ] Remove bespoke modal shells, inline table, and local agentFetch
+- [ ] Verify all existing functionality unchanged
+
+#### 4d. Finance Administration SPA
+
+- [ ] New Vite + React SPA at `/admin/finance/` (fully service-oriented — no direct database access)
+- [ ] Auth-gated: requires `finance_admin` role
+- [ ] User list (filtered to `user`/`admin` holders) using shared `UserTable`
+- [ ] Per-user edit: department multi-select, vendor include picker, vendor deny picker (all using shared `MultiSelect`)
+- [ ] Vendor pickers show "Name (Department)" format
+- [ ] Department list extracted client-side from `GET /vendors` response
+- [ ] Save via `PATCH /users/{email}` with access fields
+
+#### 4e. Vendors app spend filtering
+
+- [ ] Extend `AuthUser` context with `allowedDepartments`, `allowedVendorIds`, `deniedVendorIds`, `isFinanceAdmin`
+- [ ] Client-side resolution of effective vendor set in spending view (no extra API call)
+- [ ] Filter vendor multi-select dropdown to only show allowed vendors
+- [ ] Filter spend query results by allowed vendor set (defense in depth)
+
+#### 4f. Platform config
+
+- [ ] Firebase hosting rewrite for `/admin/finance/**`
+- [ ] Add admin-finance to deploy workflows
+- [ ] Update architecture docs in platform and vendors repos
+
+#### 4g. Supporting tasks
+
+- [ ] Populate vendor `department` field via CSV load (prerequisite for department filtering)
+- [ ] Create tech debt task: migrate vendors app from direct Firestore to API-driven architecture
+- [ ] Create Cursor rule: frontend apps access data through service APIs, no direct database access
 
 ## Implementation order
 
@@ -110,29 +152,47 @@ Deployed to prod. Old `stocks_member`/`vendors_member`/`card_member` roles clean
 2. Workstream 1 (shared auth / role model) — DONE
 3. Workstream 2 (GlobalNav admin navigation) — DONE
 4. Workstream 3 (System Administration SPA + agent endpoints + platform config) — DONE
-5. Workstream 4 (vendor spend filtering + Finance Administration SPA + related endpoints)
+5. Workstream 4a (agent service access resolution + endpoints) — DONE
+6. Workstream 4b (shared-ui admin components)
+7. Workstream 4c (System Admin SPA refactor)
+8. Workstream 4d (Finance Administration SPA)
+9. Workstream 4e (vendors app spend filtering)
+10. Workstream 4f (platform config + docs)
+11. Workstream 4g (supporting tasks: vendor departments, tech debt, Cursor rule)
 
 ## Decided questions
 
-1. `finance_admin` bypasses spend filtering; everyone else is restricted by `allowed_vendor_ids`
+1. `finance_admin` bypasses spend filtering; everyone else is restricted by the access model
 2. `finance_admin` and `haderach_user` are assigned manually (Firestore); `admin` can only grant `user` and `admin`
 3. System Administration role picker is hardcoded (`user`, `admin` only)
 4. Vendor list/detail views are unrestricted — only spend data is filtered
 5. Client-side enforcement for now (Firestore security rules unchanged)
+6. Two-tier access model: `allowed_departments` + `allowed_vendor_ids` (additive) + `denied_vendor_ids` (subtractive); deny always wins
+7. Vendors with no `department` field are invisible unless explicitly in `allowed_vendor_ids`
+8. Department values are stable (~10); dynamic resolution at query time is fine
+9. Access resolution happens in `_build_caller_context` — MCP tools receive a flat vendor ID set and are unaware of departments
+10. Vendors app resolves effective vendor set client-side (no extra API call); Finance Admin SPA is fully API-driven
+11. `GET /vendors` returns full field set, authed but unfiltered for now (designed for future caller-scoped filtering)
+12. Finance Admin SPA shows only `user`/`admin` role holders
+13. Department picker derived client-side from `GET /vendors` response (no separate endpoint)
+14. Shared-ui admin components: `AdminModal`, `MultiSelect`, `UserTable`, `TagBadge`, `agentFetch`
+15. System Admin SPA to be refactored to use shared-ui components
+16. Feature flag (`enforce_spend_filtering`) controls activation — flippable in Firebase console without deploy
 
 ## Open questions
 
-1. Migration path for existing users with `member`, `vendors_member`, etc. → `user` role (one-time script)
+(None remaining)
 
 ## Acceptance criteria
 
 - Agent service verifies caller identity via Firebase ID token on all sensitive endpoints
 - Unauthenticated requests to `/chat`, `/users`, `/vendors` are rejected
 - Users with `finance_admin` role see all vendor spend data without restriction
-- Users with `user` or `admin` roles only see spend for vendors in their `allowed_vendor_ids`
-- Users with no `allowed_vendor_ids` (and without `finance_admin`) see no spend data
+- Users with `user` or `admin` roles only see spend for vendors resolved from their `allowed_departments` + `allowed_vendor_ids` - `denied_vendor_ids`
+- Users with no access fields (and without `finance_admin`) see no spend data when filtering is enabled
 - The vendor multi-select in spending view only shows vendors the user is allowed to see
 - Agent chat responses respect the same vendor-level filtering as the UI
 - System Administration SPA allows `admin` users to create users and assign `user`/`admin` roles
-- Finance Administration SPA allows `finance_admin` users to manage `allowed_vendor_ids` per user
+- Finance Administration SPA allows `finance_admin` users to manage `allowed_departments`, `allowed_vendor_ids`, and `denied_vendor_ids` per user
+- Spend filtering can be enabled/disabled via Firestore feature flag without deploy
 - Documentation is updated in platform and vendors architecture docs

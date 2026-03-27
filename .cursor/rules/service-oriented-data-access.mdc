@@ -1,0 +1,26 @@
+---
+description: Enforce service-oriented data access — frontend apps must go through APIs, not directly to databases
+alwaysApply: true
+---
+
+# Service-Oriented Data Access
+
+Frontend applications must access data through service APIs, not directly through any database or storage backend (Firestore, SQL, object storage, etc.).
+
+## Principles
+
+1. **No direct database calls from frontend code.** All reads and writes go through a backend service endpoint. The backend owns the data access layer and can be redesigned without hunting for frontend dependencies.
+2. **New frontend features must use API endpoints.** When building a new view or feature that needs data, add or use a backend endpoint — do not add a direct database query in the browser.
+3. **Existing direct-database patterns are acknowledged tech debt.** Some apps (e.g., the vendors app) currently read from Firestore via the Firebase client SDK. These patterns should not be extended. Migration to API-driven access is tracked as tech debt.
+
+## How to apply
+
+- When adding data access to a frontend app, create or use a backend API endpoint (e.g., `GET /agent/api/vendors`).
+- Use the `agentFetch` utility (or equivalent authenticated fetch wrapper) from `@haderach/shared-ui` for all API calls.
+- Do not import Firebase client SDK (`getFirestore`, `getDoc`, `collection`, `onSnapshot`, etc.) in new frontend code for data access purposes. Firebase Auth SDK for authentication is fine.
+- If you must touch an existing direct-database pattern, flag it as tech debt and do not expand its scope.
+
+## Exceptions
+
+- **Firebase Auth** (`onAuthStateChanged`, `getIdToken`, `signOut`, etc.) is allowed in frontend code — it's authentication, not data access.
+- **Existing patterns** in apps that predate this rule may remain until migrated, but must not be extended.
