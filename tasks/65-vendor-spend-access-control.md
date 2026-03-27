@@ -112,11 +112,13 @@ Deployed to prod. Filtering disabled via feature flag (safe default).
 - [x] `agentFetch` — shared authenticated fetch utility (deduplicate from admin-system and vendors)
 - [x] Unit tests — 39 tests across 5 suites (Vitest + React Testing Library)
 
-#### 4c. System Admin SPA refactor
+#### 4c. System Admin SPA refactor — COMPLETED 2025-03-27
 
-- [ ] Refactor admin-system to consume shared-ui admin components (AdminModal, UserTable, TagBadge, agentFetch)
-- [ ] Remove bespoke modal shells, inline table, and local agentFetch
-- [ ] Verify all existing functionality unchanged
+- [x] Refactor admin-system to consume shared-ui admin components (AdminModal, UserTable, TagBadge, agentFetch)
+- [x] Remove bespoke modal shells, inline table, and local agentFetch
+- [x] Verify all existing functionality unchanged
+- [x] UX refinements: icon-only edit/delete buttons, remove redundant close/refresh, sticky headers, type-ahead search, color scheme alignment with vendors
+- [x] Fix deploy workflow hosting path mapping (admin-system → admin/system)
 
 #### 4d. Finance Administration SPA
 
@@ -155,7 +157,7 @@ Deployed to prod. Filtering disabled via feature flag (safe default).
 4. Workstream 3 (System Administration SPA + agent endpoints + platform config) — DONE
 5. Workstream 4a (agent service access resolution + endpoints) — DONE
 6. Workstream 4b (shared-ui admin components) — DONE
-7. Workstream 4c (System Admin SPA refactor)
+7. Workstream 4c (System Admin SPA refactor) — DONE
 8. Workstream 4d (Finance Administration SPA)
 9. Workstream 4e (vendors app spend filtering)
 10. Workstream 4f (platform config + docs)
