@@ -103,13 +103,14 @@ Deployed to prod. Old `stocks_member`/`vendors_member`/`card_member` roles clean
 
 Deployed to prod. Filtering disabled via feature flag (safe default).
 
-#### 4b. Shared-UI admin components
+#### 4b. Shared-UI admin components — COMPLETED 2025-03-27
 
-- [ ] `AdminModal` — generic modal shell (extracted from admin-system's duplicate modal pattern)
-- [ ] `MultiSelect` — searchable multi-select popover with custom item rendering
-- [ ] `UserTable` — configurable user list table built on DataTable
-- [ ] `TagBadge` — reusable pill/badge for roles, departments, vendor names
-- [ ] `agentFetch` — shared authenticated fetch utility (deduplicate from admin-system and vendors)
+- [x] `AdminModal` — generic modal shell (extracted from admin-system's duplicate modal pattern)
+- [x] `MultiSelect` — searchable multi-select popover with custom item rendering
+- [x] `UserTable` — configurable user list table built on Table/Card primitives
+- [x] `TagBadge` — reusable pill/badge for roles, departments, vendor names
+- [x] `agentFetch` — shared authenticated fetch utility (deduplicate from admin-system and vendors)
+- [x] Unit tests — 39 tests across 5 suites (Vitest + React Testing Library)
 
 #### 4c. System Admin SPA refactor
 
@@ -144,7 +145,7 @@ Deployed to prod. Filtering disabled via feature flag (safe default).
 
 - [ ] Populate vendor `department` field via CSV load (prerequisite for department filtering)
 - [ ] Create tech debt task: migrate vendors app from direct Firestore to API-driven architecture
-- [ ] Create Cursor rule: frontend apps access data through service APIs, no direct database access
+- [x] Create Cursor rule: frontend apps access data through service APIs, no direct database access
 
 ## Implementation order
 
@@ -153,7 +154,7 @@ Deployed to prod. Filtering disabled via feature flag (safe default).
 3. Workstream 2 (GlobalNav admin navigation) — DONE
 4. Workstream 3 (System Administration SPA + agent endpoints + platform config) — DONE
 5. Workstream 4a (agent service access resolution + endpoints) — DONE
-6. Workstream 4b (shared-ui admin components)
+6. Workstream 4b (shared-ui admin components) — DONE
 7. Workstream 4c (System Admin SPA refactor)
 8. Workstream 4d (Finance Administration SPA)
 9. Workstream 4e (vendors app spend filtering)

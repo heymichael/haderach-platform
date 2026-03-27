@@ -1,20 +1,22 @@
 ---
-description: Remind user to branch before executing on main
+description: Remind user to branch before any file write on main
 alwaysApply: true
 ---
 
 # Branch safety reminder
 
-After plan approval and before the first implementation action, check the current git branch.
+Before the **first file write or edit** in a conversation — regardless of whether a formal plan was discussed — check the current git branch.
 
-- Trigger point: after the user says to execute, and before the first write/edit action or implementation command.
-- If current branch is `main` (or `master`), proactively remind the user to create/switch to a feature branch first.
+- Trigger point: before the very first Write, StrReplace, or Shell command that modifies files. This includes small changes like updating a task file or adding a single line.
+- If current branch is `main` (or `master`), **stop and ask** before proceeding.
 - Keep the reminder non-blocking: user can explicitly choose to continue on `main`.
-- Ask once per execution start, then proceed with the user's choice without repeating the reminder.
+- Ask once per conversation, then proceed with the user's choice without repeating.
+
+This applies to **all repos in the workspace**, including cross-repo writes (e.g., editing a task file in `haderach-platform` from another repo's Cursor window).
 
 ## Suggested reminder
 
-"Before I start implementing: you're currently on `main`. Want to create/switch to a feature branch first to avoid accidental direct commits to `main`?"
+"Before I make this change: you're currently on `main` in `<repo>`. Want to create/switch to a feature branch first?"
 
 ## Example branch check
 
