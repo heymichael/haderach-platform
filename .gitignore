@@ -32,6 +32,8 @@ build/
 infra/.terraform/
 *.tfstate
 *.tfstate.backup
+*.tfplan
+infra/tfplan
 
 # Deploy-time app artifacts (extracted in CI, not checked in)
 hosting/public/card/

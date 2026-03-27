@@ -31,9 +31,23 @@ The full set of repos lives under the parent directory `../` (relative to this p
 
 ## Procedure
 
-1. Run all seven repo checks in parallel (one shell call per repo) to minimize latency.
-2. For each repo, run `git fetch origin --quiet && git status -sb` and `gh pr list --state open` together.
-3. Assemble the table and present it.
+Run a **single** Shell call (with `required_permissions: ["all"]`) that loops through all repos. This avoids multiple approval prompts. Example:
+
+```bash
+BASE="/Users/michaelmader_1/haderach_org/haderach_site"
+for repo in haderach-home vendors stocks haderach-platform card admin-system agent; do
+  echo "=== $repo ==="
+  cd "$BASE/$repo" 2>/dev/null || { echo "NOT FOUND"; continue; }
+  git fetch origin --quiet 2>&1
+  echo "BRANCH: $(git branch --show-current)"
+  echo "STATUS: $(git status -sb | head -1)"
+  git status -s
+  echo "PR: $(gh pr list --state open --json number,title,headRefName 2>&1)"
+  echo ""
+done
+```
+
+Parse the output and assemble the table.
 
 ## Notes
 

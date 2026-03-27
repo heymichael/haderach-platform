@@ -18,9 +18,10 @@ Replace the current `admin`/`member`/`*_member` role model with four stackable r
 
 ## Full plan
 
-All implementation details, file-level changes, code examples, and decided questions live in the canonical plan file:
+Implementation details, file-level changes, code examples, and decided questions live in the canonical plan files:
 
-`/Users/michaelmader_1/.cursor/plans/revised_rbac_and_admin_apps_502dbedf.plan.md`
+- **Workstreams 0-3 (RBAC, auth, GlobalNav, System Admin):** `/Users/michaelmader_1/.cursor/plans/revised_rbac_and_admin_apps_502dbedf.plan.md`
+- **Workstream 4 (vendor spend filtering, Finance Admin SPA, shared-ui components):** `/Users/michaelmader_1/.cursor/plans/workstream_4_vendor_access_6d5e7d65.plan.md`
 
 ## Role model (summary)
 
@@ -55,25 +56,33 @@ Deployed to prod and verified: authenticated requests succeed, unauthenticated r
 - [x] Update seed script with new roles (merge strategy — preserves old roles for safe cutover)
 - [x] Seed Firestore with new roles for all 9 users
 
-Code changes on `feat/rbac-roles-admin-nav` across haderach-home, vendors, stocks, card, and haderach-platform. Not yet deployed — old role names preserved in Firestore for backward compatibility.
+Deployed to prod. Old role names removed from Firestore.
 
-### 2. GlobalNav admin section
+### 2. GlobalNav admin section — COMPLETED 2025-03-26
 
-- Add `adminApps` prop to GlobalNav
-- Render Admin dropdown when user has `admin` or `finance_admin` role
-- Links to `/admin/system/` and `/admin/finance/`
+- [x] Add `adminApps` prop to GlobalNav
+- [x] Render Admin dropdown when user has `admin` or `finance_admin` role
+- [x] Links to `/admin/system/` and `/admin/finance/`
 
-### 3. System Administration SPA and agent endpoints
+### 3. System Administration SPA and agent endpoints — COMPLETED 2025-03-26
 
-- **System Administration SPA** — new Vite + React SPA at `/admin/system/`
-  - List users, create users, assign `user`/`admin` roles
+- [x] **System Administration SPA** — new Vite + React SPA at `/admin/system/` (`heymichael/system-admin`)
+  - List users, create users, edit user name and roles, delete users
   - Auth-gated: requires `admin` role
-- **Agent service endpoints**
-  - `GET /users` — list all users (or filter by role)
+  - Temporarily hides `haderach_user` role holders from display
+- [x] **Agent service endpoints**
+  - `GET /users` — list all users (optional multi-role filter)
+  - `GET /users/{email}` — single user detail with resolved vendor names
   - `POST /users` — create user doc (requires `admin`)
-  - `PATCH /users/{email}` — update roles (requires `admin`)
-- **Platform config**
+  - `PATCH /users/{email}` — update roles and name (requires `admin`)
+  - `DELETE /users/{email}` — delete user doc (requires `admin`)
+- [x] **Platform config**
   - Firebase hosting rewrite for `/admin/system/**`
+  - Admin-system added to single-app and batch deploy workflows
+- [x] **Vendors app** — updated user query from `vendors_member` to `user`/`admin` roles
+- [x] **haderach-home** — `returnToAppId` supports admin catalog apps
+
+Deployed to prod. Old `stocks_member`/`vendors_member`/`card_member` roles cleaned from Firestore.
 
 ### 4. Vendor spend filtering, Finance Administration SPA, and related endpoints
 
@@ -93,12 +102,14 @@ Code changes on `feat/rbac-roles-admin-nav` across haderach-home, vendors, stock
   - Firebase hosting rewrite for `/admin/finance/**`
 - Update architecture docs in platform and vendors repos
 
+**MCP server integration note:** The vendor analytics MCP server (being built separately) already accepts a `caller_context` parameter on all spend tool handlers with `allowed_vendor_ids` and `is_finance_admin`. When this workstream is implemented, the production agent tool wrappers in `service/tools.py` should populate `caller_context` from the verified caller's Firestore user doc before calling MCP tool functions. The MCP tools will filter spend results to `allowed_vendor_ids` (or bypass for `finance_admin`). Vendor-specific spend queries for unauthorized vendors should return `not_authorized` status; aggregate queries should silently scope to allowed vendors.
+
 ## Implementation order
 
 1. Workstream 0 (agent auth foundation) — DONE
 2. Workstream 1 (shared auth / role model) — DONE
-3. Workstream 2 (GlobalNav admin navigation)
-4. Workstream 3 (System Administration SPA + agent endpoints + platform config)
+3. Workstream 2 (GlobalNav admin navigation) — DONE
+4. Workstream 3 (System Administration SPA + agent endpoints + platform config) — DONE
 5. Workstream 4 (vendor spend filtering + Finance Administration SPA + related endpoints)
 
 ## Decided questions
