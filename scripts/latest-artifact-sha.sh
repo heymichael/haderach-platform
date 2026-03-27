@@ -4,11 +4,10 @@
 # Uses the app repo's latest main commit and verifies it exists in GCS.
 #
 # Usage:
-#   ./scripts/latest-artifact-sha.sh          # all apps
-#   ./scripts/latest-artifact-sha.sh home     # single app
-#   ./scripts/latest-artifact-sha.sh card     # single app
-#   ./scripts/latest-artifact-sha.sh stocks   # single app
-#   ./scripts/latest-artifact-sha.sh vendors  # single app
+#   ./scripts/latest-artifact-sha.sh                # all apps
+#   ./scripts/latest-artifact-sha.sh home           # single app
+#   ./scripts/latest-artifact-sha.sh admin-system   # single app
+#   ./scripts/latest-artifact-sha.sh agent          # single app
 
 set -eo pipefail
 
@@ -21,15 +20,16 @@ BUCKET="haderach-app-artifacts"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SITE_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
-APPS=("home" "card" "stocks" "vendors")
+APPS=("home" "card" "stocks" "vendors" "admin-system" "agent")
 
 get_app_dir() {
   local app_id="$1"
-  if [[ "$app_id" == "home" ]]; then
-    echo "${SITE_DIR}/haderach-home"
-  else
-    echo "${SITE_DIR}/${app_id}"
-  fi
+  case "$app_id" in
+    home)         echo "${SITE_DIR}/haderach-home" ;;
+    admin-system) echo "${SITE_DIR}/admin-system" ;;
+    agent)        echo "${SITE_DIR}/agent" ;;
+    *)            echo "${SITE_DIR}/${app_id}" ;;
+  esac
 }
 
 fetch_latest() {

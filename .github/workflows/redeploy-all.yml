@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  ALL_APP_IDS: "home card stocks vendors"
+  ALL_APP_IDS: "home card stocks vendors admin-system"
 
 jobs:
   deploy:
@@ -56,11 +56,19 @@ jobs:
               echo "Restoring $app at commit $SHA"
               gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${app}/versions/${SHA}/runtime.tar.gz" "/tmp/${app}-runtime.tar.gz"
               tar -xzf "/tmp/${app}-runtime.tar.gz" -C hosting/public
-              if [ "$app" = "home" ]; then
+
+              # Map app_id to hosting directory path
+              hdir="$app"
+              case "$app" in
+                home)         hdir="" ;;
+                admin-system) hdir="admin/system" ;;
+              esac
+
+              if [ -z "$hdir" ]; then
                 echo "Restored home app (root-level files in hosting/public/)"
               else
-                echo "Restored hosting/public/${app}/"
-                ls -la "hosting/public/${app}/"
+                echo "Restored hosting/public/${hdir}/"
+                ls -la "hosting/public/${hdir}/"
               fi
             else
               echo "No deployed marker found for $app, skipping"

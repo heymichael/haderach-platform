@@ -129,12 +129,20 @@ jobs:
       - name: Extract app runtime
         run: |
           tar -xzf artifacts/runtime.tar.gz -C hosting/public
-          if [ "${{ inputs.app_id }}" = "home" ]; then
+
+          # Map app_id to its hosting directory path
+          hosting_dir="${{ inputs.app_id }}"
+          case "${{ inputs.app_id }}" in
+            home)         hosting_dir="" ;;
+            admin-system) hosting_dir="admin/system" ;;
+          esac
+
+          if [ -z "$hosting_dir" ]; then
             echo "--- hosting/public/ (home extracts at root) ---"
             ls -la hosting/public/
           else
-            echo "--- hosting/public/${{ inputs.app_id }}/ contents ---"
-            ls -la "hosting/public/${{ inputs.app_id }}/"
+            echo "--- hosting/public/${hosting_dir}/ contents ---"
+            ls -la "hosting/public/${hosting_dir}/"
           fi
 
       - name: Authenticate to GCP via WIF
@@ -161,11 +169,19 @@ jobs:
               echo "Restoring $app at commit $SHA"
               gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${app}/versions/${SHA}/runtime.tar.gz" "/tmp/${app}-runtime.tar.gz"
               tar -xzf "/tmp/${app}-runtime.tar.gz" -C hosting/public
-              if [ "$app" = "home" ]; then
+
+              # Map app_id to hosting directory path
+              hdir="$app"
+              case "$app" in
+                home)         hdir="" ;;
+                admin-system) hdir="admin/system" ;;
+              esac
+
+              if [ -z "$hdir" ]; then
                 echo "Restored home app (root-level files in hosting/public/)"
               else
-                echo "Restored hosting/public/${app}/"
-                ls -la "hosting/public/${app}/"
+                echo "Restored hosting/public/${hdir}/"
+                ls -la "hosting/public/${hdir}/"
               fi
             else
               echo "No deployed marker found for $app, skipping"
