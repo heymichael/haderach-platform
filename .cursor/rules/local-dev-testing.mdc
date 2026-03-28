@@ -1,0 +1,62 @@
+---
+description: Standard procedure for spinning up the local dev environment for testing
+alwaysApply: true
+---
+
+# Local Dev Testing
+
+When the user asks to test locally, or a feature needs manual verification, follow this procedure. Don't ask clarifying questions — just do it.
+
+## Determine the test mode
+
+Before starting servers, determine which mode is needed based on the change:
+
+- **UI-only** (styling, layout, components, no backend calls): use **bypass mode** (`VITE_AUTH_BYPASS=true`, the default). No agent or auth needed.
+- **Backend-dependent** (auth, RBAC, chat, spend filtering, access control, API calls, anything that reads the Firestore user doc): use **real auth mode** (`VITE_AUTH_BYPASS=false`). Requires agent service and real Firebase sign-in.
+
+## Port assignments
+
+| Service | Port | Start command |
+|---|---|---|
+| vendors | 5174 | `cd ../vendors && npx vite --port 5174` |
+| admin-system | 5175 | `cd ../admin-system && npx vite --port 5175` |
+| admin-finance | 5176 | `cd ../admin-finance && npx vite --port 5176` |
+| agent (FastAPI) | 8080 | `cd ../agent && source .venv/bin/activate && python -m uvicorn service.app:app --host 0.0.0.0 --port 8080` |
+
+## UI-only mode (bypass)
+
+1. Kill existing server on the app's port: `lsof -ti :<port> | xargs kill -9 2>/dev/null`
+2. Ensure `VITE_AUTH_BYPASS=true` in the app's `.env` (this is the default)
+3. Start the app: `cd <app-dir> && npx vite --port <port>`
+
+No agent service or sign-in flow needed.
+
+## Real auth mode
+
+1. **Kill existing servers** on all needed ports:
+   ```sh
+   lsof -ti :8080 | xargs kill -9 2>/dev/null
+   lsof -ti :<app-port> | xargs kill -9 2>/dev/null
+   ```
+2. **Set `VITE_AUTH_BYPASS=false`** in the app's `.env`
+3. **Start the agent service** on port 8080
+4. **Start the app** on its assigned port
+5. **Sign in** via the dev-only Google sign-in button (appears automatically when bypass is off in dev mode — no need for haderach-home)
+6. **After testing**, restore `VITE_AUTH_BYPASS=true` in the app's `.env` and restart. Do NOT commit the `.env` change.
+
+All server starts require `required_permissions: ["all"]` for network access. Vite caches env vars at startup — always restart after changing `.env`.
+
+### GCP credentials
+
+The agent service needs valid GCP credentials for Firestore access. If you get auth errors:
+- Run `gcloud auth application-default login` to re-authenticate
+- Restart the agent service after re-auth
+- See task 76 for a planned improvement using a service account key
+
+## Minimum services per mode
+
+| Mode | App under test | Services needed |
+|---|---|---|
+| UI-only | any | app dev server only |
+| Real auth | vendors, admin-system, admin-finance | agent (8080) + app dev server |
+| Real auth | stocks, card | app dev server only |

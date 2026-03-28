@@ -130,12 +130,14 @@ Deployed to prod. Filtering disabled via feature flag (safe default).
 - [x] Department list extracted client-side from `GET /vendors` response
 - [x] Save via `PATCH /users/{email}` with access fields
 
-#### 4e. Vendors app spend filtering
+#### 4e. Vendors app spend filtering — COMPLETED 2025-03-28
 
-- [ ] Extend `AuthUser` context with `allowedDepartments`, `allowedVendorIds`, `deniedVendorIds`, `isFinanceAdmin`
-- [ ] Client-side resolution of effective vendor set in spending view (no extra API call)
-- [ ] Filter vendor multi-select dropdown to only show allowed vendors
-- [ ] Filter spend query results by allowed vendor set (defense in depth)
+- [x] Extend `AuthUser` context with `allowedDepartments`, `allowedVendorIds`, `deniedVendorIds`, `isFinanceAdmin`
+- [x] Client-side resolution of effective vendor set in spending view (no extra API call)
+- [x] Filter vendor multi-select dropdown to only show allowed vendors
+- [x] Filter spend query results by allowed vendor set (defense in depth)
+- [x] Dev-only Google sign-in button in AuthGate for local testing with real auth
+- [x] Seed script for config/feature_flags document (`scripts/seed_feature_flags.py`)
 
 #### 4f. Platform config — COMPLETED 2025-03-27
 
@@ -160,7 +162,7 @@ Deployed to prod. Filtering disabled via feature flag (safe default).
 6. Workstream 4b (shared-ui admin components) — DONE
 7. Workstream 4c (System Admin SPA refactor) — DONE
 8. Workstream 4d (Finance Administration SPA) — DONE
-9. Workstream 4e (vendors app spend filtering)
+9. Workstream 4e (vendors app spend filtering) — DONE
 10. Workstream 4f (platform config + docs) — DONE (docs outstanding)
 11. Workstream 4g (supporting tasks: vendor departments, tech debt, Cursor rule)
 
