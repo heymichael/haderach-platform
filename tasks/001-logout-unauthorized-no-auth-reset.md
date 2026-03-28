@@ -6,7 +6,7 @@ group: card
 phase: card
 priority: medium
 type: bug
-tags: [auth]
+tags: ["auth", "thisone"]
 created: 2026-03-12
 owner: Michael
 ---

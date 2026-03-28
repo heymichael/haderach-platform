@@ -1,35 +1,37 @@
 ---
 id: "62"
-title: "Extract SearchableMultiSelect component to shared-ui"
+title: "Refactor VendorFilters to use shared MultiSelect component"
 status: pending
-group: platform
-phase: platform
-priority: low
+group: vendors
+phase: vendors
+priority: high
 type: feature
-tags: [shared-ui, component, multiselect, search, radix, vendors]
+tags: [shared-ui, component, multiselect, search, vendors]
 dependencies: []
 ---
 
 ## Context
 
-The vendors app now has a local `VendorFilters` component that implements a searchable multi-select pattern using `@radix-ui/react-popover`, `Input`, `Button`, and `lucide-react` `Check`. It supports:
+The vendors app has a local `VendorFilters` component (`vendors/src/VendorFilters.tsx`) that implements a searchable multi-select using `@radix-ui/react-popover`, `Input`, `Button`, and `lucide-react` `Check`. A shared `MultiSelect` component now exists in `@haderach/shared-ui` (`haderach-home/packages/shared-ui/src/components/ui/multi-select.tsx`) with equivalent and improved functionality:
 
-- Popover trigger with summary label
-- Auto-focused search input that filters the list in real time
-- Scrollable checkbox list with multi-select
-- "Select all" / "Select matches" / "Clear" actions
+- Search filtering with auto-focus
+- Select all / Clear actions (shown simultaneously)
+- Scrollable checkbox list with selected items sorted to the top
+- Custom item rendering via `renderItem` prop
 
-This pattern is generic enough to be reused across other apps (stocks, card) wherever a filterable multi-select is needed.
+## Completed
 
-## Acceptance criteria
+- [x] Created `MultiSelect` component in `@haderach/shared-ui`
+- [x] Props: `items: { id, label }[]`, `selectedIds: string[]`, `onSelectionChange`, `placeholder`, `searchPlaceholder`, `renderItem`, `className`
+- [x] Supports search filtering, select all / clear, scrollable list, selected-first sorting with separator
 
-- [ ] Create a `SearchableMultiSelect` (or similar) component in `@haderach/shared-ui`
-- [ ] Props: `options: { id: string; label: string }[]`, `selected: string[]`, `onChange: (ids: string[]) => void`, `placeholder?: string`, `label?: string`
-- [ ] Supports search filtering, select all / clear, scrollable list
-- [ ] Refactor `vendors/src/VendorFilters.tsx` to use the shared component
+## Remaining
+
+- [ ] Refactor `vendors/src/VendorFilters.tsx` to use `MultiSelect` from `@haderach/shared-ui`
+- [ ] Remove `@radix-ui/react-popover` dependency from vendors if no longer used elsewhere
 - [ ] Verify no regressions in the vendors app vendor selector
 
 ## Reference
 
-- Current local implementation: `vendors/src/VendorFilters.tsx`
-- Shared-ui package: `haderach-home/packages/shared-ui/`
+- Shared component: `haderach-home/packages/shared-ui/src/components/ui/multi-select.tsx`
+- Local implementation to replace: `vendors/src/VendorFilters.tsx`

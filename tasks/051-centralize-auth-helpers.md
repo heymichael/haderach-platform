@@ -6,7 +6,7 @@ group: platform
 phase: platform
 priority: low
 type: improvement
-tags: [shared-ui, auth, deduplication]
+tags: [shared-ui, auth, deduplication, batch-bundle]
 effort: small
 created: 2026-03-23
 ---

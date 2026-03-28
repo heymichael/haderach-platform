@@ -4,7 +4,7 @@ title: "Extract ChatPanel into @haderach/shared-ui as a cross-app resource"
 status: pending
 group: platform
 phase: platform
-priority: medium
+priority: high
 type: improvement
 tags: [shared-ui, chat, agent, cross-app]
 effort: medium

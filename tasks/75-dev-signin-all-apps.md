@@ -6,7 +6,7 @@ group: platform
 phase: platform
 priority: low
 type: improvement
-tags: [auth, dev-experience, local-testing]
+tags: [auth, dev-experience, local-testing, batch-bundle]
 effort: small
 created: 2026-03-28
 ---

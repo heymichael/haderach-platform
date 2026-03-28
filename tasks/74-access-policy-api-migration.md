@@ -6,7 +6,7 @@ group: platform
 phase: platform
 priority: high
 type: improvement
-tags: [access-policy, service-oriented-data-access, api, auth, tech-debt]
+tags: [access-policy, service-oriented-data-access, api, auth, tech-debt, batch-bundle]
 dependencies: []
 effort: medium
 created: 2026-03-27

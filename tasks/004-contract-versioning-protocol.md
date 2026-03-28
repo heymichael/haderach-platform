@@ -3,7 +3,7 @@ id: "4"
 title: "Add contract versioning protocol docs alignment with platform"
 status: pending
 group: card
-phase: card
+phase: platform
 priority: low
 type: docs
 tags: [contracts, platform]

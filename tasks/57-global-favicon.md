@@ -6,7 +6,7 @@ group: platform
 phase: platform
 priority: low
 type: chore
-tags: [ui, branding]
+tags: [ui, branding, batch-bundle, experiment]
 effort: small
 created: 2026-03-24
 ---
