@@ -1,7 +1,7 @@
 ---
 id: "66"
 title: "DataTable inline search with row pinning"
-status: pending
+status: completed
 group: vendors
 phase: vendors
 priority: medium
@@ -10,6 +10,8 @@ tags: [shared-ui, datatable, filtering, ux]
 effort: large
 created: 2025-03-25
 ---
+
+Plan: `/Users/michaelmader_1/.cursor/plans/tasks_46_and_66_eb372702.plan.md`
 
 ## Purpose
 

@@ -1,7 +1,7 @@
 ---
 id: "62"
 title: "Refactor VendorFilters to use shared MultiSelect component"
-status: pending
+status: cancelled
 group: vendors
 phase: vendors
 priority: high

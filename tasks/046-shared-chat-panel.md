@@ -1,7 +1,7 @@
 ---
 id: "46"
 title: "Extract ChatPanel into @haderach/shared-ui as a cross-app resource"
-status: pending
+status: completed
 group: platform
 phase: platform
 priority: high
@@ -10,6 +10,8 @@ tags: [shared-ui, chat, agent, cross-app, vendor-components]
 effort: medium
 created: 2026-03-23
 ---
+
+Plan: `/Users/michaelmader_1/.cursor/plans/tasks_46_and_66_eb372702.plan.md`
 
 ## Purpose
 
