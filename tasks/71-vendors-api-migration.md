@@ -1,7 +1,7 @@
 ---
 id: "71"
 title: "Migrate vendors app from direct Firestore to API-driven architecture"
-status: pending
+status: completed
 group: vendors
 phase: platform
 priority: medium
@@ -12,7 +12,8 @@ effort: medium
 created: 2026-03-28
 ---
 
-Full implementation plan: `/Users/michaelmader_1/.cursor/plans/spend_rest_endpoint_0f7389de.plan.md`
+Backend plan: `/Users/michaelmader_1/.cursor/plans/spend_rest_endpoint_0f7389de.plan.md`
+Frontend plan: `/Users/michaelmader_1/.cursor/plans/task_71_frontend_migration_59ce472f.plan.md`
 
 ## Purpose
 
