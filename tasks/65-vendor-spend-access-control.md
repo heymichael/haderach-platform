@@ -120,15 +120,15 @@ Deployed to prod. Filtering disabled via feature flag (safe default).
 - [x] UX refinements: icon-only edit/delete buttons, remove redundant close/refresh, sticky headers, type-ahead search, color scheme alignment with vendors
 - [x] Fix deploy workflow hosting path mapping (admin-system → admin/system)
 
-#### 4d. Finance Administration SPA
+#### 4d. Finance Administration SPA — COMPLETED 2025-03-27
 
-- [ ] New Vite + React SPA at `/admin/finance/` (fully service-oriented — no direct database access)
-- [ ] Auth-gated: requires `finance_admin` role
-- [ ] User list (filtered to `user`/`admin` holders) using shared `UserTable`
-- [ ] Per-user edit: department multi-select, vendor include picker, vendor deny picker (all using shared `MultiSelect`)
-- [ ] Vendor pickers show "Name (Department)" format
-- [ ] Department list extracted client-side from `GET /vendors` response
-- [ ] Save via `PATCH /users/{email}` with access fields
+- [x] New Vite + React SPA at `/admin/finance/` (fully service-oriented — no direct database access)
+- [x] Auth-gated: requires `finance_admin` role
+- [x] User list (filtered to `user`/`admin` holders) using shared `UserTable`
+- [x] Per-user edit: department multi-select, vendor include picker, vendor deny picker (all using shared `MultiSelect`)
+- [x] Vendor pickers show "Name (Department)" format
+- [x] Department list extracted client-side from `GET /vendors` response
+- [x] Save via `PATCH /users/{email}` with access fields
 
 #### 4e. Vendors app spend filtering
 
@@ -137,16 +137,17 @@ Deployed to prod. Filtering disabled via feature flag (safe default).
 - [ ] Filter vendor multi-select dropdown to only show allowed vendors
 - [ ] Filter spend query results by allowed vendor set (defense in depth)
 
-#### 4f. Platform config
+#### 4f. Platform config — COMPLETED 2025-03-27
 
-- [ ] Firebase hosting rewrite for `/admin/finance/**`
-- [ ] Add admin-finance to deploy workflows
+- [x] Firebase hosting rewrite for `/admin/finance/**`
+- [x] Add admin-finance to deploy workflows (single-app, batch, redeploy-all)
+- [x] Terraform: service account, WIF binding, GCS IAM for admin-finance artifact publishing
 - [ ] Update architecture docs in platform and vendors repos
 
 #### 4g. Supporting tasks
 
-- [ ] Populate vendor `department` field via CSV load (prerequisite for department filtering)
-- [ ] Create tech debt task: migrate vendors app from direct Firestore to API-driven architecture
+- [x] Populate vendor `department` field via CSV load (481 vendors classified)
+- [x] Create tech debt task: migrate vendors app from direct Firestore to API-driven architecture (task 71)
 - [x] Create Cursor rule: frontend apps access data through service APIs, no direct database access
 
 ## Implementation order
@@ -158,9 +159,9 @@ Deployed to prod. Filtering disabled via feature flag (safe default).
 5. Workstream 4a (agent service access resolution + endpoints) — DONE
 6. Workstream 4b (shared-ui admin components) — DONE
 7. Workstream 4c (System Admin SPA refactor) — DONE
-8. Workstream 4d (Finance Administration SPA)
+8. Workstream 4d (Finance Administration SPA) — DONE
 9. Workstream 4e (vendors app spend filtering)
-10. Workstream 4f (platform config + docs)
+10. Workstream 4f (platform config + docs) — DONE (docs outstanding)
 11. Workstream 4g (supporting tasks: vendor departments, tech debt, Cursor rule)
 
 ## Decided questions
