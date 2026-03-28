@@ -47,6 +47,12 @@ resource "google_service_account" "admin_system_artifact_publisher" {
   project      = var.project_id
 }
 
+resource "google_service_account" "admin_finance_artifact_publisher" {
+  account_id   = "admin-fin-artifact-publisher"
+  display_name = "admin-finance-artifact-publisher"
+  project      = var.project_id
+}
+
 resource "google_service_account" "mixpanel_bigquery_reader" {
   account_id   = "mixpanel-bigquery-reader"
   display_name = "mixpanel-bigquery-reader"

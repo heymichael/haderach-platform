@@ -46,6 +46,13 @@ resource "google_storage_bucket_iam_member" "admin_system_publisher_admin" {
   member = "serviceAccount:${google_service_account.admin_system_artifact_publisher.email}"
 }
 
+# Bucket IAM: admin-finance-artifact-publisher can manage objects (create, view, overwrite)
+resource "google_storage_bucket_iam_member" "admin_finance_publisher_admin" {
+  bucket = google_storage_bucket.app_artifacts.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.admin_finance_artifact_publisher.email}"
+}
+
 # Bucket IAM: platform-deployer can view objects (download artifacts)
 resource "google_storage_bucket_iam_member" "deployer_viewer" {
   bucket = google_storage_bucket.app_artifacts.name

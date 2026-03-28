@@ -28,6 +28,10 @@ on:
         description: "admin-system commit SHA (leave empty to skip)"
         required: false
         type: string
+      admin_finance_sha:
+        description: "admin-finance commit SHA (leave empty to skip)"
+        required: false
+        type: string
       target_env:
         description: "Deployment target environment"
         required: true
@@ -45,7 +49,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  ALL_APP_IDS: "home card stocks vendors admin-system"
+  ALL_APP_IDS: "home card stocks vendors admin-system admin-finance"
 
 jobs:
   resolve:
@@ -75,15 +79,16 @@ jobs:
           STOCKS_SHA: ${{ inputs.stocks_sha }}
           VENDORS_SHA: ${{ inputs.vendors_sha }}
           ADMIN_SYSTEM_SHA: ${{ inputs.admin_system_sha }}
+          ADMIN_FINANCE_SHA: ${{ inputs.admin_finance_sha }}
           BUCKET: ${{ vars.GCS_ARTIFACT_BUCKET }}
         run: |
-          declare -A APP_REPOS=([home]=haderach-home [card]=card [stocks]=stocks [vendors]=vendors [admin-system]=system-admin)
-          declare -A APP_SHAS=([home]="$HOME_SHA" [card]="$CARD_SHA" [stocks]="$STOCKS_SHA" [vendors]="$VENDORS_SHA" [admin-system]="$ADMIN_SYSTEM_SHA")
+          declare -A APP_REPOS=([home]=haderach-home [card]=card [stocks]=stocks [vendors]=vendors [admin-system]=system-admin [admin-finance]=admin-finance)
+          declare -A APP_SHAS=([home]="$HOME_SHA" [card]="$CARD_SHA" [stocks]="$STOCKS_SHA" [vendors]="$VENDORS_SHA" [admin-system]="$ADMIN_SYSTEM_SHA" [admin-finance]="$ADMIN_FINANCE_SHA")
 
           MATRIX_ENTRIES=()
           DEPLOY_JSON="{}"
 
-          for app in home card stocks vendors admin-system; do
+          for app in home card stocks vendors admin-system admin-finance; do
             sha="${APP_SHAS[$app]}"
 
             if [[ -z "$sha" && "$DEPLOY_ALL" == "true" ]]; then
