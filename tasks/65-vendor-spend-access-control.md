@@ -1,7 +1,7 @@
 ---
 id: "65"
 title: "RBAC model, vendor spend access control, and admin apps"
-status: in-progress
+status: done
 group: platform
 phase: platform
 priority: high
