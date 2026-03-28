@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  ALL_APP_IDS: "home card stocks vendors admin-system"
+  ALL_APP_IDS: "home card stocks vendors admin-system admin-finance"
 
 jobs:
   deploy:
@@ -61,7 +61,8 @@ jobs:
               hdir="$app"
               case "$app" in
                 home)         hdir="" ;;
-                admin-system) hdir="admin/system" ;;
+                admin-system)  hdir="admin/system" ;;
+                admin-finance) hdir="admin/finance" ;;
               esac
 
               if [ -z "$hdir" ]; then

@@ -20,14 +20,15 @@ BUCKET="haderach-app-artifacts"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SITE_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
-APPS=("home" "card" "stocks" "vendors" "admin-system" "agent")
+APPS=("home" "card" "stocks" "vendors" "admin-system" "admin-finance" "agent")
 
 get_app_dir() {
   local app_id="$1"
   case "$app_id" in
     home)         echo "${SITE_DIR}/haderach-home" ;;
-    admin-system) echo "${SITE_DIR}/admin-system" ;;
-    agent)        echo "${SITE_DIR}/agent" ;;
+    admin-system)  echo "${SITE_DIR}/admin-system" ;;
+    admin-finance) echo "${SITE_DIR}/admin-finance" ;;
+    agent)         echo "${SITE_DIR}/agent" ;;
     *)            echo "${SITE_DIR}/${app_id}" ;;
   esac
 }
