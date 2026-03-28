@@ -12,6 +12,8 @@ effort: medium
 created: 2026-03-28
 ---
 
+Full implementation plan: `/Users/michaelmader_1/.cursor/plans/spend_rest_endpoint_0f7389de.plan.md`
+
 ## Purpose
 
 The vendors app currently reads and writes Firestore directly from the client (via Firebase JS SDK). All other apps follow the service-oriented pattern: data flows through the agent service API, with no direct database access from frontends. This inconsistency creates several problems:
