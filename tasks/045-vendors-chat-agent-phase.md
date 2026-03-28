@@ -1,7 +1,7 @@
 ---
 id: "45"
 title: "Complete Vendors Chat Agent Phase"
-status: in-progress
+status: done
 group: vendors
 phase: vendors
 priority: high
