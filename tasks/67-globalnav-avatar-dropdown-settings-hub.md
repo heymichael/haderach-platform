@@ -6,7 +6,7 @@ group: platform
 phase: platform
 priority: high
 type: feature
-tags: [globalnav, shared-ui, settings, admin, ux, rbac]
+tags: ["uxredo", "globalnav", "shared-ui", "settings", "admin", "ux", "rbac", "admin-revamp"]
 dependencies: ["65"]
 effort: large
 created: 2025-03-25

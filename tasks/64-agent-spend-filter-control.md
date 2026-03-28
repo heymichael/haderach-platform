@@ -6,7 +6,7 @@ group: vendors
 phase: vendors
 priority: medium
 type: feature
-tags: [vendors, chat, agent, spending, filter, context-awareness, mcp]
+tags: [vendors, chat, agent, spending, filter, context-awareness, mcp, agent-strategy]
 dependencies: ["68"]
 effort: medium
 created: 2026-03-25

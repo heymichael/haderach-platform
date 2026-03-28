@@ -6,7 +6,7 @@ group: vendors
 phase: vendors
 priority: medium
 type: feature
-tags: [vendors, chat, agent, columns, table, ux]
+tags: [vendors, chat, agent, columns, table, ux, agent-strategy]
 dependencies: []
 ---
 

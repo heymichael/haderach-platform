@@ -6,7 +6,7 @@ group: vendors
 phase: platform
 priority: medium
 type: tech-debt
-tags: [vendors, api, firestore, architecture, agent]
+tags: [vendors, api, firestore, architecture, agent, vendor-components]
 dependencies: ["65"]
 effort: medium
 created: 2026-03-28

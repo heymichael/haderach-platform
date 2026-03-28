@@ -6,7 +6,7 @@ group: platform
 phase: platform
 priority: high
 type: improvement
-tags: [shared-ui, chat, agent, cross-app]
+tags: [shared-ui, chat, agent, cross-app, vendor-components]
 effort: medium
 created: 2026-03-23
 ---
@@ -25,9 +25,10 @@ The `ChatPanel` and `ChatToggle` components currently live in `vendors/src/` and
 
 1. Extract `ChatPanel` and `ChatToggle` into `packages/shared-ui/src/components/` in `haderach-home`.
 2. Make the component generic — accept `appContext` (or similar) as a prop instead of hardcoding `{ app: 'vendors' }`. Accept an optional `onToolResult` callback for app-specific side effects (e.g., refreshing a vendor list after an add).
-3. Export from `@haderach/shared-ui` barrel.
-4. Update `vendors/src/App.tsx` to consume the shared component instead of the local copy.
-5. Optionally add the chat panel to other apps (card, stocks) as a follow-up.
+3. Extract `vendors/src/components/ui/dialog.tsx` (Radix Dialog primitive) into `packages/shared-ui/src/components/ui/dialog.tsx` — this is a generic shadcn-style primitive not yet in shared-ui that other apps would use.
+4. Export all new components from `@haderach/shared-ui` barrel.
+5. Update `vendors/src/App.tsx` to consume the shared components instead of local copies.
+6. Optionally add the chat panel to other apps (card, stocks) as a follow-up.
 
 ## Design considerations
 

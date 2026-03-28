@@ -1,7 +1,7 @@
 ---
 id: "50"
 title: "Add vendor API health monitoring (logging, deep check, alerting)"
-status: pending
+status: done
 group: vendors
 phase: vendors
 priority: medium

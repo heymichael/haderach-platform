@@ -6,7 +6,7 @@ group: vendors
 phase: vendors
 priority: low
 type: improvement
-tags: [agent, ux, performance, chat]
+tags: [agent, ux, performance, chat, agent-strategy]
 dependencies: []
 effort: medium
 created: 2026-03-24

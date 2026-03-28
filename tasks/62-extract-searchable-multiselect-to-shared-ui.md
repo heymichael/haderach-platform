@@ -6,7 +6,7 @@ group: vendors
 phase: vendors
 priority: high
 type: feature
-tags: [shared-ui, component, multiselect, search, vendors]
+tags: [shared-ui, component, multiselect, search, vendors, vendor-components]
 dependencies: []
 ---
 

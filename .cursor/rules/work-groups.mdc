@@ -1,0 +1,22 @@
+---
+description: Show tasks grouped by work chunk tags
+alwaysApply: false
+---
+
+# Work Groups
+
+When asked to show work groups, work chunks, or tagged task groupings:
+
+1. Read `tasks/79-work-chunks.md` to get the current list of work chunk tags (listed under "Active work chunks" as bold tag names).
+2. For each tag, search all `tasks/*.md` files for that tag in the `tags:` frontmatter line.
+3. For each matching task, extract the `id` and `title` from frontmatter.
+4. Present results as a table per tag:
+
+```
+### <tag-name>
+| Task | Title |
+|------|-------|
+| <id> | <title> |
+```
+
+Only include tasks where the tag appears in the `tags:` frontmatter array. Exclude the work chunks task itself (task 79) from the results.

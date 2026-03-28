@@ -6,7 +6,7 @@ group: platform
 phase: platform
 priority: medium
 type: feature
-tags: [rbac, auth, admin, shared-ui, firestore]
+tags: [rbac, auth, admin, shared-ui, firestore, admin-revamp]
 effort: medium
 created: 2026-03-28
 ---
