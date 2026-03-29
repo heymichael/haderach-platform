@@ -6,7 +6,7 @@ group: vendors
 phase: vendors
 priority: high
 type: feature
-tags: [vendors, integrations, billing, spend]
+tags: [vendors, integrations, billing, spend, vendor-data]
 effort: large
 ---
 

@@ -1,12 +1,12 @@
 ---
 id: "72"
 title: "Fix missing haderach logo on admin screens"
-status: pending
+status: cancelled
 group: admin
 phase: admin
 priority: medium
 type: bug
-tags: [admin-system, admin-finance, logo, ui]
+tags: [admin-system, admin-finance, logo, ui, uxredo]
 dependencies: []
 effort: small
 created: 2026-03-27

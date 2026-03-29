@@ -18,6 +18,5 @@ Track work groupings (tags) used to bundle related tasks for planning and execut
 ## Active work chunks
 
 - **agent-strategy** — Agent capabilities, chat UX, and tool-calling improvements
-- **batch-bundle** — Cross-app changes that can be bundled into a single deployment batch
-- **vendor-components** — Vendor app component extraction, API migration, and shared-ui alignment
 - **admin-revamp** — Multi-page admin-system conversion, user/role/app-permissions pages, and GlobalNav settings redesign
+- **uxredo** — Reorient and redesign the way the fundamental nav system in the app works

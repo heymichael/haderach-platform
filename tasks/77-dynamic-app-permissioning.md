@@ -126,6 +126,15 @@ apps/system_administration
 - Admin users can manage app permissions through the System Admin UI
 - Decouples app metadata from the shared-ui build cycle
 
+## Execution order (admin revamp)
+
+1. **Task 85** — Rename admin-finance to admin-vendors
+2. **Task 67 Part 1** — GlobalNav avatar dropdown
+3. **Task 80 (Users + Roles)** — Add react-router-dom, extract UsersPage and RolesPage
+4. **Task 77** — Dynamic app permissioning backend (this task)
+5. **Task 80 (Apps page)** — Add AppsPage route once task 77 backend is ready
+6. **Task 67 Part 2** — Settings hub SPA at `/admin/`
+
 ## Considerations
 
 - The `path` field should generally not be editable via UI — changing it would break routing

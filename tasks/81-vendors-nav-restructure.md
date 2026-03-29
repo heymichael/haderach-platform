@@ -6,7 +6,7 @@ group: vendors
 phase: vendors
 priority: high
 type: improvement
-tags: [ui, navigation, vendors, shared-ui]
+tags: ["ui", "navigation", "vendors", "shared-ui", "uxredo"]
 effort: medium
 created: 2026-03-28
 ---

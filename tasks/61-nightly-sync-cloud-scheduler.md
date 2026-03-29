@@ -6,7 +6,7 @@ group: platform
 phase: platform
 priority: high
 type: feature
-tags: [cloud-scheduler, cloud-run-job, terraform, sync, vendors, spend, infra]
+tags: [cloud-scheduler, cloud-run-job, terraform, sync, vendors, spend, infra, vendor-data]
 dependencies: ["56"]
 effort: medium
 created: 2026-03-25
