@@ -1,60 +1,30 @@
 ---
-description: Centralized task management conventions using taskmd
+description: Task management redirect — tasks live in the haderach-tasks repo
 alwaysApply: true
 ---
 
-# Task Management (taskmd)
+# Task Management
 
-This platform repo is the **single source of truth** for all task management across all apps (card, stocks, platform). Tasks live in `tasks/` as individual markdown files with YAML frontmatter. Managed via [taskmd](https://github.com/driangle/taskmd).
+All tasks are managed centrally in the **haderach-tasks** repo at `../haderach-tasks/` using [taskmd](https://github.com/driangle/taskmd). This repo no longer contains task files.
 
-## Reading tasks for context
+## Creating a task from this repo
 
-When the user references a task by number (e.g., "task 29"), look it up in `tasks/` by matching the `id` field or filename prefix (e.g., `29-*.md`).
+Write the task file to `../haderach-tasks/` with `group: platform` and `phase: platform` in the frontmatter. Follow the taskmd format and conventions defined in `haderach-tasks/.cursor/rules/todo-conventions.mdc`.
 
-When looking for work or understanding project priorities, only read tasks where `status` is `pending` or `in-progress`. Ignore `completed`, `cancelled`, and `blocked` tasks unless specifically asked about them.
+Use plain integer IDs with no leading zeros (e.g., `"7"` not `"007"`). Check existing files in `../haderach-tasks/` to determine the next available ID.
 
-## Task file format
+If the task is ambiguous about which app it belongs to (e.g., cross-cutting infra work), prompt the user to specify the `group` value (`card`, `stocks`, `home`, `vendors`, `admin`, `agent`, or `platform`).
 
-Each task is a standalone `.md` file with YAML frontmatter:
+## Reading tasks
 
-```yaml
----
-id: "1"
-title: "Short descriptive title"
-status: pending          # pending | in-progress | in-review | completed | blocked | cancelled
-group: card              # card | stocks | platform  (REQUIRED — which app this task belongs to)
-phase: card              # must match group — shows in the PHASE column of the list view
-priority: medium         # low | medium | high | critical
-type: feature            # feature | bug | improvement | chore | docs
-tags: [relevant, tags]
-dependencies: ["3"]      # optional: IDs of tasks that must complete first
-effort: medium           # optional: small | medium | large
-created: YYYY-MM-DD
----
-```
+When the user references a task by number (e.g., "task 29"), look it up in `../haderach-tasks/` by matching the `id` field or filename prefix (e.g., `29-*.md`). All tasks across all apps live there — the referenced task may belong to any group, not just `platform`.
 
-The `group` and `phase` fields are required on every task and must have the same value. Valid values: `card`, `stocks`, `platform`. `group` enables "Group by: Group" in the Board view. `phase` shows the app in the PHASE column of the list view and enables the Phases view for per-app progress tracking.
+To see tasks for this app, read files in `../haderach-tasks/` where the `group` frontmatter field is `platform`. Only read tasks where `status` is `pending` or `in-progress` unless specifically asked about others.
 
-The markdown body should include Purpose/Objective and Approach/Acceptance Criteria sections.
+## Task dashboard
 
-## Creating a task
-
-Use descriptive filenames: `ID-short-slug.md` (e.g., `7-add-caching-layer.md`). Use plain integer IDs with no leading zeros (e.g., `"7"` not `"007"`). Check existing files in `tasks/` to determine the next available ID. Always set both the `group` and `phase` fields to the same app value. If the app association is ambiguous (e.g., cross-cutting work), prompt the user to specify.
-
-## Completing a task
-
-Set `status: completed` in the frontmatter. Do not delete the file.
-
-## Spinning up the task dashboard
-
-To start the taskmd web dashboard:
+To start the taskmd web dashboard, run from the tasks repo:
 
 ```sh
-taskmd web start --dir tasks/ --open --port 4173
+cd ../haderach-tasks && taskmd web start --dir . --open --port 4173
 ```
-
-Run this from the platform repo root (`haderach-platform/`). The binary is installed at `~/bin/taskmd`. The dashboard opens at `http://localhost:4173`.
-
-## Cross-repo task creation
-
-When working in an app repo (card, stocks) and a task needs to be created, write the task file to the platform repo at `../haderach-platform/tasks/`. Set the `group` field to match the app being worked on. The sibling layout under `haderach_site/` is relied upon: `haderach_site/{card,stocks,haderach-platform}`.
