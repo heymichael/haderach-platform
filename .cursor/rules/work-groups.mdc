@@ -19,4 +19,4 @@ When asked to show work groups, work chunks, or tagged task groupings:
 | <id> | <title> |
 ```
 
-Only include tasks where the tag appears in the `tags:` frontmatter array. Exclude the work chunks task itself (task 79) from the results.
+Only include tasks where the tag appears in the `tags:` frontmatter array. Exclude tasks with `status: completed` or `status: cancelled`. Exclude the work chunks task itself (task 79) from the results.

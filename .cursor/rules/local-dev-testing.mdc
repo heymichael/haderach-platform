@@ -41,7 +41,7 @@ No agent service or sign-in flow needed.
 2. **Set `VITE_AUTH_BYPASS=false`** in the app's `.env`
 3. **Start the agent service** on port 8080
 4. **Start the app** on its assigned port
-5. **Sign in** via the dev-only Google sign-in button (appears automatically when bypass is off in dev mode — no need for haderach-home)
+5. **Sign in** via the dev-only Google sign-in button (appears automatically in all apps when bypass is off in dev mode — each app's sign-in is self-contained, no need for haderach-home)
 6. **After testing**, restore `VITE_AUTH_BYPASS=true` in the app's `.env` and restart. Do NOT commit the `.env` change.
 
 All server starts require `required_permissions: ["all"]` for network access. Vite caches env vars at startup — always restart after changing `.env`.
