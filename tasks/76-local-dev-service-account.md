@@ -1,7 +1,7 @@
 ---
 id: "76"
 title: "Use service account key for local agent dev instead of ADC"
-status: pending
+status: completed
 group: agent
 phase: agent
 priority: low

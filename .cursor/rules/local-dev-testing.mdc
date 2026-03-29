@@ -48,10 +48,9 @@ All server starts require `required_permissions: ["all"]` for network access. Vi
 
 ### GCP credentials
 
-The agent service needs valid GCP credentials for Firestore access. If you get auth errors:
-- Run `gcloud auth application-default login` to re-authenticate
-- Restart the agent service after re-auth
-- See task 76 for a planned improvement using a service account key
+The agent service needs valid GCP credentials for Firestore access. The recommended approach is a **service account key** (`agent-local-dev-sa-key.json`) placed in the agent repo root with `GOOGLE_APPLICATION_CREDENTIALS=agent-local-dev-sa-key.json` in `.env`. This key never expires. See `agent/README.md` for setup instructions.
+
+Fallback: run `gcloud auth application-default login` (expires periodically, requires re-auth and agent restart).
 
 ## Minimum services per mode
 
