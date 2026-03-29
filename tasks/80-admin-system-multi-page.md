@@ -19,7 +19,7 @@ admin-system is currently a single-screen SPA (no router, one view + modals) tha
 The admin apps are named by the **objects being permissioned**, not the role doing the granting:
 
 - **admin-system** — system-level things: users, roles, which apps each role can access. Gated by `admin` role.
-- **admin-vendors** (currently `admin-finance`, rename tracked in task 85) — vendor-level things: vendor access controls, spend permissions. Gated by `finance_admin` role.
+- **admin-vendors** — vendor-level things: vendor access controls, spend permissions. Gated by `finance_admin` role.
 
 These stay as separate apps with separate auth gates for security boundary reasons: different permission requirements, different data sensitivity, independent deploy cadence.
 
@@ -113,11 +113,11 @@ Users and Roles pages can ship independently of the Apps page. The Apps page dep
 
 - **Task 77** (dynamic app permissioning) — the Apps page needs the `GET /apps` and `PATCH /apps/{id}` endpoints. Users and Roles pages can ship first.
 - **Task 67** (Settings hub) — the Settings hub's "System" link navigates to `/admin/system/`. These tasks are complementary, not overlapping.
-- **Task 85** (rename admin-finance to admin-vendors) — naming alignment for the admin app model.
+- **Task 85** (rename admin-finance to admin-vendors) — naming alignment for the admin app model (done).
 
 ## Execution order (admin revamp)
 
-1. **Task 85** — Rename admin-finance to admin-vendors
+1. **Task 85** — Rename admin-finance to admin-vendors (done)
 2. **Task 67 Part 1** — GlobalNav avatar dropdown
 3. **Task 80 (Users + Roles)** — Add react-router-dom, extract UsersPage and RolesPage (this task)
 4. **Task 77** — Dynamic app permissioning backend

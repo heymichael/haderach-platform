@@ -62,7 +62,7 @@ Deployed to prod. Old role names removed from Firestore.
 
 - [x] Add `adminApps` prop to GlobalNav
 - [x] Render Admin dropdown when user has `admin` or `finance_admin` role
-- [x] Links to `/admin/system/` and `/admin/finance/`
+- [x] Links to `/admin/system/` and `/admin/vendors/`
 
 ### 3. System Administration SPA and agent endpoints — COMPLETED 2025-03-26
 
@@ -120,9 +120,9 @@ Deployed to prod. Filtering disabled via feature flag (safe default).
 - [x] UX refinements: icon-only edit/delete buttons, remove redundant close/refresh, sticky headers, type-ahead search, color scheme alignment with vendors
 - [x] Fix deploy workflow hosting path mapping (admin-system → admin/system)
 
-#### 4d. Finance Administration SPA — COMPLETED 2025-03-27
+#### 4d. Vendor Administration SPA — COMPLETED 2025-03-27
 
-- [x] New Vite + React SPA at `/admin/finance/` (fully service-oriented — no direct database access)
+- [x] New Vite + React SPA at `/admin/vendors/` (fully service-oriented — no direct database access)
 - [x] Auth-gated: requires `finance_admin` role
 - [x] User list (filtered to `user`/`admin` holders) using shared `UserTable`
 - [x] Per-user edit: department multi-select, vendor include picker, vendor deny picker (all using shared `MultiSelect`)
@@ -141,9 +141,9 @@ Deployed to prod. Filtering disabled via feature flag (safe default).
 
 #### 4f. Platform config — COMPLETED 2025-03-27
 
-- [x] Firebase hosting rewrite for `/admin/finance/**`
-- [x] Add admin-finance to deploy workflows (single-app, batch, redeploy-all)
-- [x] Terraform: service account, WIF binding, GCS IAM for admin-finance artifact publishing
+- [x] Firebase hosting rewrite for `/admin/vendors/**`
+- [x] Add admin-vendors to deploy workflows (single-app, batch, redeploy-all)
+- [x] Terraform: service account, WIF binding, GCS IAM for admin-vendors artifact publishing
 - [ ] Update architecture docs in platform and vendors repos
 
 #### 4g. Supporting tasks

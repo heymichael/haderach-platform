@@ -6,7 +6,7 @@ group: admin
 phase: admin
 priority: medium
 type: bug
-tags: [admin-system, admin-finance, logo, ui, uxredo]
+tags: [admin-system, admin-vendors, logo, ui, uxredo]
 dependencies: []
 effort: small
 created: 2026-03-27
@@ -14,7 +14,7 @@ created: 2026-03-27
 
 ## Context
 
-The haderach logo is not showing up on the admin screens (admin-system, possibly admin-finance). This needs to be investigated and fixed.
+The haderach logo is not showing up on the admin screens (admin-system, possibly admin-vendors). This needs to be investigated and fixed.
 
 ## What needs to happen
 

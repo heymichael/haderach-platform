@@ -59,8 +59,8 @@
         "destination": "/admin/system/index.html"
       },
       {
-        "source": "/admin/finance/**",
-        "destination": "/admin/finance/index.html"
+        "source": "/admin/vendors/**",
+        "destination": "/admin/vendors/index.html"
       },
       {
         "source": "/",

@@ -28,7 +28,7 @@ Task markdown files currently live in `haderach-platform/tasks/`. Once branch pr
 
 - `haderach-platform` — remove `tasks/`, update any internal references
 - `admin-system` — update `todo-conventions.mdc`
-- `admin-finance` — update `todo-conventions.mdc`
+- `admin-vendors` — update `todo-conventions.mdc`
 - `vendors` — update `todo-conventions.mdc` (if present)
 - `haderach-home` — update `todo-conventions.mdc` (if present)
 - `agent` — update `todo-conventions.mdc` (if present)

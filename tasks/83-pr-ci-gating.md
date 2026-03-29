@@ -29,4 +29,4 @@ cherry-pick to `main`.
 - `agent`
 - `vendors`
 - Consider applying the same pattern to `haderach-home`, `admin-system`,
-  `admin-finance`
+  `admin-vendors`

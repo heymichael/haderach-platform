@@ -1,7 +1,7 @@
 ---
 id: "85"
 title: "Rename admin-finance to admin-vendors"
-status: pending
+status: in-progress
 group: platform
 phase: platform
 priority: medium

@@ -24,7 +24,7 @@ Add the same pattern to the remaining apps:
 | App | File | Port |
 |---|---|---|
 | admin-system | `src/auth/AuthGate.tsx` | 5175 |
-| admin-finance | `src/auth/AuthGate.tsx` | 5176 |
+| admin-vendors | `src/auth/AuthGate.tsx` | 5176 |
 | stocks | `src/auth/AuthGate.tsx` | (check `.env`) |
 | card | `src/auth/AuthGate.tsx` | (check `.env`) |
 
