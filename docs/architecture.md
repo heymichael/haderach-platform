@@ -101,7 +101,7 @@ Deploys an app artifact to Firebase Hosting via manual dispatch.
 
 Manual dispatch (`workflow_dispatch`) with inputs:
 
-- `app_id`: which app to deploy (`home`, `card`, `stocks`, or `vendors`).
+- `app_id`: which app to deploy (`home`, `card`, `stocks`, `vendors`, `admin-system`, or `admin-vendors`).
 - `commit_sha`: the app commit SHA whose artifacts to deploy.
 - `target_env`: `staging` or `production`.
 
@@ -271,6 +271,11 @@ Platform consumes metadata and promotes specific versions by environment.
 | `stocks` | `/stocks/` | `stocks` | Deployed |
 | `vendors` | `/vendors/` | `vendors` | Deployed |
 | `admin-system` | `/admin/system/` | `admin-system` | Deployed |
+| `admin-vendors` | `/admin/vendors/` | `admin-vendors` | Deployed |
+
+### Settings hub
+
+The homepage also serves a Settings hub at `/admin/` — a role-gated navigation shell that links to admin apps. This is handled by a Firebase Hosting rewrite (`/admin{,/}` → `index.html`) and rendered within the `haderach-home` SPA. It is not a separate onboarded app; it shares the `home` artifact.
 
 ## Backend Services (Cloud Run)
 
@@ -338,6 +343,11 @@ Roles are global (not per-app) and a user can hold multiple roles.
 
 Admin app access is defined in `ADMIN_CATALOG` and `ADMIN_GRANTING_ROLES` in
 `@haderach/shared-ui` (`haderach-home/packages/shared-ui/src/auth/app-catalog.ts`).
+App definitions are also stored in the Firestore `apps` collection and can be managed at runtime via the System Administration app's Apps page.
+
+#### Settings hub entry point
+
+The GlobalNav avatar dropdown includes a "Settings" link pointing to `/admin/`. All authenticated users see this link; the Settings hub itself filters visible admin apps based on the user's roles.
 
 #### Permission resolution
 
@@ -355,7 +365,17 @@ users/{normalizedEmail}
   first_name: string
   last_name: string
   createdAt: string            // ISO timestamp
+
+apps/{appSlug}
+  id: string                   // app slug (matches doc ID)
+  label: string                // display name
+  path: string                 // URL path prefix (e.g., "/stocks/")
+  type: "app" | "admin"        // regular app or admin app
+  granting_roles: string[]     // roles that grant access
+  sort_order: number           // display ordering
 ```
+
+The `apps` collection is seeded via `agent/scripts/seed_apps.py` and is editable by admins through the System Administration app's Apps page (`PATCH /agent/api/apps/{id}`).
 
 ### Managing users
 
@@ -402,6 +422,14 @@ mapping there — no per-app copies to maintain.
 
 The `allowlists` collection and its Firestore rules remain in place for rollback
 safety. It can be removed once all apps are confirmed stable on the RBAC model.
+
+## CI Gating and Branch Protection
+
+All app repositories have GitHub branch protection enabled on `main`:
+
+- Required status check: **PR checks** (the `ci.yml` workflow) must pass before merging.
+- All repos run lint + build (frontend) or compile + test (agent) as part of PR CI.
+- This prevents merging PRs with build failures but does not gate post-merge publish failures (which may arise from dependency drift between PR CI and publish environments).
 
 ## Security and Indexing Defaults
 
