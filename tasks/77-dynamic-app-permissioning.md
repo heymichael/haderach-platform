@@ -1,7 +1,7 @@
 ---
 id: "77"
 title: "Make app permissioning and labels configurable via Firestore"
-status: pending
+status: in-progress
 group: platform
 phase: platform
 priority: medium
@@ -130,8 +130,8 @@ apps/system_administration
 
 1. **Task 85** — Rename admin-finance to admin-vendors (done)
 2. **Task 67 Part 1** — GlobalNav avatar dropdown
-3. **Task 80 (Users + Roles)** — Add react-router-dom, extract UsersPage and RolesPage
-4. **Task 77** — Dynamic app permissioning backend (this task)
+3. **Task 80 (Users + Roles)** — Add react-router-dom, extract UsersPage and RolesPage (done)
+4. **Task 77** — Dynamic app permissioning backend (done — endpoints + seed)
 5. **Task 80 (Apps page)** — Add AppsPage route once task 77 backend is ready
 6. **Task 67 Part 2** — Settings hub SPA at `/admin/`
 

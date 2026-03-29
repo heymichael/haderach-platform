@@ -61,6 +61,10 @@ The GitHub repo rename, Terraform apply, and first deploy under the new name nee
 5. **Task 80 (Apps page)** — Add AppsPage route once task 77 backend is ready
 6. **Task 67 Part 2** — Settings hub SPA at `/admin/`
 
+## Implementation plan
+
+`/Users/michaelmader_1/.cursor/plans/rename_admin-finance_to_admin-vendors_082f0796.plan.md`
+
 ## Notes
 - The `finance_admin` role name is NOT changed — it stays in Firestore and code as-is
 - All file edits are mechanical find-and-replace, no logic changes

@@ -1,7 +1,7 @@
 ---
 id: "67"
 title: "GlobalNav avatar dropdown redesign and Settings hub SPA"
-status: pending
+status: done
 group: platform
 phase: platform
 priority: high
@@ -56,11 +56,11 @@ This doesn't block task 67 itself, but should be resolved before additional SPAs
 ## Execution order (admin revamp)
 
 1. **Task 85** — Rename admin-finance to admin-vendors (done)
-2. **Task 67 Part 1** — GlobalNav avatar dropdown (this task)
+2. **Task 67 Part 1** — GlobalNav avatar dropdown (done)
 3. **Task 80 (Users + Roles)** — Add react-router-dom, extract UsersPage and RolesPage
-4. **Task 77** — Dynamic app permissioning backend
-5. **Task 80 (Apps page)** — Add AppsPage route once task 77 backend is ready
-6. **Task 67 Part 2** — Settings hub SPA at `/admin/` (this task)
+4. **Task 77** — Dynamic app permissioning backend (done)
+5. **Task 80 (Apps page)** — Add AppsPage route once task 77 backend is ready (done)
+6. **Task 67 Part 2** — Settings hub SPA at `/admin/` (done)
 
 ## Acceptance criteria
 

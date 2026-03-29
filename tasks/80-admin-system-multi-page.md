@@ -1,7 +1,7 @@
 ---
 id: "80"
 title: "Convert admin-system to multi-page app with Users, Roles, and App Permissions pages"
-status: pending
+status: done
 group: platform
 phase: platform
 priority: high
@@ -118,10 +118,10 @@ Users and Roles pages can ship independently of the Apps page. The Apps page dep
 ## Execution order (admin revamp)
 
 1. **Task 85** — Rename admin-finance to admin-vendors (done)
-2. **Task 67 Part 1** — GlobalNav avatar dropdown
-3. **Task 80 (Users + Roles)** — Add react-router-dom, extract UsersPage and RolesPage (this task)
-4. **Task 77** — Dynamic app permissioning backend
-5. **Task 80 (Apps page)** — Add AppsPage route once task 77 backend is ready (this task)
+2. **Task 67 Part 1** — GlobalNav avatar dropdown (done)
+3. **Task 80 (Users + Roles)** — Add react-router-dom, extract UsersPage and RolesPage (done)
+4. **Task 77** — Dynamic app permissioning backend (done)
+5. **Task 80 (Apps page)** — Add AppsPage route once task 77 backend is ready (done)
 6. **Task 67 Part 2** — Settings hub SPA at `/admin/`
 
 ## Acceptance criteria
