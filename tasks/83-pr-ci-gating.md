@@ -1,7 +1,7 @@
 ---
 id: "83"
 title: "Add PR CI checks and branch protection to prevent premature merges"
-status: pending
+status: done
 group: platform
 phase: agent
 ---
