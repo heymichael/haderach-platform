@@ -334,7 +334,7 @@ Roles are global (not per-app) and a user can hold multiple roles.
 | App | Route | Required role |
 |-----|-------|--------------|
 | System Administration | `/admin/system/` | `admin` |
-| Finance Administration | `/admin/finance/` | `finance_admin` |
+| Vendor Administration | `/admin/vendors/` | `finance_admin` |
 
 Admin app access is defined in `ADMIN_CATALOG` and `ADMIN_GRANTING_ROLES` in
 `@haderach/shared-ui` (`haderach-home/packages/shared-ui/src/auth/app-catalog.ts`).

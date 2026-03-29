@@ -20,7 +20,7 @@ Before starting servers, determine which mode is needed based on the change:
 |---|---|---|
 | vendors | 5174 | `cd ../vendors && npx vite --port 5174` |
 | admin-system | 5175 | `cd ../admin-system && npx vite --port 5175` |
-| admin-finance | 5176 | `cd ../admin-finance && npx vite --port 5176` |
+| admin-vendors | 5176 | `cd ../admin-vendors && npx vite --port 5176` |
 | agent (FastAPI) | 8080 | `cd ../agent && source .venv/bin/activate && python -m uvicorn service.app:app --host 0.0.0.0 --port 8080` |
 
 ## UI-only mode (bypass)
@@ -57,5 +57,5 @@ Fallback: run `gcloud auth application-default login` (expires periodically, req
 | Mode | App under test | Services needed |
 |---|---|---|
 | UI-only | any | app dev server only |
-| Real auth | vendors, admin-system, admin-finance | agent (8080) + app dev server |
+| Real auth | vendors, admin-system, admin-vendors | agent (8080) + app dev server |
 | Real auth | stocks, card | app dev server only |

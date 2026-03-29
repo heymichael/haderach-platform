@@ -36,12 +36,12 @@ export const APP_GRANTING_ROLES: Record<string, string[]> = {
 
 export const ADMIN_CATALOG: NavApp[] = [
   { id: "system_administration", label: "System", path: "/admin/system/" },
-  { id: "finance_administration", label: "Finance", path: "/admin/finance/" },
+  { id: "vendor_administration", label: "Vendors", path: "/admin/vendors/" },
 ]
 
 export const ADMIN_GRANTING_ROLES: Record<string, string[]> = {
   system_administration: ["admin"],
-  finance_administration: ["finance_admin"],
+  vendor_administration: ["finance_admin"],
 }
 ```
 
@@ -128,7 +128,7 @@ apps/system_administration
 
 ## Execution order (admin revamp)
 
-1. **Task 85** — Rename admin-finance to admin-vendors
+1. **Task 85** — Rename admin-finance to admin-vendors (done)
 2. **Task 67 Part 1** — GlobalNav avatar dropdown
 3. **Task 80 (Users + Roles)** — Add react-router-dom, extract UsersPage and RolesPage
 4. **Task 77** — Dynamic app permissioning backend (this task)

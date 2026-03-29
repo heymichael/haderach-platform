@@ -47,9 +47,9 @@ resource "google_service_account" "admin_system_artifact_publisher" {
   project      = var.project_id
 }
 
-resource "google_service_account" "admin_finance_artifact_publisher" {
-  account_id   = "admin-fin-artifact-publisher"
-  display_name = "admin-finance-artifact-publisher"
+resource "google_service_account" "admin_vendors_artifact_publisher" {
+  account_id   = "admin-vend-artifact-publisher"
+  display_name = "admin-vendors-artifact-publisher"
   project      = var.project_id
 }
 

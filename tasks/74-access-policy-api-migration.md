@@ -14,7 +14,7 @@ created: 2026-03-27
 
 ## Context
 
-Every frontend app (vendors, stocks, admin-system, admin-finance) has an identical `src/auth/accessPolicy.ts` that reads the `users/{email}` document directly from Firestore via the Firebase client SDK to get roles, first name, and last name. This is the most widespread violation of the service-oriented data access rule.
+Every frontend app (vendors, stocks, admin-system, admin-vendors) has an identical `src/auth/accessPolicy.ts` that reads the `users/{email}` document directly from Firestore via the Firebase client SDK to get roles, first name, and last name. This is the most widespread violation of the service-oriented data access rule.
 
 The read happens after Firebase Auth is complete, so the user already has a valid ID token and can call an authenticated API endpoint instead.
 
@@ -33,5 +33,5 @@ The read happens after Firebase Auth is complete, so the user already has a vali
 - `vendors/src/auth/accessPolicy.ts`
 - `stocks/src/auth/accessPolicy.ts`
 - `admin-system/src/auth/accessPolicy.ts`
-- `admin-finance/src/auth/accessPolicy.ts`
+- `admin-vendors/src/auth/accessPolicy.ts`
 - `agent` (new endpoint)

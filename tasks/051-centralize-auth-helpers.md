@@ -24,7 +24,7 @@ Several auth primitives are duplicated across all app repos. Centralizing them i
 Every app defines its own `AuthUser` interface in `src/auth/AuthUserContext.ts`. The common fields are identical:
 
 ```typescript
-// duplicated in: vendors, card, stocks, admin-system, admin-finance
+// duplicated in: vendors, card, stocks, admin-system, admin-vendors
 export interface AuthUser {
   email: string
   photoURL?: string
@@ -92,4 +92,4 @@ Some apps extend this with app-specific fields (e.g. vendors adds `allowedDepart
 | stocks | `src/auth/AuthUserContext.ts` | None |
 | vendors | `src/auth/AuthUserContext.ts` | `allowedDepartments`, `allowedVendorIds`, `deniedVendorIds`, `isFinanceAdmin` |
 | admin-system | `src/auth/AuthUserContext.ts` | None |
-| admin-finance | `src/auth/AuthUserContext.ts` | None |
+| admin-vendors | `src/auth/AuthUserContext.ts` | None |

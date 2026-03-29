@@ -13,7 +13,7 @@ on:
           - stocks
           - vendors
           - admin-system
-          - admin-finance
+          - admin-vendors
       commit_sha:
         description: "App commit SHA to deploy"
         required: true
@@ -37,7 +37,7 @@ concurrency:
 env:
   APP_ID: ${{ inputs.app_id }}
   GCS_PATH: ${{ inputs.app_id }}/versions/${{ inputs.commit_sha }}
-  ALL_APP_IDS: "home card stocks vendors admin-system admin-finance"
+  ALL_APP_IDS: "home card stocks vendors admin-system admin-vendors"
 
 jobs:
   download-and-verify:
@@ -136,7 +136,7 @@ jobs:
           case "${{ inputs.app_id }}" in
             home)         hosting_dir="" ;;
             admin-system)  hosting_dir="admin/system" ;;
-            admin-finance) hosting_dir="admin/finance" ;;
+            admin-vendors) hosting_dir="admin/vendors" ;;
           esac
 
           if [ -z "$hosting_dir" ]; then
@@ -177,7 +177,7 @@ jobs:
               case "$app" in
                 home)         hdir="" ;;
                 admin-system)  hdir="admin/system" ;;
-                admin-finance) hdir="admin/finance" ;;
+                admin-vendors) hdir="admin/vendors" ;;
               esac
 
               if [ -z "$hdir" ]; then
