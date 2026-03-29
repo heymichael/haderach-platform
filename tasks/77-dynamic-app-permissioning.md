@@ -1,7 +1,7 @@
 ---
 id: "77"
 title: "Make app permissioning and labels configurable via Firestore"
-status: in-progress
+status: done
 group: platform
 phase: platform
 priority: medium
