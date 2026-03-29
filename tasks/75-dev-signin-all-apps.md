@@ -1,7 +1,7 @@
 ---
 id: "75"
 title: "Add dev-only Google sign-in to all app AuthGates"
-status: in-progress
+status: done
 group: platform
 phase: platform
 priority: low

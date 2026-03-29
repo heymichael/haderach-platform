@@ -304,11 +304,16 @@ Authentication is centralized at the platform level. Users sign in once at
 1. User navigates to an app route (e.g., `/card/`).
 2. App's `AuthGate` checks for an existing Firebase Auth session (shared via
    same-origin IndexedDB persistence).
-3. If no session exists, the app redirects to `/?returnTo=/card/`.
+3. If no session exists:
+   - **Production**: the app redirects to `/?returnTo=/card/`.
+   - **Local dev** (`import.meta.env.DEV`): the app shows a dev-only "Sign in
+     with Google" button, allowing authentication directly on the app's origin
+     without requiring haderach-home to be running.
 4. The home app (`haderach-home`, served at `/`) handles Google sign-in
-   via Firebase Auth.
-5. After sign-in, the home app fetches the user's roles from Firestore and either
-   redirects to `returnTo` (if the user has access) or shows an app directory.
+   via Firebase Auth (production flow).
+5. After sign-in, the app calls `fetchUserDoc` (from `@haderach/shared-ui`) which
+   hits `GET /agent/api/me` to retrieve the user's roles and profile from the
+   agent service. The home app still reads Firestore directly for its own auth flow.
 
 ### Role-based access control
 
@@ -366,9 +371,10 @@ Initial data is seeded using `scripts/seed-users.py`.
 
 ### Fail-closed behavior
 
-If the Firestore read fails (network error, missing document, permission denied),
-apps return an empty roles array — the user is denied access until Firestore is
-reachable.
+If the user doc fetch fails (agent API unreachable, network error, or missing
+document), apps return an empty roles array — the user is denied access until the
+service is reachable. The home app falls back similarly on direct Firestore read
+failure.
 
 ### Security rules
 
@@ -386,10 +392,11 @@ Defined in `firestore.rules` and deployed via `firebase deploy`:
 
 ### Forward compatibility
 
-`APP_CATALOG` and `APP_GRANTING_ROLES` are centralized in `@haderach/shared-ui`
-(`haderach-home/packages/shared-ui/src/auth/app-catalog.ts`). All app repos
-import from this single source of truth. When onboarding a new app, update the
-catalog and role mapping there — no per-app copies to maintain.
+`APP_CATALOG`, `APP_GRANTING_ROLES`, and auth primitives (`BaseAuthUser`,
+`fetchUserDoc`, `buildDisplayName`) are centralized in `@haderach/shared-ui`
+(`haderach-home/packages/shared-ui/src/auth/`). All app repos import from this
+single source of truth. When onboarding a new app, update the catalog and role
+mapping there — no per-app copies to maintain.
 
 ### Legacy: allowlists collection
 

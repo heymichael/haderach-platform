@@ -1,7 +1,7 @@
 ---
 id: "74"
 title: "Migrate accessPolicy Firestore reads to API endpoint"
-status: in-progress
+status: done
 group: platform
 phase: platform
 priority: high

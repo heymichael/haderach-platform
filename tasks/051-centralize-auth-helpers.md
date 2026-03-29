@@ -1,7 +1,7 @@
 ---
 id: "51"
 title: "Centralize auth helpers and BaseAuthUser into shared-ui"
-status: pending
+status: done
 group: platform
 phase: platform
 priority: low
