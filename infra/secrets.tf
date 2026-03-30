@@ -73,3 +73,18 @@ resource "google_secret_manager_secret" "openai_api_key" {
     auto {}
   }
 }
+
+# Cloud SQL connection string — value set automatically by Terraform
+resource "google_secret_manager_secret" "database_url" {
+  secret_id = "DATABASE_URL"
+  project   = var.project_id
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "database_url" {
+  secret      = google_secret_manager_secret.database_url.id
+  secret_data = "postgresql://${google_sql_user.app.name}:${random_password.db_password.result}@/${google_sql_database.haderach.name}?host=/cloudsql/${google_sql_database_instance.main.connection_name}"
+}

@@ -31,11 +31,10 @@ haderach-platform/
 │   └── public/
 │       └── .gitkeep          # deploy-time-only; all content from app artifacts
 ├── infra/
-│   └── (terraform modules, including firestore.tf)
+│   └── (terraform modules: cloud-sql.tf, cloud-run.tf, firestore.tf, etc.)
 ├── scripts/
 │   ├── latest-artifact-sha.sh
-│   ├── seed-allowlists.py
-│   └── seed-users.py
+│   └── seed-users.py          # deprecated — see agent/scripts/seed_users.py
 ├── tasks/
 │   └── (taskmd task files)
 ├── .firebaserc
@@ -283,7 +282,7 @@ The homepage also serves a Settings hub at `/admin/` — a role-gated navigation
 |---|---|---|---|
 | `vendors-api` | `/vendors/api/**` | `vendors` | Vendor spend data (AWS billing) |
 | `stocks-api` | `/stocks/api/**` | `stocks` | Stock market data (Massive API) |
-| `agent-api` | `/agent/api/**` | `agent` | Shared chat agent (OpenAI tool-calling, Firestore CRUD) |
+| `agent-api` | `/agent/api/**` | `agent` | Shared chat agent (OpenAI tool-calling, Postgres CRUD) |
 
 All backend services run on Cloud Run (us-central1) and are fronted by Firebase
 Hosting rewrites. The default compute service account is used at runtime; each
@@ -322,7 +321,8 @@ Authentication is centralized at the platform level. Users sign in once at
 
 ### Role-based access control
 
-User access is controlled via four stackable roles stored in Firestore `users/{email}` documents.
+User access is controlled via four stackable roles stored in the Postgres `users` and
+`user_roles` tables (managed by the agent service on Cloud SQL).
 Roles are global (not per-app) and a user can hold multiple roles.
 
 #### Roles
@@ -331,8 +331,8 @@ Roles are global (not per-app) and a user can hold multiple roles.
 |------|-------------|-------------|-------------------|-------------|
 | `user` | stocks, vendors | Only `allowed_vendor_ids` | None | `admin` via System Admin UI |
 | `admin` | stocks, vendors | Only `allowed_vendor_ids` | Create users, grant `user`/`admin` roles | `admin` via System Admin UI |
-| `finance_admin` | None (needs `user`/`admin` too) | All spend (bypasses filtering) | Grant `allowed_vendor_ids` to users | Manual Firestore |
-| `haderach_user` | card | N/A | None | Manual Firestore |
+| `finance_admin` | None (needs `user`/`admin` too) | All spend (bypasses filtering) | Grant `allowed_vendor_ids` to users | `admin`/`finance_admin` via Admin UI |
+| `haderach_user` | card | N/A | None | `admin` via System Admin UI |
 
 #### Admin apps
 
@@ -356,26 +356,28 @@ Each app defines an `APP_GRANTING_ROLES` mapping in code. Admin apps use a separ
 grants access to that app. Role-to-permission mapping is intentionally in code
 (not Firestore) — the role set is small and well-defined.
 
-#### Firestore schema
+#### Database schema (Postgres)
+
+All user, role, vendor, spend, and app data is stored in Cloud SQL Postgres
+(`haderach-main` instance, `haderach` database). Full schema in
+`agent/migrations/001_init.sql`. Key tables:
 
 ```text
-users/{normalizedEmail}
-  roles: string[]              // e.g., ["admin", "finance_admin"]
-  allowed_vendor_ids: string[] // vendor doc IDs for spend filtering
-  first_name: string
-  last_name: string
-  createdAt: string            // ISO timestamp
+users (id UUID, email, first_name, last_name, created_at)
+  └─ user_roles (user_id → users.id, role_id → roles.id)
+  └─ user_allowed_departments (user_id → users.id, department_id → departments.id)
+  └─ user_allowed_vendors (user_id → users.id, vendor_id → vendors.id)
+  └─ user_denied_vendors (user_id → users.id, vendor_id → vendors.id)
 
-apps/{appSlug}
-  id: string                   // app slug (matches doc ID)
-  label: string                // display name
-  path: string                 // URL path prefix (e.g., "/stocks/")
-  type: "app" | "admin"        // regular app or admin app
-  granting_roles: string[]     // roles that grant access
-  sort_order: number           // display ordering
+roles (id UUID, name)  — admin, finance_admin, user, haderach_user
+
+apps (id UUID, slug, label, path, type, sort_order)
+  └─ app_granting_roles (app_id → apps.id, role_id → roles.id)
 ```
 
-The `apps` collection is seeded via `agent/scripts/seed_apps.py` and is editable by admins through the System Administration app's Apps page (`PATCH /agent/api/apps/{id}`).
+Seeded via `agent/scripts/seed_users.py` and `agent/scripts/seed_apps.py`.
+Editable at runtime via the System Administration app (`PATCH /agent/api/apps/{id}`,
+user management endpoints).
 
 ### Managing users
 
@@ -383,11 +385,11 @@ Users with the `admin` role can manage users via the System Administration app
 at `/admin/system/`. This app supports creating users, assigning `user`/`admin`
 roles, and deleting users.
 
-`finance_admin` and `haderach_user` roles are assigned manually in the
-[Firebase Console](https://console.firebase.google.com) under the `haderach-ai`
-project → Firestore Database → `users` collection.
+`finance_admin` and `haderach_user` roles are assigned via the
+agent API (`PATCH /agent/api/users/{email}`) or the `agent/scripts/seed_users.py`
+Postgres seed script.
 
-Initial data is seeded using `scripts/seed-users.py`.
+Initial data is seeded using `agent/scripts/seed_users.py`.
 
 ### Fail-closed behavior
 
@@ -396,19 +398,12 @@ document), apps return an empty roles array — the user is denied access until 
 service is reachable. The home app falls back similarly on direct Firestore read
 failure.
 
-### Security rules
-
-Defined in `firestore.rules` and deployed via `firebase deploy`:
-
-- `users/{email}`: read allowed if authenticated; writes denied from client SDKs.
-- `vendors/{vendorId}`: read allowed if authenticated; writes denied from client SDKs. Writes are performed via Admin SDK (seed script, agent service).
-- `allowlists/{appId}`: retained for backward compatibility during migration.
-- Admin writes go through the Firebase Console or Admin SDK scripts.
-
 ### Infrastructure
 
-- Firestore Native mode is provisioned via `infra/firestore.tf`.
-- User data is seeded using `scripts/seed-users.py`.
+- Cloud SQL Postgres provisioned via `infra/cloud-sql.tf`.
+- Firestore Native mode provisioned via `infra/firestore.tf` (retained for
+  home app direct reads during transition; the agent service no longer uses Firestore).
+- User data seeded via `agent/scripts/seed_users.py` (Postgres).
 
 ### Forward compatibility
 
@@ -420,8 +415,8 @@ mapping there — no per-app copies to maintain.
 
 ### Legacy: allowlists collection
 
-The `allowlists` collection and its Firestore rules remain in place for rollback
-safety. It can be removed once all apps are confirmed stable on the RBAC model.
+The Firestore `allowlists` collection has been retired. Access is now controlled
+entirely by the RBAC system in Postgres (roles, user_allowed_vendors, etc.).
 
 ## CI Gating and Branch Protection
 

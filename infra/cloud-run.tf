@@ -10,11 +10,33 @@ resource "google_cloud_run_v2_service" "vendors_api" {
   project  = var.project_id
 
   template {
+    volumes {
+      name = "cloudsql"
+      cloud_sql_instance {
+        instances = [google_sql_database_instance.main.connection_name]
+      }
+    }
+
     containers {
       image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.apps.repository_id}/vendors-api:latest"
 
       ports {
         container_port = 8080
+      }
+
+      volume_mounts {
+        name       = "cloudsql"
+        mount_path = "/cloudsql"
+      }
+
+      env {
+        name = "DATABASE_URL"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.database_url.secret_id
+            version = "latest"
+          }
+        }
       }
 
       env {
@@ -43,6 +65,8 @@ resource "google_cloud_run_v2_service" "vendors_api" {
 
   depends_on = [
     google_secret_manager_secret_iam_member.vendors_api_secret_access,
+    google_secret_manager_secret_iam_member.vendors_api_db_secret_access,
+    google_secret_manager_secret_version.database_url,
   ]
 }
 
@@ -69,11 +93,33 @@ resource "google_cloud_run_v2_service" "agent_api" {
   project  = var.project_id
 
   template {
+    volumes {
+      name = "cloudsql"
+      cloud_sql_instance {
+        instances = [google_sql_database_instance.main.connection_name]
+      }
+    }
+
     containers {
       image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.apps.repository_id}/agent-api:latest"
 
       ports {
         container_port = 8080
+      }
+
+      volume_mounts {
+        name       = "cloudsql"
+        mount_path = "/cloudsql"
+      }
+
+      env {
+        name = "DATABASE_URL"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.database_url.secret_id
+            version = "latest"
+          }
+        }
       }
 
       env {
@@ -124,6 +170,8 @@ resource "google_cloud_run_v2_service" "agent_api" {
     google_secret_manager_secret_iam_member.agent_api_secret_access,
     google_secret_manager_secret_iam_member.agent_api_bill_secret_access,
     google_secret_manager_secret_iam_member.vendors_api_secret_access,
+    google_secret_manager_secret_iam_member.agent_api_db_secret_access,
+    google_secret_manager_secret_version.database_url,
   ]
 }
 
@@ -144,6 +192,20 @@ resource "google_secret_manager_secret_iam_member" "agent_api_secret_access" {
 
 resource "google_secret_manager_secret_iam_member" "agent_api_bill_secret_access" {
   secret_id = google_secret_manager_secret.vendor_bill_credentials.secret_id
+  project   = var.project_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_secret_manager_secret_iam_member" "agent_api_db_secret_access" {
+  secret_id = google_secret_manager_secret.database_url.secret_id
+  project   = var.project_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_secret_manager_secret_iam_member" "vendors_api_db_secret_access" {
+  secret_id = google_secret_manager_secret.database_url.secret_id
   project   = var.project_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
