@@ -24,6 +24,13 @@ resource "google_service_account_iam_member" "agent_publisher_act_as_compute" {
   member             = "serviceAccount:${google_service_account.agent_artifact_publisher.email}"
 }
 
+# Default compute SA needs cloudsql.client for Cloud SQL Auth Proxy
+resource "google_project_iam_member" "compute_cloudsql_client" {
+  project = var.project_id
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
+}
+
 resource "google_project_iam_member" "mixpanel_bq_data_viewer" {
   project = var.project_id
   role    = "roles/bigquery.dataViewer"
