@@ -31,6 +31,20 @@ resource "google_project_iam_member" "compute_cloudsql_client" {
   member  = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
 }
 
+# agent-local-dev needs cloudsql.client for local Cloud SQL Proxy
+resource "google_project_iam_member" "agent_local_dev_cloudsql_client" {
+  project = var.project_id
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${google_service_account.agent_local_dev.email}"
+}
+
+# agent-local-dev needs firebaseauth.admin for local ID token verification
+resource "google_project_iam_member" "agent_local_dev_firebase_auth" {
+  project = var.project_id
+  role    = "roles/firebaseauth.admin"
+  member  = "serviceAccount:${google_service_account.agent_local_dev.email}"
+}
+
 resource "google_project_iam_member" "mixpanel_bq_data_viewer" {
   project = var.project_id
   role    = "roles/bigquery.dataViewer"

@@ -191,6 +191,15 @@ jobs:
             fi
           done
 
+      - name: Restore content files from haderach-content
+        uses: actions/checkout@v4
+        with:
+          repository: heymichael/haderach-content
+          path: content
+      - run: |
+          cp -r content/public/* hosting/public/
+          echo "Restored content files into hosting/public/"
+
       - name: Deploy to Firebase Hosting
         run: npx firebase-tools deploy --only hosting --project haderach-ai
 

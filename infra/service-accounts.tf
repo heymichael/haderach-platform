@@ -58,3 +58,10 @@ resource "google_service_account" "mixpanel_bigquery_reader" {
   display_name = "mixpanel-bigquery-reader"
   project      = var.project_id
 }
+
+resource "google_service_account" "agent_local_dev" {
+  account_id   = "agent-local-dev"
+  display_name = "agent-local-dev"
+  description  = "Local development SA for agent service (Cloud SQL Proxy, Firebase Auth)"
+  project      = var.project_id
+}
