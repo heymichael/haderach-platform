@@ -8,9 +8,10 @@ Application implementation, app CI, and app-local tests live in separate app rep
 ## What this repo is responsible for
 
 - Shared host and routing topology for `haderach.ai`.
-- Platform-level authentication and RBAC (sign-in page, Firestore user/role management).
+- Platform-level authentication and RBAC (sign-in page, Postgres user/role management via agent service).
 - Promotion of app-published artifacts into deployable platform state.
 - Environment deploy orchestration.
+- Content hosting infrastructure (`docs.haderach.ai` — authenticated static-file server).
 - Platform-level smoke checks across app routes.
 - Security/indexing defaults.
 
@@ -24,32 +25,38 @@ Application implementation, app CI, and app-local tests live in separate app rep
 
 - `hosting/public/` - deploy-time-only; all content comes from app artifacts (only `.gitkeep` is committed).
 - `firebase.json` - hosting baseline, rewrites, and security/indexing defaults.
-- `firestore.rules` - Firestore security rules (users collection, vendors, allowlists).
+- `firestore.rules` - Firestore security rules (retained for home app direct reads).
 - `.github/workflows/deploy.yml` - app deploy workflow (manual dispatch, WIF auth, artifact download, Firebase deploy).
+- `.github/workflows/batch-deploy.yml` - deploy multiple app artifacts in a single Firebase Hosting deploy.
 - `.github/workflows/redeploy-all.yml` - reconstructs full hosting state from latest-deployed markers and redeploys.
-- `scripts/latest-artifact-sha.sh` - fetch latest published artifact SHA for one or all apps.
-- `scripts/seed-users.py` - seed Firestore `users` collection with RBAC role assignments.
-- `scripts/seed-allowlists.py` - seed Firestore `allowlists` collection (legacy).
+- `.github/workflows/deploy-content.yml` - sync `haderach-content` files to GCS bucket.
+- `.github/workflows/deploy-content-api.yml` - build and deploy the `content-api` Cloud Run service.
+- `services/content-api/` - authenticated static-file server for `docs.haderach.ai` (FastAPI + Google OAuth + GCS).
+- `scripts/seed-users.py` - deprecated — see `agent/scripts/seed_users.py`.
 - `docs/architecture.md` - ownership boundaries, release flow, deploy workflow, routing model, auth/RBAC.
-- `tasks/` - per-task markdown files managed by [taskmd](https://github.com/driangle/taskmd).
-- `infra/` - Terraform modules for GCP infrastructure.
+- `infra/` - Terraform modules for GCP infrastructure (Cloud Run, Cloud SQL, Secret Manager, GCS, IAM, WIF).
 
 ```text
 haderach-platform/
 ├── .cursor/
-│   ├── rules/
-│   │   ├── architecture-pointer.mdc
-│   │   ├── branch-safety-reminder.mdc
-│   │   ├── pr-conventions.mdc
-│   │   ├── repo-hygiene.mdc
-│   │   └── todo-conventions.mdc
-│   └── skills/
-│       └── fetch-artifact-sha/
-│           └── SKILL.md
+│   └── rules/
+│       ├── architecture-pointer.mdc
+│       ├── backend-auth-policy.mdc
+│       ├── branch-safety-reminder.mdc
+│       ├── cross-repo-status.mdc
+│       ├── local-dev-testing.mdc
+│       ├── pr-conventions.mdc
+│       ├── repo-hygiene.mdc
+│       ├── service-oriented-data-access.mdc
+│       ├── todo-conventions.mdc
+│       └── work-groups.mdc
 ├── .github/
 │   ├── pull_request_template.md
 │   └── workflows/
+│       ├── batch-deploy.yml
 │       ├── deploy.yml
+│       ├── deploy-content.yml
+│       ├── deploy-content-api.yml
 │       └── redeploy-all.yml
 ├── docs/
 │   └── architecture.md
@@ -59,14 +66,14 @@ haderach-platform/
 ├── infra/
 │   └── (terraform modules)
 ├── scripts/
-│   ├── latest-artifact-sha.sh
-│   ├── seed-allowlists.py
 │   └── seed-users.py
-├── tasks/
-│   └── *.md (one file per task, managed by taskmd)
+├── services/
+│   └── content-api/
+│       ├── Dockerfile
+│       ├── app.py
+│       └── requirements.txt
 ├── .firebaserc
 ├── .gitignore
-├── .taskmd.yaml
 ├── firebase.json
 ├── firestore.rules
 └── README.md
@@ -96,7 +103,7 @@ The deploy workflow (`.github/workflows/deploy.yml`) is triggered manually via `
 
 Inputs:
 
-- `app_id`: which app to deploy (`home`, `card`, `stocks`, or `vendors`).
+- `app_id`: which app to deploy (`home`, `card`, `stocks`, `vendors`, `admin-system`, or `admin-vendors`).
 - `commit_sha`: the app commit SHA whose published artifacts to deploy.
 - `target_env`: `staging` or `production`.
 
@@ -118,6 +125,22 @@ See `docs/architecture.md` for full deploy flow details and GCP auth setup.
 | `card` | `/card/` | `card/versions/<sha>/` |
 | `stocks` | `/stocks/` | `stocks/versions/<sha>/` |
 | `vendors` | `/vendors/` | `vendors/versions/<sha>/` |
+| `admin-system` | `/admin/system/` | `admin-system/versions/<sha>/` |
+| `admin-vendors` | `/admin/vendors/` | `admin-vendors/versions/<sha>/` |
+
+## Related repos
+
+| Repo | Relationship |
+|---|---|
+| `haderach-home` | Homepage SPA + shared-ui design system (served at `/`) |
+| `card` | Card editor app (served at `/card/`) |
+| `stocks` | Stocks app (served at `/stocks/`) |
+| `vendors` | Vendor management app (served at `/vendors/`) |
+| `admin-system` | System admin app (served at `/admin/system/`) |
+| `admin-vendors` | Vendor admin app (served at `/admin/vendors/`) |
+| `agent` | Shared chat agent backend (Cloud Run at `/agent/api/`) |
+| `haderach-content` | Static content source synced to GCS for `docs.haderach.ai` |
+| `haderach-tasks` | Centralized task management (tasks, bugs, strategy records) |
 
 ## Promotion/deploy model evolution
 

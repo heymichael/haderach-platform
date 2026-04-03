@@ -10,20 +10,24 @@ It does not own app business logic. It owns shared hosting/routing/deployment or
 ```text
 haderach-platform/
 ├── .cursor/
-│   ├── rules/
-│   │   ├── architecture-pointer.mdc
-│   │   ├── branch-safety-reminder.mdc
-│   │   ├── pr-conventions.mdc
-│   │   ├── repo-hygiene.mdc
-│   │   └── todo-conventions.mdc
-│   └── skills/
-│       └── fetch-artifact-sha/
-│           └── SKILL.md
+│   └── rules/
+│       ├── architecture-pointer.mdc
+│       ├── backend-auth-policy.mdc
+│       ├── branch-safety-reminder.mdc
+│       ├── cross-repo-status.mdc
+│       ├── local-dev-testing.mdc
+│       ├── pr-conventions.mdc
+│       ├── repo-hygiene.mdc
+│       ├── service-oriented-data-access.mdc
+│       ├── todo-conventions.mdc
+│       └── work-groups.mdc
 ├── .github/
 │   ├── pull_request_template.md
 │   └── workflows/
 │       ├── batch-deploy.yml
 │       ├── deploy.yml
+│       ├── deploy-content.yml
+│       ├── deploy-content-api.yml
 │       └── redeploy-all.yml
 ├── docs/
 │   └── architecture.md
@@ -31,15 +35,16 @@ haderach-platform/
 │   └── public/
 │       └── .gitkeep          # deploy-time-only; all content from app artifacts
 ├── infra/
-│   └── (terraform modules: cloud-sql.tf, cloud-run.tf, firestore.tf, etc.)
+│   └── (terraform modules: cloud-sql.tf, cloud-run.tf, content-api.tf, firestore.tf, etc.)
 ├── scripts/
-│   ├── latest-artifact-sha.sh
 │   └── seed-users.py          # deprecated — see agent/scripts/seed_users.py
-├── tasks/
-│   └── (taskmd task files)
+├── services/
+│   └── content-api/           # authenticated static-file server (docs.haderach.ai)
+│       ├── Dockerfile
+│       ├── app.py
+│       └── requirements.txt
 ├── .firebaserc
 ├── .gitignore
-├── .taskmd.yaml
 ├── firebase.json
 ├── firestore.rules
 └── README.md
@@ -179,6 +184,41 @@ Manual dispatch (`workflow_dispatch`) with one input:
    `hosting/public/`.
 3. Run `firebase deploy --only hosting --project haderach-ai`.
 
+### Content Deploy (`.github/workflows/deploy-content.yml`)
+
+Syncs static content files from the `haderach-content` repo to a GCS bucket
+(`haderach-content-docs`) via `gsutil rsync`. Content is served by the
+`content-api` Cloud Run service at `docs.haderach.ai`.
+
+#### Trigger
+
+Manual dispatch (`workflow_dispatch`) with one input:
+
+- `target_env`: `staging` or `production`.
+
+#### Flow
+
+1. Check out `heymichael/haderach-content`.
+2. Authenticate to GCP via Workload Identity Federation.
+3. `gsutil -m rsync -r -d content/public/ gs://<CONTENT_BUCKET>/`.
+
+### Content API Deploy (`.github/workflows/deploy-content-api.yml`)
+
+Builds and deploys the `content-api` Cloud Run service image.
+
+#### Trigger
+
+Manual dispatch (`workflow_dispatch`) with one input:
+
+- `target_env`: `staging` or `production`.
+
+#### Flow
+
+1. Authenticate to GCP via WIF.
+2. Build Docker image from `services/content-api/`.
+3. Push to Artifact Registry (`us-central1-docker.pkg.dev/<project>/haderach-apps/content-api`).
+4. Deploy to Cloud Run (`content-api` service).
+
 ### GCS Deploy Markers
 
 Because Firebase Hosting deploys are atomic (the entire `hosting/public/`
@@ -211,6 +251,28 @@ Both workflows read these markers to restore other apps' artifacts before deploy
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` | WIF provider resource name |
 | `GCP_SERVICE_ACCOUNT` | GCP service account for deploy |
 | `GCS_ARTIFACT_BUCKET` | GCS bucket name (`haderach-app-artifacts`) |
+| `GCP_PROJECT_ID` | GCP project ID (used by content-api deploy) |
+| `CONTENT_BUCKET` | GCS bucket for content files (`haderach-content-docs`) |
+
+### Managed secrets (Secret Manager)
+
+Terraform declares secret entries in `infra/secrets.tf` and `infra/content-api.tf`.
+Actual values are set manually via `gcloud secrets versions add`.
+
+| Secret | Consumer | Purpose |
+|---|---|---|
+| `OPENAI_API_KEY` | agent-api | OpenAI tool-calling |
+| `DATABASE_URL` | agent-api, vendors-api | Cloud SQL Postgres connection |
+| `VENDOR_AWS_BILLING_CREDENTIALS` | agent-api, vendors-api | AWS billing API (JSON blob) |
+| `VENDOR_GCP_BILLING_CREDENTIALS` | agent-api | GCP BigQuery billing export (JSON blob) |
+| `VENDOR_BILL_CREDENTIALS` | agent-api | Bill.com API (JSON blob) |
+| `MASSIVE_API_KEY` | stocks-api | Massive stock market API |
+| `ANTHROPIC_API_KEY` | — | Reserved |
+| `FIREBASE_SERVICE_ACCOUNT` | — | Firebase Admin SDK |
+| `MIXPANEL_BIGQUERY_SERVICE_ACCOUNT_API` | — | Mixpanel BigQuery integration |
+| `CONTENT_OAUTH_CLIENT_ID` | content-api | Google OAuth client ID |
+| `CONTENT_OAUTH_CLIENT_SECRET` | content-api | Google OAuth client secret |
+| `CONTENT_SESSION_SECRET` | content-api | Cookie signing key |
 
 ### Future evolution
 
@@ -283,9 +345,13 @@ The homepage also serves a Settings hub at `/admin/` — a role-gated navigation
 | `vendors-api` | `/vendors/api/**` | `vendors` | Vendor spend data (AWS billing) |
 | `stocks-api` | `/stocks/api/**` | `stocks` | Stock market data (Massive API) |
 | `agent-api` | `/agent/api/**` | `agent` | Shared chat agent (OpenAI tool-calling, Postgres CRUD) |
+| `content-api` | `docs.haderach.ai` | `haderach-platform` (services/content-api/) | Authenticated static-file server (GCS-backed, Google OAuth) |
 
-All backend services run on Cloud Run (us-central1) and are fronted by Firebase
-Hosting rewrites. The default compute service account is used at runtime; each
+All backend services run on Cloud Run (us-central1). `vendors-api`, `stocks-api`,
+and `agent-api` are fronted by Firebase Hosting rewrites on `haderach.ai`.
+`content-api` is mapped to a custom domain (`docs.haderach.ai`) and serves
+authenticated static content from GCS with Google OAuth sign-in and a Postgres
+user whitelist. The default compute service account is used at runtime; each
 service's secrets are injected via Secret Manager env var mounts.
 
 ## Smoke Test Ownership
