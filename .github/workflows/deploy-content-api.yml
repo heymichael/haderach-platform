@@ -1,0 +1,79 @@
+name: deploy-content-api
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: "Deployment target environment"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: content-api-deploy-${{ inputs.target_env }}
+  cancel-in-progress: false
+
+env:
+  SERVICE_NAME: content-api
+  IMAGE: us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/haderach-apps/content-api
+  REGION: us-central1
+
+jobs:
+  build-and-deploy:
+    name: Build and deploy content-api
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.target_env }}
+    steps:
+      - name: Checkout haderach-platform
+        uses: actions/checkout@v4
+
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+      - name: Build Docker image
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          docker build \
+            --platform linux/amd64 \
+            -t ${{ env.IMAGE }}:${SHA} \
+            -t ${{ env.IMAGE }}:latest \
+            services/content-api/
+
+      - name: Push Docker image
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          docker push ${{ env.IMAGE }}:${SHA}
+          docker push ${{ env.IMAGE }}:latest
+
+      - name: Deploy to Cloud Run
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          gcloud run services update ${{ env.SERVICE_NAME }} \
+            --region ${{ env.REGION }} \
+            --image ${{ env.IMAGE }}:${SHA}
+
+      - name: Log deployment summary
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          echo "============================================"
+          echo "content-api deployment complete"
+          echo "  Image SHA:   ${SHA}"
+          echo "  Environment: ${{ inputs.target_env }}"
+          echo "  Service:     ${{ env.SERVICE_NAME }}"
+          echo "============================================"

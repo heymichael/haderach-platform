@@ -16,33 +16,21 @@ permissions:
   id-token: write
 
 concurrency:
-  group: platform-deploy-${{ inputs.target_env }}
+  group: content-deploy-${{ inputs.target_env }}
   cancel-in-progress: false
-
-env:
-  ALL_APP_IDS: "home card stocks vendors admin-system admin-vendors"
 
 jobs:
   deploy:
-    name: Deploy content to Firebase Hosting
+    name: Sync content to GCS
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.target_env }}
     steps:
-      - name: Checkout platform (firebase.json + hosting skeleton)
-        uses: actions/checkout@v4
-
       - name: Checkout haderach-content
         uses: actions/checkout@v4
         with:
           repository: heymichael/haderach-content
           path: content
-
-      - name: Copy content files into hosting directory
-        run: |
-          cp -r content/public/* hosting/public/
-          echo "--- content files copied ---"
-          ls -la hosting/public/
 
       - name: Authenticate to GCP via WIF
         uses: google-github-actions/auth@v2
@@ -53,37 +41,8 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Restore all apps from latest deployed artifacts
-        run: |
-          for app in ${{ env.ALL_APP_IDS }}; do
-            echo "Checking for latest-deployed marker for $app..."
-            MARKER="gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${app}/latest-deployed.json"
-            if gsutil -q stat "$MARKER" 2>/dev/null; then
-              SHA=$(gsutil cat "$MARKER" | jq -r '.commit_sha')
-              echo "Restoring $app at commit $SHA"
-              gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${app}/versions/${SHA}/runtime.tar.gz" "/tmp/${app}-runtime.tar.gz"
-              tar -xzf "/tmp/${app}-runtime.tar.gz" -C hosting/public
-
-              hdir="$app"
-              case "$app" in
-                home)          hdir="" ;;
-                admin-system)  hdir="admin/system" ;;
-                admin-vendors) hdir="admin/vendors" ;;
-              esac
-
-              if [ -z "$hdir" ]; then
-                echo "Restored home app (root-level files in hosting/public/)"
-              else
-                echo "Restored hosting/public/${hdir}/"
-                ls -la "hosting/public/${hdir}/"
-              fi
-            else
-              echo "No deployed marker found for $app, skipping"
-            fi
-          done
-
-      - name: Deploy to Firebase Hosting
-        run: npx firebase-tools deploy --only hosting --project haderach-ai
+      - name: Sync content files to GCS bucket
+        run: gsutil -m rsync -r -d content/public/ gs://${{ vars.CONTENT_BUCKET }}/
 
       - name: Log deployment summary
         run: |
@@ -92,4 +51,5 @@ jobs:
           echo "Content deployment complete"
           echo "  Content SHA: $CONTENT_SHA"
           echo "  Environment: ${{ inputs.target_env }}"
+          echo "  Bucket:      ${{ vars.CONTENT_BUCKET }}"
           echo "============================================"

@@ -63,6 +63,10 @@ resource "google_cloud_run_v2_service" "vendors_api" {
     }
   }
 
+  lifecycle {
+    ignore_changes = [template[0].containers[0].image]
+  }
+
   depends_on = [
     google_secret_manager_secret_iam_member.vendors_api_secret_access,
     google_secret_manager_secret_iam_member.vendors_api_db_secret_access,
@@ -166,6 +170,10 @@ resource "google_cloud_run_v2_service" "agent_api" {
     }
   }
 
+  lifecycle {
+    ignore_changes = [template[0].containers[0].image]
+  }
+
   depends_on = [
     google_secret_manager_secret_iam_member.agent_api_secret_access,
     google_secret_manager_secret_iam_member.agent_api_bill_secret_access,
@@ -248,6 +256,10 @@ resource "google_cloud_run_v2_service" "stocks_api" {
       min_instance_count = 0
       max_instance_count = 2
     }
+  }
+
+  lifecycle {
+    ignore_changes = [template[0].containers[0].image]
   }
 
   depends_on = [
