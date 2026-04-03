@@ -52,6 +52,18 @@ resource "google_secret_manager_secret" "massive_api_key" {
   }
 }
 
+# GCP billing service account key (JSON blob) — used by agent-api for BigQuery billing export.
+# This secret was created manually in the console; import before first apply:
+#   terraform import google_secret_manager_secret.vendor_gcp_billing_credentials projects/haderach-ai/secrets/VENDOR_GCP_BILLING_CREDENTIALS
+resource "google_secret_manager_secret" "vendor_gcp_billing_credentials" {
+  secret_id = "VENDOR_GCP_BILLING_CREDENTIALS"
+  project   = var.project_id
+
+  replication {
+    auto {}
+  }
+}
+
 # Bill.com API credentials (JSON blob) — used by agent-api
 resource "google_secret_manager_secret" "vendor_bill_credentials" {
   secret_id = "VENDOR_BILL_CREDENTIALS"
