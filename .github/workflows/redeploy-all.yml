@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  ALL_APP_IDS: "home card stocks vendors admin-system admin-vendors"
+  ALL_APP_IDS: "home card expenses stocks vendors admin-system admin-vendors"
 
 jobs:
   deploy:
