@@ -187,13 +187,27 @@ def serve_content(request: Request, path: str):
             path = path + ".html"
 
     if not blob.exists():
+        # Storybook's manager requests /iframe.html at the root but the file
+        # lives under components/ in the bucket.  Transparently rewrite.
+        if path == "iframe.html":
+            blob = bucket.blob("components/iframe.html")
+            path = "components/iframe.html"
+
+    if not blob.exists():
         return HTMLResponse("<h1>404 — Not Found</h1>", status_code=404)
 
     content = blob.download_as_bytes()
     content_type = mimetypes.guess_type(path)[0] or "application/octet-stream"
 
-    return Response(content=content, media_type=content_type, headers={
+    headers = {
         "X-Content-Type-Options": "nosniff",
-        "X-Frame-Options": "DENY",
         "Cache-Control": "private, max-age=300",
-    })
+    }
+    # Storybook embeds the preview in an iframe on the same origin.
+    # Use SAMEORIGIN for components/ assets; DENY everywhere else.
+    if path.startswith("components/"):
+        headers["X-Frame-Options"] = "SAMEORIGIN"
+    else:
+        headers["X-Frame-Options"] = "DENY"
+
+    return Response(content=content, media_type=content_type, headers=headers)
