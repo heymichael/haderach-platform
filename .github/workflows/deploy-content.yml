@@ -42,7 +42,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Sync content files to GCS bucket
-        run: gsutil -m rsync -r -d content/public/ gs://${{ vars.CONTENT_BUCKET }}/
+        run: gsutil -m rsync -r -d -x '^components/' content/public/ gs://${{ vars.CONTENT_BUCKET }}/
 
       - name: Log deployment summary
         run: |
