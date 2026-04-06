@@ -1,25 +1,33 @@
 ---
-description: Remind user to branch before any file write on main
+description: PR-based workflow — never commit directly to main
 alwaysApply: true
 ---
 
-# Branch safety reminder
+# Branch Safety
 
-Before the **first file write or edit** in a conversation — regardless of whether a formal plan was discussed — check the current git branch.
+All repos use a PR-based workflow. **Never commit or push directly to main.**
 
-- Trigger point: before the very first Write, StrReplace, or Shell command that modifies files. This includes small changes like updating a task file or adding a single line.
-- If current branch is `main` (or `master`), **stop and ask** before proceeding.
-- Keep the reminder non-blocking: user can explicitly choose to continue on `main`.
-- Ask once per conversation, then proceed with the user's choice without repeating.
+## Rules
 
-This applies to **all repos in the workspace**, including cross-repo writes (e.g., editing a task file in `haderach-platform` from another repo's Cursor window).
+1. Before the **first file write or edit** in a conversation, check the current branch with `git branch --show-current`.
+2. If on `main`, create a feature branch first: `git checkout -b <type>/<short-slug>` (e.g., `strategy/145-r3`, `feature/161-release-skills`, `chore/status-normalization`).
+3. Push with `-u` to set the upstream: `git push -u origin HEAD`.
+4. Open a PR via `gh pr create`.
+5. Wait for PR checks to pass before merging.
+6. Merge via `gh pr merge` — never by pushing to main.
 
-## Suggested reminder
+This applies to **all repos in the workspace**, including cross-repo writes (e.g., editing a task file in `haderach-tasks` from another repo's Cursor window). No exceptions unless the user explicitly requests an admin bypass.
 
-"Before I make this change: you're currently on `main` in `<repo>`. Want to create/switch to a feature branch first?"
+## Branch naming
 
-## Example branch check
+Use `<type>/<short-slug>` where type is one of: `feature`, `improvement`, `bug`, `chore`, `docs`, `strategy`.
+
+## Branch check
 
 ```sh
 git branch --show-current
 ```
+
+## Reference
+
+Decision from Strategy 149, Round 2: "All repos move to PR-based workflow — no direct commits to main. Everything goes through PRs, including task status updates — no exceptions."
