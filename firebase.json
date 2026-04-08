@@ -67,6 +67,10 @@
         "destination": "/index.html"
       },
       {
+        "source": "/legal/**",
+        "destination": "/index.html"
+      },
+      {
         "source": "/",
         "destination": "/index.html"
       }
