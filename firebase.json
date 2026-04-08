@@ -67,6 +67,17 @@
         "destination": "/index.html"
       },
       {
+<<<<<<< Updated upstream
+=======
+        "source": "/legal/**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/integrations/**",
+        "destination": "/index.html"
+      },
+      {
+>>>>>>> Stashed changes
         "source": "/",
         "destination": "/index.html"
       }
