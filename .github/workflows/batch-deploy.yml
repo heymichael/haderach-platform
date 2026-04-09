@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       deploy_all_latest:
-        description: "Deploy latest published artifact for all apps"
+        description: "Use latest main artifact for any app with an empty SHA"
         required: false
         type: boolean
         default: false
@@ -98,7 +98,7 @@ jobs:
 
             if [[ -z "$sha" && "$DEPLOY_ALL" == "true" ]]; then
               repo="${APP_REPOS[$app]}"
-              echo "Looking up latest main SHA for $app (repo: $repo)..."
+              echo "Looking up latest main SHA for $app (repo: $repo) because SHA was empty..."
               if [[ -z "$GH_TOKEN" ]]; then
                 echo "ERROR: deploy_all_latest requires CROSS_REPO_PAT secret"
                 exit 1
@@ -125,7 +125,7 @@ jobs:
           done
 
           if [[ ${#MATRIX_ENTRIES[@]} -eq 0 ]]; then
-            echo "ERROR: no apps to deploy. Provide at least one SHA or enable deploy_all_latest."
+            echo "ERROR: no apps to deploy. Provide at least one SHA, or enable deploy_all_latest to resolve latest SHA for empty entries."
             exit 1
           fi
 
