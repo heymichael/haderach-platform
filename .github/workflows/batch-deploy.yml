@@ -9,33 +9,68 @@ on:
         type: boolean
         default: false
       home_sha:
-        description: "home commit SHA (leave empty to skip)"
+        description: "home commit SHA (leave empty to skip unless latest is checked)"
         required: false
         type: string
+      home_latest:
+        description: "home: use latest main artifact"
+        required: false
+        type: boolean
+        default: false
       card_sha:
-        description: "card commit SHA (leave empty to skip)"
+        description: "card commit SHA (leave empty to skip unless latest is checked)"
         required: false
         type: string
+      card_latest:
+        description: "card: use latest main artifact"
+        required: false
+        type: boolean
+        default: false
       stocks_sha:
-        description: "stocks commit SHA (leave empty to skip)"
+        description: "stocks commit SHA (leave empty to skip unless latest is checked)"
         required: false
         type: string
+      stocks_latest:
+        description: "stocks: use latest main artifact"
+        required: false
+        type: boolean
+        default: false
       expenses_sha:
-        description: "expenses commit SHA (leave empty to skip)"
+        description: "expenses commit SHA (leave empty to skip unless latest is checked)"
         required: false
         type: string
+      expenses_latest:
+        description: "expenses: use latest main artifact"
+        required: false
+        type: boolean
+        default: false
       vendors_sha:
-        description: "vendors commit SHA (leave empty to skip)"
+        description: "vendors commit SHA (leave empty to skip unless latest is checked)"
         required: false
         type: string
+      vendors_latest:
+        description: "vendors: use latest main artifact"
+        required: false
+        type: boolean
+        default: false
       admin_system_sha:
-        description: "admin-system commit SHA (leave empty to skip)"
+        description: "admin-system commit SHA (leave empty to skip unless latest is checked)"
         required: false
         type: string
+      admin_system_latest:
+        description: "admin-system: use latest main artifact"
+        required: false
+        type: boolean
+        default: false
       admin_vendors_sha:
-        description: "admin-vendors commit SHA (leave empty to skip)"
+        description: "admin-vendors commit SHA (leave empty to skip unless latest is checked)"
         required: false
         type: string
+      admin_vendors_latest:
+        description: "admin-vendors: use latest main artifact"
+        required: false
+        type: boolean
+        default: false
       target_env:
         description: "Deployment target environment"
         required: true
@@ -85,32 +120,57 @@ jobs:
           VENDORS_SHA: ${{ inputs.vendors_sha }}
           ADMIN_SYSTEM_SHA: ${{ inputs.admin_system_sha }}
           ADMIN_VENDORS_SHA: ${{ inputs.admin_vendors_sha }}
+          HOME_LATEST: ${{ inputs.home_latest }}
+          CARD_LATEST: ${{ inputs.card_latest }}
+          EXPENSES_LATEST: ${{ inputs.expenses_latest }}
+          STOCKS_LATEST: ${{ inputs.stocks_latest }}
+          VENDORS_LATEST: ${{ inputs.vendors_latest }}
+          ADMIN_SYSTEM_LATEST: ${{ inputs.admin_system_latest }}
+          ADMIN_VENDORS_LATEST: ${{ inputs.admin_vendors_latest }}
           BUCKET: ${{ vars.GCS_ARTIFACT_BUCKET }}
         run: |
           declare -A APP_REPOS=([home]=haderach-home [card]=card [expenses]=expenses [stocks]=stocks [vendors]=vendors [admin-system]=system-admin [admin-vendors]=admin-vendors)
           declare -A APP_SHAS=([home]="$HOME_SHA" [card]="$CARD_SHA" [expenses]="$EXPENSES_SHA" [stocks]="$STOCKS_SHA" [vendors]="$VENDORS_SHA" [admin-system]="$ADMIN_SYSTEM_SHA" [admin-vendors]="$ADMIN_VENDORS_SHA")
+          declare -A APP_LATEST=([home]="$HOME_LATEST" [card]="$CARD_LATEST" [expenses]="$EXPENSES_LATEST" [stocks]="$STOCKS_LATEST" [vendors]="$VENDORS_LATEST" [admin-system]="$ADMIN_SYSTEM_LATEST" [admin-vendors]="$ADMIN_VENDORS_LATEST")
 
           MATRIX_ENTRIES=()
           DEPLOY_JSON="{}"
 
           for app in home card expenses stocks vendors admin-system admin-vendors; do
             sha="${APP_SHAS[$app]}"
+            use_latest="${APP_LATEST[$app]}"
+            repo="${APP_REPOS[$app]}"
 
-            if [[ -z "$sha" && "$DEPLOY_ALL" == "true" ]]; then
-              repo="${APP_REPOS[$app]}"
-              echo "Looking up latest main SHA for $app (repo: $repo) because SHA was empty..."
-              if [[ -z "$GH_TOKEN" ]]; then
-                echo "ERROR: deploy_all_latest requires CROSS_REPO_PAT secret"
-                exit 1
-              fi
-              sha=$(gh api "repos/heymichael/${repo}/commits/main" --jq '.sha' 2>/dev/null || echo "")
+            if [[ "$DEPLOY_ALL" == "true" ]]; then
               if [[ -z "$sha" ]]; then
-                echo "ERROR: could not resolve SHA for $app"
-                exit 1
+                echo "Looking up latest main SHA for $app (repo: $repo) because SHA was empty..."
+                if [[ -z "$GH_TOKEN" ]]; then
+                  echo "ERROR: deploy_all_latest requires CROSS_REPO_PAT secret"
+                  exit 1
+                fi
+                sha=$(gh api "repos/heymichael/${repo}/commits/main" --jq '.sha' 2>/dev/null || echo "")
+                if [[ -z "$sha" ]]; then
+                  echo "ERROR: could not resolve SHA for $app"
+                  exit 1
+                fi
+              fi
+            else
+              if [[ "$use_latest" == "true" ]]; then
+                echo "Per-app latest enabled for $app. Resolving latest main SHA (repo: $repo)..."
+                if [[ -z "$GH_TOKEN" ]]; then
+                  echo "ERROR: per-app latest resolution requires CROSS_REPO_PAT secret"
+                  exit 1
+                fi
+                sha=$(gh api "repos/heymichael/${repo}/commits/main" --jq '.sha' 2>/dev/null || echo "")
+                if [[ -z "$sha" ]]; then
+                  echo "ERROR: could not resolve SHA for $app"
+                  exit 1
+                fi
               fi
             fi
 
             if [[ -n "$sha" ]]; then
+              echo "Resolved deploy SHA for $app: $sha"
               echo "Verifying artifact exists for $app at $sha..."
               if ! gsutil -q stat "gs://${BUCKET}/${app}/versions/${sha}/manifest.json" 2>/dev/null; then
                 echo "ERROR: artifact not found for $app at $sha — publish may still be running"
@@ -125,7 +185,7 @@ jobs:
           done
 
           if [[ ${#MATRIX_ENTRIES[@]} -eq 0 ]]; then
-            echo "ERROR: no apps to deploy. Provide at least one SHA, or enable deploy_all_latest to resolve latest SHA for empty entries."
+            echo "ERROR: no apps to deploy. Provide at least one SHA, enable deploy_all_latest, or check per-app latest boxes."
             exit 1
           fi
 
