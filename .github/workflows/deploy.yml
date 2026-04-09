@@ -15,9 +15,14 @@ on:
           - vendors
           - admin-system
           - admin-vendors
+      use_latest_artifact:
+        description: "Use latest main artifact automatically"
+        required: false
+        type: boolean
+        default: true
       commit_sha:
-        description: "App commit SHA to deploy"
-        required: true
+        description: "Manual app commit SHA (used only when 'use_latest_artifact' is false)"
+        required: false
         type: string
       target_env:
         description: "Deployment target environment"
@@ -37,12 +42,75 @@ concurrency:
 
 env:
   APP_ID: ${{ inputs.app_id }}
-  GCS_PATH: ${{ inputs.app_id }}/versions/${{ inputs.commit_sha }}
   ALL_APP_IDS: "home card expenses stocks vendors admin-system admin-vendors"
 
 jobs:
+  resolve:
+    name: Resolve deploy SHA
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.resolve.outputs.should_deploy }}
+      resolved_sha: ${{ steps.resolve.outputs.resolved_sha }}
+    steps:
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Resolve SHA
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.CROSS_REPO_PAT }}
+          USE_LATEST: ${{ inputs.use_latest_artifact }}
+          APP_ID: ${{ inputs.app_id }}
+          MANUAL_SHA: ${{ inputs.commit_sha }}
+          BUCKET: ${{ vars.GCS_ARTIFACT_BUCKET }}
+        run: |
+          declare -A APP_REPOS=([home]=haderach-home [card]=card [expenses]=expenses [stocks]=stocks [vendors]=vendors [admin-system]=system-admin [admin-vendors]=admin-vendors)
+
+          if [[ "$USE_LATEST" == "true" ]]; then
+            repo="${APP_REPOS[$APP_ID]}"
+            if [[ -z "$repo" ]]; then
+              echo "ERROR: unknown app_id '$APP_ID'"
+              exit 1
+            fi
+            if [[ -z "$GH_TOKEN" ]]; then
+              echo "ERROR: use_latest_artifact requires CROSS_REPO_PAT secret"
+              exit 1
+            fi
+            sha=$(gh api "repos/heymichael/${repo}/commits/main" --jq '.sha' 2>/dev/null || echo "")
+            if [[ -z "$sha" ]]; then
+              echo "ERROR: could not resolve latest main SHA for $APP_ID ($repo)"
+              exit 1
+            fi
+            echo "Resolved latest main SHA for $APP_ID: $sha"
+          else
+            sha="$MANUAL_SHA"
+            if [[ -z "$sha" ]]; then
+              echo "No manual commit_sha provided and use_latest_artifact=false; skipping deploy."
+              echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+              echo "resolved_sha=" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Using manual SHA for $APP_ID: $sha"
+          fi
+
+          if ! gsutil -q stat "gs://${BUCKET}/${APP_ID}/versions/${sha}/manifest.json" 2>/dev/null; then
+            echo "ERROR: artifact not found for $APP_ID at $sha"
+            exit 1
+          fi
+
+          echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+          echo "resolved_sha=$sha" >> "$GITHUB_OUTPUT"
+
   download-and-verify:
     name: Download and verify artifacts
+    needs: resolve
+    if: needs.resolve.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Authenticate to GCP via WIF
@@ -56,13 +124,17 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Download artifacts from GCS
+        env:
+          RESOLVED_SHA: ${{ needs.resolve.outputs.resolved_sha }}
         run: |
           mkdir -p artifacts
-          gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ env.GCS_PATH }}/manifest.json" artifacts/
-          gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ env.GCS_PATH }}/runtime.tar.gz" artifacts/
-          gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ env.GCS_PATH }}/checksums.txt" artifacts/
+          gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ inputs.app_id }}/versions/${RESOLVED_SHA}/manifest.json" artifacts/
+          gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ inputs.app_id }}/versions/${RESOLVED_SHA}/runtime.tar.gz" artifacts/
+          gsutil cp "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ inputs.app_id }}/versions/${RESOLVED_SHA}/checksums.txt" artifacts/
 
       - name: Validate manifest
+        env:
+          RESOLVED_SHA: ${{ needs.resolve.outputs.resolved_sha }}
         run: |
           echo "--- manifest.json ---"
           cat artifacts/manifest.json
@@ -82,8 +154,8 @@ jobs:
             exit 1
           fi
 
-          if [ "$MANIFEST_SHA" != "${{ inputs.commit_sha }}" ]; then
-            echo "ERROR: manifest commit_sha '$MANIFEST_SHA' does not match requested '${{ inputs.commit_sha }}'"
+          if [ "$MANIFEST_SHA" != "$RESOLVED_SHA" ]; then
+            echo "ERROR: manifest commit_sha '$MANIFEST_SHA' does not match requested '$RESOLVED_SHA'"
             exit 1
           fi
 
@@ -114,7 +186,8 @@ jobs:
 
   deploy:
     name: Deploy to Firebase Hosting
-    needs: download-and-verify
+    needs: [resolve, download-and-verify]
+    if: needs.resolve.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.target_env }}
@@ -196,17 +269,32 @@ jobs:
         run: npx firebase-tools deploy --only hosting --project haderach-ai
 
       - name: Write latest-deployed marker to GCS
+        env:
+          RESOLVED_SHA: ${{ needs.resolve.outputs.resolved_sha }}
         run: |
-          echo '{"commit_sha":"${{ inputs.commit_sha }}","deployed_at":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}' \
+          echo '{"commit_sha":"'"${RESOLVED_SHA}"'","deployed_at":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}' \
             | gsutil cp - "gs://${{ vars.GCS_ARTIFACT_BUCKET }}/${{ inputs.app_id }}/latest-deployed.json"
           echo "Wrote latest-deployed marker for ${{ inputs.app_id }}"
 
       - name: Log deployment summary
+        env:
+          RESOLVED_SHA: ${{ needs.resolve.outputs.resolved_sha }}
         run: |
           echo "============================================"
           echo "Deployment complete"
           echo "  App:         ${{ env.APP_ID }}"
-          echo "  Commit SHA:  ${{ inputs.commit_sha }}"
+          echo "  Commit SHA:  ${RESOLVED_SHA}"
           echo "  Environment: ${{ inputs.target_env }}"
           echo "  Version:     $(jq -r '.version' artifacts/manifest.json)"
           echo "============================================"
+
+  skip:
+    name: Skip deploy (no manual SHA provided)
+    needs: resolve
+    if: needs.resolve.outputs.should_deploy != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain skip
+        run: |
+          echo "Deployment skipped."
+          echo "Reason: use_latest_artifact=false and commit_sha was empty."
