@@ -1,0 +1,56 @@
+---
+description: IAM and service account governance — human approval required before any SA or permission change
+alwaysApply: true
+---
+
+# IAM Governance
+
+**Source:** Strategy 186-r3 (Service account boundaries and key hygiene), Strategy 201-r1 (Local-dev SA security audit).
+
+## Hard stop: human approval required
+
+**Never create, modify, or delete a service account, IAM binding, or permission grant without explicit approval from the user.** This applies to:
+
+- Creating a new `google_service_account` resource in Terraform
+- Adding or changing `google_storage_bucket_iam_member`, `google_project_iam_member`, or any IAM binding
+- Adding or modifying WIF bindings (`google_service_account_iam_member` with `workloadIdentityUser`)
+- Granting roles to existing SAs (even "just" adding `objectViewer`)
+- Creating or rotating SA keys
+- Changing `.env` files that reference SA credentials
+
+When a task requires new or changed SA/IAM permissions, **stop and present the change to the user** before writing any Terraform, CLI commands, or workflow changes. Include: which SA, which role, which resource scope, and why.
+
+## Service account principles
+
+1. **One SA per trust boundary.** Never reuse an SA across unrelated purposes. If a new workflow needs GCS access and the existing SA was built for Cloud Run deploys, create a new SA — don't add GCS roles to the deploy SA.
+
+2. **Credential security tiers** (prefer higher tiers):
+   - **Tier 1 — WIF (keyless):** GitHub Actions and other OIDC providers. No keys on disk. Always prefer this for CI/CD.
+   - **Tier 2 — Secret Manager:** Runtime secrets for Cloud Run / Cloud Functions. No keys in repos.
+   - **Tier 3 — JSON key on disk:** Local dev and agent workflows where no OIDC provider exists. Restrict blast radius via dedicated SA with resource-scoped IAM.
+
+3. **Scope restriction is the primary mitigation for Tier 3.** When a key must live on disk, the SA should have the narrowest possible permissions — bucket-level IAM (not project-level), and IAM conditions for path-scoped access where supported.
+
+4. **Terraform owns SA definitions and IAM bindings.** Secret *values* are set via `gcloud` CLI, never stored in Terraform state. All SA infrastructure changes go through PR review in the platform repo.
+
+## Service account matrix
+
+Every SA must be documented in the service account matrix (`haderach-platform/docs/sa-matrix.md`) with:
+
+| Field | Description |
+|-------|-------------|
+| SA name | `account_id` from Terraform |
+| Purpose | What workflow or service uses it |
+| Scope | Which resources it can access (bucket, project, service) |
+| Roles | Exact IAM roles granted |
+| Secrets location | Where credentials live (WIF, Secret Manager, local key file) |
+| Rotation cadence | Quarterly for JSON keys; N/A for WIF |
+| Owner | Who is responsible for rotation and access review |
+
+When proposing a new SA, include a draft matrix row in the approval request.
+
+## Key rotation
+
+- JSON key rotation cadence: **quarterly**.
+- Evidence: GCP Admin Activity audit logs (`CreateServiceAccountKey` / `DeleteServiceAccountKey`).
+- `.env` files must reference secrets by file path, never inline secret values.

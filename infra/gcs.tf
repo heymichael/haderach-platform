@@ -9,6 +9,16 @@ resource "google_storage_bucket" "app_artifacts" {
   force_destroy = false
 
   uniform_bucket_level_access = true
+
+  lifecycle_rule {
+    condition {
+      age                = 90
+      matches_prefix     = ["test-results/"]
+    }
+    action {
+      type = "Delete"
+    }
+  }
 }
 
 # Bucket IAM: card-artifact-publisher can manage objects (create, view, overwrite)
@@ -58,6 +68,18 @@ resource "google_storage_bucket_iam_member" "admin_vendors_publisher_admin" {
   bucket = google_storage_bucket.app_artifacts.name
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.admin_vendors_artifact_publisher.email}"
+}
+
+# Bucket IAM: test-results-publisher can manage objects under test-results/ only
+resource "google_storage_bucket_iam_member" "test_results_publisher_admin" {
+  bucket = google_storage_bucket.app_artifacts.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.test_results_publisher.email}"
+
+  condition {
+    title      = "test-results-prefix-only"
+    expression = "resource.name.startsWith(\"projects/_/buckets/${google_storage_bucket.app_artifacts.name}/objects/test-results/\")"
+  }
 }
 
 # Bucket IAM: platform-deployer can view objects (download artifacts)
