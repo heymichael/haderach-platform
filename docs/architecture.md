@@ -105,8 +105,9 @@ Deploys an app artifact to Firebase Hosting via manual dispatch.
 
 Manual dispatch (`workflow_dispatch`) with inputs:
 
-- `app_id`: which app to deploy (`home`, `card`, `stocks`, `vendors`, `admin-system`, or `admin-vendors`).
-- `commit_sha`: the app commit SHA whose artifacts to deploy.
+- `app_id`: which app to deploy (`home`, `card`, `expenses`, `stocks`, `vendors`, `admin-system`, or `admin-vendors`).
+- `use_latest_artifact`: boolean (default true) — resolve latest main SHA automatically.
+- `commit_sha`: manual app commit SHA (used only when `use_latest_artifact` is false).
 - `target_env`: `staging` or `production`.
 
 #### Flow
@@ -133,10 +134,14 @@ once, and does one atomic deploy.
 
 Manual dispatch (`workflow_dispatch`) with inputs:
 
-- `deploy_all_latest`: boolean — resolve latest main SHA for all apps automatically.
-- `home_sha`, `card_sha`, `stocks_sha`, `vendors_sha`: optional per-app SHAs.
-  Explicit SHA always overrides `deploy_all_latest` for that app.
+- `deploy_all_latest`: boolean — resolve latest main SHA for any app with an empty SHA.
+- Per-app inputs: `home_sha`, `card_sha`, `expenses_sha`, `stocks_sha`, `vendors_sha`,
+  `admin_system_sha`, `admin_vendors_sha` — optional commit SHAs.
+- Per-app latest toggles: `home_latest`, `card_latest`, `expenses_latest`, `stocks_latest`,
+  `vendors_latest`, `admin_system_latest`, `admin_vendors_latest` — boolean, use latest main artifact for that app.
 - `target_env`: `staging` or `production`.
+
+Explicit SHA always takes precedence. Per-app `_latest` toggles override `deploy_all_latest` for granular control.
 
 #### Flow
 
@@ -329,6 +334,7 @@ Platform consumes metadata and promotes specific versions by environment.
 |---|---|---|---|
 | `home` | `/` | `haderach-home` | Deployed |
 | `card` | `/card/` | `card` | Deployed |
+| `expenses` | `/expenses/` | `expenses` | Deployed |
 | `stocks` | `/stocks/` | `stocks` | Deployed |
 | `vendors` | `/vendors/` | `vendors` | Deployed |
 | `admin-system` | `/admin/system/` | `admin-system` | Deployed |
@@ -395,8 +401,8 @@ Roles are global (not per-app) and a user can hold multiple roles.
 
 | Role | Regular apps | Vendor spend | Admin capabilities | Assigned by |
 |------|-------------|-------------|-------------------|-------------|
-| `user` | stocks, vendors | Only `allowed_vendor_ids` | None | `admin` via System Admin UI |
-| `admin` | stocks, vendors | Only `allowed_vendor_ids` | Create users, grant `user`/`admin` roles | `admin` via System Admin UI |
+| `user` | expenses, vendors | Only `allowed_vendor_ids` | None | `admin` via System Admin UI |
+| `admin` | expenses, vendors | Only `allowed_vendor_ids` | Create users, grant `user`/`admin` roles | `admin` via System Admin UI |
 | `finance_admin` | None (needs `user`/`admin` too) | All spend (bypasses filtering) | Grant `allowed_vendor_ids` to users | `admin`/`finance_admin` via Admin UI |
 | `haderach_user` | card | N/A | None | `admin` via System Admin UI |
 
