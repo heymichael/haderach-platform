@@ -85,6 +85,13 @@ resource "google_service_account_iam_member" "admin_vendors_wif_binding" {
   member             = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/github-actions/attribute.repository/heymichael/admin-vendors"
 }
 
+# heymichael/agent repo can impersonate test-results-publisher (test report uploads)
+resource "google_service_account_iam_member" "agent_test_results_wif_binding" {
+  service_account_id = google_service_account.test_results_publisher.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/github-actions/attribute.repository/heymichael/agent"
+}
+
 # heymichael/haderach-platform repo can impersonate platform-deployer
 resource "google_service_account_iam_member" "platform_wif_binding" {
   service_account_id = google_service_account.platform_deployer.name

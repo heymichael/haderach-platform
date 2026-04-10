@@ -65,6 +65,13 @@ resource "google_service_account" "mixpanel_bigquery_reader" {
   project      = var.project_id
 }
 
+resource "google_service_account" "test_results_publisher" {
+  account_id   = "test-results-publisher"
+  display_name = "test-results-publisher"
+  description  = "Uploads pytest/Playwright JSON test reports to GCS (CI via WIF, local via JSON key)"
+  project      = var.project_id
+}
+
 resource "google_service_account" "agent_local_dev" {
   account_id   = "agent-local-dev"
   display_name = "agent-local-dev"
