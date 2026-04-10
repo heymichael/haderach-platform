@@ -82,6 +82,13 @@ resource "google_storage_bucket_iam_member" "test_results_publisher_admin" {
   }
 }
 
+# Bucket IAM: test-results-publisher can list/read objects (needed for test_history queries)
+resource "google_storage_bucket_iam_member" "test_results_publisher_viewer" {
+  bucket = google_storage_bucket.app_artifacts.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_service_account.test_results_publisher.email}"
+}
+
 # Bucket IAM: platform-deployer can view objects (download artifacts)
 resource "google_storage_bucket_iam_member" "deployer_viewer" {
   bucket = google_storage_bucket.app_artifacts.name
