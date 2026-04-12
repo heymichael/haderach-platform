@@ -56,3 +56,17 @@ resource "google_project_iam_member" "mixpanel_bq_job_user" {
   role    = "roles/bigquery.jobUser"
   member  = "serviceAccount:${google_service_account.mixpanel_bigquery_reader.email}"
 }
+
+# agent-artifact-publisher needs cloudsql.client for SchemaSpy doc generation workflow
+resource "google_project_iam_member" "agent_artifact_publisher_cloudsql_client" {
+  project = var.project_id
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${google_service_account.agent_artifact_publisher.email}"
+}
+
+# agent-artifact-publisher needs DATABASE_URL secret for SchemaSpy doc generation
+resource "google_secret_manager_secret_iam_member" "agent_artifact_publisher_database_url" {
+  secret_id = google_secret_manager_secret.database_url.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.agent_artifact_publisher.email}"
+}
