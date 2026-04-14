@@ -46,3 +46,14 @@ Each entry includes:
 - **Rotated by:** michael@haderach.ai
 - **Credential location:** `agent/openai-api-key.txt` (gitignored, chmod 600)
 - **Post-rotation state:** Old key revoked in OpenAI dashboard; new key active and confirmed loaded by agent service
+
+---
+
+### 2026-04-14 — Postgres database password (haderach-app)
+
+- **Service:** Cloud SQL — instance `haderach-main`, project `haderach-ai`
+- **User rotated:** `haderach-app`
+- **Rotated by:** michael@haderach.ai
+- **Method:** `gcloud sql users set-password haderach-app --instance=haderach-main --project=haderach-ai --prompt-for-password`
+- **Credential location:** `agent/haderach-database-url.txt` (gitignored); production via Secret Manager
+- **Post-rotation state:** New password set in Cloud SQL; `haderach-database-url.txt` updated; agent connectivity confirmed (`session_user: haderach-app`)
