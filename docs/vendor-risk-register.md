@@ -23,7 +23,7 @@ Tracks third-party vendors and subprocessors that handle Haderach data. SOC 2 re
 | Bill.com | Accounts payable data sync | Client vendor invoice data | High | SOC 2 Type II — [bill.com/security](https://bill.com/security) | Client credentials provided; OAuth migration tracked separately |
 | QuickBooks Online (Intuit) | Accounting data sync | Client financial data | High | SOC 2 Type II — [intuit.com/security](https://intuit.com/security) | Client credentials provided; OAuth migration tracked separately |
 | AWS (Cost Explorer) | Cloud billing data sync | Client AWS billing data | Medium | SOC 2 Type II — [aws.amazon.com/compliance](https://aws.amazon.com/compliance) | Client credentials provided; migration to customer-managed access tracked separately |
-| Vercel | Frontend hosting | Public static assets only | Low | SOC 2 Type II — [vercel.com/security](https://vercel.com/security) | No customer data; public content only |
+| Firebase Hosting | Frontend hosting | Public static assets only | Low | SOC 2 Type II — [firebase.google.com/support/privacy](https://firebase.google.com/support/privacy) | No customer data; public content only. Part of GCP/Google Trust Services. |
 | _[TODO: add remaining SaaS tools as identified]_ | | | | | |
 
 ---
