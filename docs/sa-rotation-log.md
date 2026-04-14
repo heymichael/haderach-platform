@@ -35,3 +35,14 @@ Each entry includes:
   0cd8a20ba9dad1a037dfee4704a1f32ef79871b3  2026-04-14T19:41:33Z  9999-12-31T23:59:59Z
   ```
   _(two short-lived keys are Google-managed system keys; `0cd8...` is the user-managed key on disk)_
+
+---
+
+### 2026-04-14 — OpenAI API key
+
+- **Service:** OpenAI API (platform.openai.com)
+- **Key revoked:** `sk-...ader` (name unknown — rotated out)
+- **Key created:** `haderach-platform-agent` (`sk-...fjkA`)
+- **Rotated by:** michael@haderach.ai
+- **Credential location:** `agent/openai-api-key.txt` (gitignored, chmod 600)
+- **Post-rotation state:** Old key revoked in OpenAI dashboard; new key active and confirmed loaded by agent service
