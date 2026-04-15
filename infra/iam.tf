@@ -70,3 +70,42 @@ resource "google_secret_manager_secret_iam_member" "agent_artifact_publisher_dat
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.agent_artifact_publisher.email}"
 }
+
+# ---------------------------------------------------------------------------
+# CMS service IAM (task #227, approved 2026-04-14T19:47)
+# ---------------------------------------------------------------------------
+
+resource "google_project_iam_member" "cms_api_runner_cloudsql_client" {
+  project = var.project_id
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${google_service_account.cms_api_runner.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "cms_api_runner_db_url" {
+  secret_id = google_secret_manager_secret.cms_database_url.secret_id
+  project   = var.project_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.cms_api_runner.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "cms_api_runner_payload_secret" {
+  secret_id = google_secret_manager_secret.payload_secret.secret_id
+  project   = var.project_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.cms_api_runner.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "cms_api_runner_cms_api_key" {
+  secret_id = google_secret_manager_secret.cms_api_key.secret_id
+  project   = var.project_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.cms_api_runner.email}"
+}
+
+# agent-api needs CMS_API_KEY to call the Payload API
+resource "google_secret_manager_secret_iam_member" "agent_api_cms_api_key" {
+  secret_id = google_secret_manager_secret.cms_api_key.secret_id
+  project   = var.project_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
+}
