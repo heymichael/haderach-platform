@@ -46,6 +46,26 @@ Covers all access to production systems, including:
 
 ---
 
+## Credential classification and rotation cadence
+
+Not all secrets rotate on the same schedule. The quarterly cadence applies to *access credentials* — secrets that authenticate an identity and can be independently reissued. *Signing/infrastructure keys* follow a longer cadence because rotation invalidates all downstream tokens and integrations simultaneously.
+
+| Classification | Examples | Rotation cadence | Rationale |
+|---|---|---|---|
+| Access credential | SA JSON keys, database passwords, API tokens, OpenAI API keys | Quarterly (90 days) | Can be rotated independently; limited blast radius per credential |
+| Signing/infrastructure key | PAYLOAD_SECRET (JWT signing), encryption keys | Annual or on-compromise | Rotation invalidates all sessions and API keys across all tenants; stored in Secret Manager with documented emergency rotation procedure |
+
+**Emergency rotation procedure for signing keys:**
+1. Generate new secret value: `openssl rand -base64 32`
+2. Add as new version in Secret Manager: `gcloud secrets versions add <SECRET_ID> --data-file=-`
+3. Restart affected Cloud Run services to pick up new version
+4. All existing sessions and API keys are invalidated — users must re-authenticate and API keys must be re-generated
+5. Log the rotation event in `sa-rotation-log.md`
+
+**Decision source:** Strategy 226-r5 (multi-tenant auth isolation boundaries)
+
+---
+
 ## Review log
 
 | Review date | Reviewer | Findings | Actions taken |
