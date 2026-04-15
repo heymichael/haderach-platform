@@ -55,6 +55,13 @@
         }
       },
       {
+        "source": "/cms/api/**",
+        "run": {
+          "serviceId": "cms-api",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "/admin/system/**",
         "destination": "/admin/system/index.html"
       },

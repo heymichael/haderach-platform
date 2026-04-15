@@ -100,3 +100,44 @@ resource "google_secret_manager_secret_version" "database_url" {
   secret      = google_secret_manager_secret.database_url.id
   secret_data = "postgresql://${google_sql_user.app.name}:${random_password.db_password.result}@/${google_sql_database.haderach.name}?host=/cloudsql/${google_sql_database_instance.main.connection_name}"
 }
+
+# ---------------------------------------------------------------------------
+# CMS secrets (task #227, approved 2026-04-14T19:47)
+# ---------------------------------------------------------------------------
+
+resource "google_secret_manager_secret" "cms_database_url" {
+  secret_id = "CMS_DATABASE_URL"
+  project   = var.project_id
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "cms_database_url" {
+  secret      = google_secret_manager_secret.cms_database_url.id
+  secret_data = "postgresql://${google_sql_user.cms_app.name}:${random_password.cms_db_password.result}@/${google_sql_database.cms.name}?host=/cloudsql/${google_sql_database_instance.cms.connection_name}"
+}
+
+resource "google_secret_manager_secret" "payload_secret" {
+  secret_id = "PAYLOAD_SECRET"
+  project   = var.project_id
+
+  replication {
+    auto {}
+  }
+}
+
+# Value set manually: openssl rand -base64 32 | gcloud secrets versions add PAYLOAD_SECRET --data-file=-
+
+resource "google_secret_manager_secret" "cms_api_key" {
+  secret_id = "CMS_API_KEY"
+  project   = var.project_id
+
+  replication {
+    auto {}
+  }
+}
+
+# Value set after first deploy: create agent user in Payload admin, copy generated API key:
+#   echo -n "<key>" | gcloud secrets versions add CMS_API_KEY --data-file=-

@@ -78,3 +78,18 @@ resource "google_service_account" "agent_local_dev" {
   description  = "Local development SA for agent service (Cloud SQL Proxy, Firebase Auth)"
   project      = var.project_id
 }
+
+# IAM approval: 2026-04-14T19:47, Michael Mader (task #227)
+resource "google_service_account" "cms_api_runner" {
+  account_id   = "cms-api-runner"
+  display_name = "cms-api-runner"
+  description  = "Cloud Run runtime identity for cms-api (Payload CMS service)"
+  project      = var.project_id
+}
+
+resource "google_service_account" "cms_artifact_publisher" {
+  account_id   = "cms-artifact-publisher"
+  display_name = "cms-artifact-publisher"
+  description  = "CI/CD image push for haderach-cms repo"
+  project      = var.project_id
+}
