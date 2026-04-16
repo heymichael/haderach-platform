@@ -98,3 +98,11 @@ resource "google_service_account_iam_member" "platform_wif_binding" {
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/github-actions/attribute.repository/heymichael/haderach-platform"
 }
+
+# heymichael/haderach-cms repo can impersonate cms-artifact-publisher
+# IAM approval: 2026-04-15, Michael Mader (task #227)
+resource "google_service_account_iam_member" "cms_wif_binding" {
+  service_account_id = google_service_account.cms_artifact_publisher.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/github-actions/attribute.repository/heymichael/haderach-cms"
+}

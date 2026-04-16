@@ -109,3 +109,21 @@ resource "google_secret_manager_secret_iam_member" "agent_api_cms_api_key" {
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
 }
+
+# ---------------------------------------------------------------------------
+# CMS CI/CD IAM (task #227, approved 2026-04-15)
+# ---------------------------------------------------------------------------
+
+# cms-artifact-publisher needs run.developer to deploy new revisions
+resource "google_project_iam_member" "cms_publisher_run_developer" {
+  project = var.project_id
+  role    = "roles/run.developer"
+  member  = "serviceAccount:${google_service_account.cms_artifact_publisher.email}"
+}
+
+# cms-artifact-publisher needs to act-as cms-api-runner when deploying
+resource "google_service_account_iam_member" "cms_publisher_act_as_cms_runner" {
+  service_account_id = google_service_account.cms_api_runner.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.cms_artifact_publisher.email}"
+}
