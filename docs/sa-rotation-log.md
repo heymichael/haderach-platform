@@ -121,3 +121,29 @@ Each entry includes:
 - **Credential location:** No JSON key — WIF to be configured when CI/CD is set up
 - **Classification:** N/A (WIF keyless; no key to rotate)
 - **Terraform PR:** heymichael/haderach-platform#47
+
+---
+
+### 2026-04-16 — DATABASE_URL secret — format correction
+
+- **Event:** secret version added (version 3)
+- **Service:** Cloud SQL — instance `haderach-main`, project `haderach-ai`
+- **User:** `haderach-app`
+- **Corrected by:** cursor agent (approved by michael@haderach.ai)
+- **Credential location:** Secret Manager (`DATABASE_URL`, version 3)
+- **What happened:** Secret version 2 (created 2026-04-14 during password rotation) used a TCP connection string (`localhost:5433`) instead of the Cloud SQL Unix socket format. The Cloud Run service only has the socket configured (`run.googleapis.com/cloudsql-instances`), not a TCP proxy sidecar, so all DB connections failed. Combined with the `load_text_credential` bug in agent PR #74 (fixed in PR #75), this caused a full auth outage — all users saw "Access denied" since 2026-04-14.
+- **Fix:** Created version 3 with the rotated password in Unix socket format (`host=/cloudsql/haderach-ai:us-central1:haderach-main`). Password is URL-encoded. Redeployed agent-api (revision `agent-api-00112-kqr`). Pool warmed successfully.
+- **Post-fix state:** Secret Manager `DATABASE_URL` version 3 active; agent-api connecting via Cloud SQL socket; `/me` endpoint returning user roles correctly.
+
+---
+
+### 2026-04-16 — CMS_API_KEY — CREATED
+
+- **Event:** created
+- **Service:** Server-to-server API key for agent service → Payload CMS REST API
+- **User:** `agent@haderach.ai` (Payload user id 2, role: agent)
+- **Credential location:** Secret Manager (`CMS_API_KEY`, version 1)
+- **Classification:** Access credential — quarterly rotation (90 days)
+- **Auth header format:** `Authorization: users API-Key <key>`
+- **Created by:** michael@haderach.ai via Payload REST API
+- **Next rotation due:** 2026-07-16
