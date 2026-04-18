@@ -105,7 +105,7 @@ Deploys an app artifact to Firebase Hosting via manual dispatch.
 
 Manual dispatch (`workflow_dispatch`) with inputs:
 
-- `app_id`: which app to deploy (`home`, `card`, `expenses`, `stocks`, `vendors`, `admin-system`, or `admin-vendors`).
+- `app_id`: which app to deploy (`home`, `card`, `expenses`, `stocks`, `vendors`, `admin-system`, `admin-vendors`, or `site`).
 - `use_latest_artifact`: boolean (default true) — resolve latest main SHA automatically.
 - `commit_sha`: manual app commit SHA (used only when `use_latest_artifact` is false).
 - `target_env`: `staging` or `production`.
