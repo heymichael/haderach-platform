@@ -18,12 +18,12 @@ resource "google_cloud_run_v2_service" "site_api" {
         container_port = 8080
       }
 
-      resources {
-        limits = {
-          cpu    = "1"
-          memory = "256Mi"
-        }
-      }
+          resources {
+            limits = {
+              cpu    = "1"
+              memory = "512Mi"
+            }
+          }
     }
 
     scaling {
