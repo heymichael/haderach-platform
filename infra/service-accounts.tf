@@ -95,16 +95,10 @@ resource "google_service_account" "cms_artifact_publisher" {
 }
 
 # IAM approval: 2026-04-18, Michael Mader (task #240)
-resource "google_service_account" "site_runner" {
-  account_id   = "site-runner"
-  display_name = "site-runner"
-  description  = "Cloud Run runtime identity for site-api (Vite SPA frontend)"
-  project      = var.project_id
-}
-
+# Updated: switched from Cloud Run to GCS artifact deployment
 resource "google_service_account" "site_artifact_publisher" {
   account_id   = "site-artifact-publisher"
   display_name = "site-artifact-publisher"
-  description  = "CI/CD image push for heymichael/site repo"
+  description  = "CI/CD artifact upload for heymichael/site repo"
   project      = var.project_id
 }

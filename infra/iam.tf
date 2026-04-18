@@ -147,18 +147,6 @@ resource "google_project_iam_member" "cms_publisher_cloudsql_client" {
 
 # ---------------------------------------------------------------------------
 # Site CI/CD IAM (task #240, approved 2026-04-18)
+# Updated: switched from Cloud Run to GCS artifact deployment
 # ---------------------------------------------------------------------------
-
-# site-artifact-publisher needs run.developer to deploy new revisions
-resource "google_project_iam_member" "site_publisher_run_developer" {
-  project = var.project_id
-  role    = "roles/run.developer"
-  member  = "serviceAccount:${google_service_account.site_artifact_publisher.email}"
-}
-
-# site-artifact-publisher needs to act-as site-runner when deploying
-resource "google_service_account_iam_member" "site_publisher_act_as_site_runner" {
-  service_account_id = google_service_account.site_runner.name
-  role               = "roles/iam.serviceAccountUser"
-  member             = "serviceAccount:${google_service_account.site_artifact_publisher.email}"
-}
+# GCS permissions defined in gcs.tf (site_publisher_admin)

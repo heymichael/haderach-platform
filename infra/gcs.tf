@@ -70,6 +70,14 @@ resource "google_storage_bucket_iam_member" "admin_vendors_publisher_admin" {
   member = "serviceAccount:${google_service_account.admin_vendors_artifact_publisher.email}"
 }
 
+# Bucket IAM: site-artifact-publisher can manage objects (create, view, overwrite)
+# IAM approval: 2026-04-18, Michael Mader (task #240) — switched from Cloud Run to GCS
+resource "google_storage_bucket_iam_member" "site_publisher_admin" {
+  bucket = google_storage_bucket.app_artifacts.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.site_artifact_publisher.email}"
+}
+
 # Bucket IAM: test-results-publisher can manage objects under test-results/ only
 resource "google_storage_bucket_iam_member" "test_results_publisher_admin" {
   bucket = google_storage_bucket.app_artifacts.name
