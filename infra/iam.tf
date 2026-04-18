@@ -127,3 +127,38 @@ resource "google_service_account_iam_member" "cms_publisher_act_as_cms_runner" {
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${google_service_account.cms_artifact_publisher.email}"
 }
+
+# cms-artifact-publisher needs CMS_DATABASE_URL for CI migrations
+# IAM approval: 2026-04-18, Michael Mader (task #240)
+resource "google_secret_manager_secret_iam_member" "cms_publisher_db_url" {
+  secret_id = google_secret_manager_secret.cms_database_url.secret_id
+  project   = var.project_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.cms_artifact_publisher.email}"
+}
+
+# cms-artifact-publisher needs cloudsql.client for CI migrations via proxy
+# IAM approval: 2026-04-18, Michael Mader (task #240)
+resource "google_project_iam_member" "cms_publisher_cloudsql_client" {
+  project = var.project_id
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${google_service_account.cms_artifact_publisher.email}"
+}
+
+# ---------------------------------------------------------------------------
+# Site CI/CD IAM (task #240, approved 2026-04-18)
+# ---------------------------------------------------------------------------
+
+# site-artifact-publisher needs run.developer to deploy new revisions
+resource "google_project_iam_member" "site_publisher_run_developer" {
+  project = var.project_id
+  role    = "roles/run.developer"
+  member  = "serviceAccount:${google_service_account.site_artifact_publisher.email}"
+}
+
+# site-artifact-publisher needs to act-as site-runner when deploying
+resource "google_service_account_iam_member" "site_publisher_act_as_site_runner" {
+  service_account_id = google_service_account.site_runner.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.site_artifact_publisher.email}"
+}

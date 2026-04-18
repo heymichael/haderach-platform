@@ -62,6 +62,13 @@
         }
       },
       {
+        "source": "/site/**",
+        "run": {
+          "serviceId": "site-api",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "/admin/system/**",
         "destination": "/admin/system/index.html"
       },

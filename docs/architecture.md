@@ -339,6 +339,7 @@ Platform consumes metadata and promotes specific versions by environment.
 | `vendors` | `/vendors/` | `vendors` | Deployed |
 | `admin-system` | `/admin/system/` | `admin-system` | Deployed |
 | `admin-vendors` | `/admin/vendors/` | `admin-vendors` | Deployed |
+| `site` | `/site/**` | `site` | Deployed via Cloud Run (site-api); not GCS artifact-based |
 
 ### Settings hub
 
@@ -352,6 +353,7 @@ The homepage also serves a Settings hub at `/admin/` — a role-gated navigation
 | `stocks-api` | `/stocks/api/**` | `stocks` | Stock market data (Massive API) |
 | `agent-api` | `/agent/api/**` | `agent` | Shared chat agent (OpenAI tool-calling, Postgres CRUD) |
 | `content-api` | `docs.haderach.ai` | `haderach-platform` (services/content-api/) | Authenticated static-file server (GCS-backed, Google OAuth) |
+| `site-api` | `/site/**` | `site` | Vite SPA frontend for the CMS domain (nginx static server) |
 
 All backend services run on Cloud Run (us-central1). `vendors-api`, `stocks-api`,
 and `agent-api` are fronted by Firebase Hosting rewrites on `haderach.ai`.
@@ -359,6 +361,11 @@ and `agent-api` are fronted by Firebase Hosting rewrites on `haderach.ai`.
 authenticated static content from GCS with Google OAuth sign-in and a Postgres
 user whitelist. The default compute service account is used at runtime; each
 service's secrets are injected via Secret Manager env var mounts.
+
+`site-api` is a Vite SPA served by nginx on Cloud Run. It is fronted by a
+Firebase Hosting rewrite at `/site/**`. Its CI/CD workflow (in the `site` repo)
+checks out both `site` and `haderach-home` (for the local `@haderach/shared-ui`
+dependency) and requires the `CROSS_REPO_PAT` secret in the `site` repo.
 
 ## Smoke Test Ownership
 
