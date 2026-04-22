@@ -72,6 +72,25 @@ resource "google_secret_manager_secret_iam_member" "agent_artifact_publisher_dat
 }
 
 # ---------------------------------------------------------------------------
+# agent-api runtime identity (task #271, approved 2026-04-21)
+# Brings agent-api-runtime SA + bindings under Terraform; previously the live
+# Cloud Run service ran as this SA but it was created out-of-band. See docs/sa-matrix.md.
+# ---------------------------------------------------------------------------
+
+resource "google_project_iam_member" "agent_api_runtime_cloudsql_client" {
+  project = var.project_id
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${google_service_account.agent_api_runtime.email}"
+}
+
+# agent-artifact-publisher needs to act-as agent-api-runtime when deploying revisions
+resource "google_service_account_iam_member" "agent_publisher_act_as_agent_api_runtime" {
+  service_account_id = google_service_account.agent_api_runtime.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.agent_artifact_publisher.email}"
+}
+
+# ---------------------------------------------------------------------------
 # CMS service IAM (task #227, approved 2026-04-14T19:47)
 # ---------------------------------------------------------------------------
 

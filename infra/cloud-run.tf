@@ -97,6 +97,8 @@ resource "google_cloud_run_v2_service" "agent_api" {
   project  = var.project_id
 
   template {
+    service_account = google_service_account.agent_api_runtime.email
+
     volumes {
       name = "cloudsql"
       cloud_sql_instance {
@@ -136,36 +138,6 @@ resource "google_cloud_run_v2_service" "agent_api" {
         }
       }
 
-      env {
-        name = "VENDOR_AWS_BILLING_CREDENTIALS"
-        value_source {
-          secret_key_ref {
-            secret  = google_secret_manager_secret.vendor_aws_billing_credentials.secret_id
-            version = "latest"
-          }
-        }
-      }
-
-      env {
-        name = "VENDOR_BILL_CREDENTIALS"
-        value_source {
-          secret_key_ref {
-            secret  = google_secret_manager_secret.vendor_bill_credentials.secret_id
-            version = "latest"
-          }
-        }
-      }
-
-      env {
-        name = "VENDOR_GCP_BILLING_CREDENTIALS"
-        value_source {
-          secret_key_ref {
-            secret  = google_secret_manager_secret.vendor_gcp_billing_credentials.secret_id
-            version = "latest"
-          }
-        }
-      }
-
       resources {
         limits = {
           cpu    = "1"
@@ -186,9 +158,6 @@ resource "google_cloud_run_v2_service" "agent_api" {
 
   depends_on = [
     google_secret_manager_secret_iam_member.agent_api_secret_access,
-    google_secret_manager_secret_iam_member.agent_api_bill_secret_access,
-    google_secret_manager_secret_iam_member.agent_api_gcp_billing_secret_access,
-    google_secret_manager_secret_iam_member.vendors_api_secret_access,
     google_secret_manager_secret_iam_member.agent_api_db_secret_access,
     google_secret_manager_secret_version.database_url,
   ]
@@ -202,32 +171,24 @@ resource "google_cloud_run_v2_service_iam_member" "agent_api_public" {
   member   = "allUsers"
 }
 
+# Secret bindings for agent-api runtime identity.
+# Repointed from default compute SA → agent-api-runtime under task #271 (2026-04-21).
+# Vendor billing secret bindings (AWS/Bill/GCP) are intentionally not declared here;
+# the agent-api process does not consume those env vars in production today (no cron).
+# When nightly vendor sync moves to a Cloud Run job, file a separate task to wire
+# both the env vars and matching agent-api-runtime secret bindings.
 resource "google_secret_manager_secret_iam_member" "agent_api_secret_access" {
   secret_id = google_secret_manager_secret.openai_api_key.secret_id
   project   = var.project_id
   role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
-}
-
-resource "google_secret_manager_secret_iam_member" "agent_api_bill_secret_access" {
-  secret_id = google_secret_manager_secret.vendor_bill_credentials.secret_id
-  project   = var.project_id
-  role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
-}
-
-resource "google_secret_manager_secret_iam_member" "agent_api_gcp_billing_secret_access" {
-  secret_id = google_secret_manager_secret.vendor_gcp_billing_credentials.secret_id
-  project   = var.project_id
-  role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
+  member    = "serviceAccount:${google_service_account.agent_api_runtime.email}"
 }
 
 resource "google_secret_manager_secret_iam_member" "agent_api_db_secret_access" {
   secret_id = google_secret_manager_secret.database_url.secret_id
   project   = var.project_id
   role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
+  member    = "serviceAccount:${google_service_account.agent_api_runtime.email}"
 }
 
 resource "google_secret_manager_secret_iam_member" "vendors_api_db_secret_access" {
