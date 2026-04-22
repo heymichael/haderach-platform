@@ -138,6 +138,24 @@ resource "google_cloud_run_v2_service" "agent_api" {
         }
       }
 
+      # CMS REST API base URL — must match what `agent/service/cms_tools.py`
+      # joins paths onto (it appends `/api/...`). Includes the `/cms` basePath
+      # mounted by haderach-cms next.config.ts (bug 266).
+      env {
+        name  = "CMS_API_URL"
+        value = "https://haderach.ai/cms"
+      }
+
+      env {
+        name = "CMS_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.cms_api_key.secret_id
+            version = "latest"
+          }
+        }
+      }
+
       resources {
         limits = {
           cpu    = "1"
@@ -159,6 +177,7 @@ resource "google_cloud_run_v2_service" "agent_api" {
   depends_on = [
     google_secret_manager_secret_iam_member.agent_api_secret_access,
     google_secret_manager_secret_iam_member.agent_api_db_secret_access,
+    google_secret_manager_secret_iam_member.agent_api_cms_api_key,
     google_secret_manager_secret_version.database_url,
   ]
 }
