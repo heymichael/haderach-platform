@@ -47,6 +47,16 @@ resource "google_service_account" "agent_artifact_publisher" {
   project      = var.project_id
 }
 
+# IAM approval: 2026-04-21, Michael Mader (task #271)
+# Imported from existing live SA created out-of-band; brings the runtime identity
+# under Terraform per the iam-governance rule. See docs/sa-matrix.md and task 271.
+resource "google_service_account" "agent_api_runtime" {
+  account_id   = "agent-api-runtime"
+  display_name = "agent-api-runtime"
+  description  = "Cloud Run runtime identity for agent-api service"
+  project      = var.project_id
+}
+
 resource "google_service_account" "admin_system_artifact_publisher" {
   account_id   = "admin-sys-artifact-publisher"
   display_name = "admin-system-artifact-publisher"
