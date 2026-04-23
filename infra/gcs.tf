@@ -64,6 +64,23 @@ resource "google_storage_bucket" "app_artifacts" {
   }
 }
 
+resource "google_storage_bucket" "strategy_documents" {
+  name          = "haderach-strategy-documents"
+  location      = "US"
+  project       = var.project_id
+  force_destroy = false
+
+  uniform_bucket_level_access = true
+}
+
+# Bucket IAM: strategy-document-uploader can create/read/update objects
+# IAM approval: 2026-04-22, Michael Mader (task #276)
+resource "google_storage_bucket_iam_member" "strategy_document_uploader_object_user" {
+  bucket = google_storage_bucket.strategy_documents.name
+  role   = "roles/storage.objectUser"
+  member = "serviceAccount:${google_service_account.strategy_document_uploader.email}"
+}
+
 # Bucket IAM: card-artifact-publisher can manage objects (create, view, overwrite)
 resource "google_storage_bucket_iam_member" "card_publisher_admin" {
   bucket = google_storage_bucket.app_artifacts.name
