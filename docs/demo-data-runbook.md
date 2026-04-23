@@ -2,7 +2,7 @@
 
 **Owner:** Michael Mader (michael@haderach.ai)  
 **Status:** Draft — interim process pending dedicated demo environment  
-**Last reviewed:** 2026-04-22  
+**Last reviewed:** 2026-04-22 (load path added)  
 **Review cadence:** Quarterly (or on process change)
 
 ---
@@ -124,15 +124,55 @@ gcloud storage cp \
 
 ### 5. Load into local development
 
-Developers load the curated dataset into a local database and use that as the
-default demo/seed path for local development.
+Developers load the curated dataset into a local Postgres instance running
+in Docker. The local instance is defined in `agent/docker-compose.local.yml`
+(port `5436`, db `haderach_local`, user `agent_local`, password `localdev`).
 
-The local workflow should eventually be simple enough to express as:
+Steps:
 
-1. start the local database
-2. load schema if needed
-3. import the curated demo dataset
-4. start the app or service
+1. Authenticate to GCS (one-time per machine):
+
+   ```bash
+   gcloud auth login
+   gcloud config set project haderach-ai
+   ```
+
+   Membership in `haderach-developers-data@haderach.ai` grants read access
+   to `gs://haderach-demo-data`.
+
+2. Start the local Postgres container (from the agent repo):
+
+   ```bash
+   cd /path/to/agent
+   docker compose -f docker-compose.local.yml up -d
+   ```
+
+3. Download the latest curated artifact:
+
+   ```bash
+   gcloud storage cp \
+     gs://haderach-demo-data/postgres/demo-dataset-latest.sql.gz \
+     /tmp/demo-dataset-latest.sql.gz
+   ```
+
+4. Load it into the local database:
+
+   ```bash
+   gunzip -c /tmp/demo-dataset-latest.sql.gz | \
+     PGPASSWORD=localdev psql \
+       -h localhost -p 5436 \
+       -U agent_local -d haderach_local
+   ```
+
+   The artifact is a `pg_dump` plain-SQL dump that creates schema and data
+   in a single transaction; no separate migration step is required.
+
+5. Start the agent service against the local DB (see `agent/README.md`).
+
+Refresh path: rerun steps 3 and 4 against the new `*-latest.sql.gz` object
+whenever the owner publishes a refresh. To roll back, list versions with
+`gcloud storage ls --all-versions gs://haderach-demo-data/postgres/` and
+download a specific generation.
 
 ### 6. Record the refresh
 
@@ -168,8 +208,10 @@ This runbook identifies the following implementation gaps:
    Bucket: `gs://haderach-demo-data`. Owner: `michael@haderach.ai`
    (`objectAdmin`). Developers: `haderach-developers-data@haderach.ai`
    (`objectViewer`).
-2. Define the local import command or script developers should run to load
-   the artifact from GCS into a local database.
+2. ~~Define the local import command or script developers should run to load
+   the artifact from GCS into a local database.~~ Done — task #239,
+   2026-04-22. See section 5 above (`gcloud storage cp` + `psql` against the
+   local Docker Postgres on port `5436`).
 3. Define the refresh log location if it will not live in this file.
 4. Define the curation checklist in more detail once the first curated dataset
    is created.
