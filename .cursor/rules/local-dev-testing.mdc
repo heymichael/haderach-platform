@@ -58,4 +58,4 @@ Fallback: run `gcloud auth application-default login` (expires periodically, req
 |---|---|---|
 | UI-only | any | app dev server only |
 | Real auth | vendors, admin-system, admin-vendors | agent (8080) + app dev server |
-| Real auth | stocks, card | app dev server only |
+| Real auth | stocks | app dev server only |

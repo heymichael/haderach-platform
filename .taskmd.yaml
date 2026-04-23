@@ -4,8 +4,6 @@ id:
   padding: 3
 workflow: solo
 phases:
-  - id: card
-    name: "Card"
   - id: stocks
     name: "Stocks"
   - id: platform

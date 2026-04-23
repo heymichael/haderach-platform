@@ -3,7 +3,7 @@
 Platform control plane for `haderach.ai`.
 
 This repository owns shared hosting/routing/deploy orchestration and cross-app smoke checks.
-Application implementation, app CI, and app-local tests live in separate app repositories (`card`, `stocks`, `vendors`, `agent`).
+Application implementation, app CI, and app-local tests live in separate app repositories (`stocks`, `vendors`, `agent`).
 
 ## What this repo is responsible for
 
@@ -103,7 +103,7 @@ The deploy workflow (`.github/workflows/deploy.yml`) is triggered manually via `
 
 Inputs:
 
-- `app_id`: which app to deploy (`home`, `card`, `stocks`, `vendors`, `admin-system`, or `admin-vendors`).
+- `app_id`: which app to deploy (`home`, `stocks`, `vendors`, `admin-system`, or `admin-vendors`).
 - `commit_sha`: the app commit SHA whose published artifacts to deploy.
 - `target_env`: `staging` or `production`.
 
@@ -122,7 +122,6 @@ See `docs/architecture.md` for full deploy flow details and GCP auth setup.
 | App ID | Route | Artifact Bucket Path |
 |---|---|---|
 | `home` | `/` | `home/versions/<sha>/` |
-| `card` | `/card/` | `card/versions/<sha>/` |
 | `stocks` | `/stocks/` | `stocks/versions/<sha>/` |
 | `vendors` | `/vendors/` | `vendors/versions/<sha>/` |
 | `admin-system` | `/admin/system/` | `admin-system/versions/<sha>/` |
@@ -133,7 +132,6 @@ See `docs/architecture.md` for full deploy flow details and GCP auth setup.
 | Repo | Relationship |
 |---|---|
 | `haderach-home` | Homepage SPA + shared-ui design system (served at `/`) |
-| `card` | Card editor app (served at `/card/`) |
 | `stocks` | Stocks app (served at `/stocks/`) |
 | `vendors` | Vendor management app (served at `/vendors/`) |
 | `admin-system` | System admin app (served at `/admin/system/`) |
