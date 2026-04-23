@@ -82,6 +82,13 @@ resource "google_service_account" "test_results_publisher" {
   project      = var.project_id
 }
 
+resource "google_service_account" "strategy_document_uploader" {
+  account_id   = "strategy-docs-uploader"
+  display_name = "haderach-strategy-document-uploader"
+  description  = "Uploads gitignored strategy documents to GCS on explicit operator request"
+  project      = var.project_id
+}
+
 resource "google_service_account" "agent_local_dev" {
   account_id   = "agent-local-dev"
   display_name = "agent-local-dev"

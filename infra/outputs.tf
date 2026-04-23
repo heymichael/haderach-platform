@@ -27,3 +27,8 @@ output "demo_data_bucket" {
   description = "GCS bucket for curated demo / shared local-dev data"
   value       = google_storage_bucket.demo_data.name
 }
+
+output "strategy_documents_bucket" {
+  description = "GCS bucket for gitignored strategy documents"
+  value       = google_storage_bucket.strategy_documents.name
+}
