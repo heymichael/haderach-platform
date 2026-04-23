@@ -2,6 +2,49 @@
 # GCS Buckets
 # ---------------------------------------------------------------------------
 
+# Curated demo data — production-derived, owner-curated, developer-readable.
+# See docs/demo-data-policy.md and docs/demo-data-runbook.md.
+# Versioning enabled so a bad refresh can be rolled back without re-pulling production.
+resource "google_storage_bucket" "demo_data" {
+  name          = "haderach-demo-data"
+  location      = "US"
+  project       = var.project_id
+  force_destroy = false
+
+  uniform_bucket_level_access = true
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    condition {
+      age        = 90
+      with_state = "ARCHIVED"
+    }
+    action {
+      type = "Delete"
+    }
+  }
+}
+
+# Bucket IAM: demo-data — owner is the only writer (per demo-data-policy.md).
+# IAM approval: 2026-04-22, Michael Mader (task #239)
+resource "google_storage_bucket_iam_member" "demo_data_owner_admin" {
+  bucket = google_storage_bucket.demo_data.name
+  role   = "roles/storage.objectAdmin"
+  member = "user:michael@haderach.ai"
+}
+
+# Bucket IAM: demo-data — developers in the haderach-developers-data group get read-only access.
+# Group membership is managed in Google Workspace, not Terraform.
+# IAM approval: 2026-04-22, Michael Mader (task #239)
+resource "google_storage_bucket_iam_member" "demo_data_developers_viewer" {
+  bucket = google_storage_bucket.demo_data.name
+  role   = "roles/storage.objectViewer"
+  member = "group:haderach-developers-data@haderach.ai"
+}
+
 resource "google_storage_bucket" "app_artifacts" {
   name          = "haderach-app-artifacts"
   location      = "US"
