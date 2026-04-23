@@ -3,7 +3,7 @@
 Canonical record of all Haderach platform service accounts. Updated whenever a SA is created, modified, or deleted. Reviewed quarterly alongside key rotation.
 
 **Owner:** Michael Mader (michael@haderach.ai)  
-**Last reviewed:** 2026-04-21
+**Last reviewed:** 2026-04-23
 
 ---
 
@@ -15,13 +15,12 @@ These SAs are used by GitHub Actions in each frontend repo to publish immutable 
 
 | SA Name | Email | Purpose | Scope | Roles | Credential location | Rotation cadence | Notes |
 |---|---|---|---|---|---|---|---|
-| card-artifact-publisher | card-artifact-publisher@haderach-ai.iam.gserviceaccount.com | CI/CD artifact publish for heymichael/card repo | Bucket: haderach-app-artifacts | `roles/storage.objectAdmin` | WIF (keyless via GitHub Actions) | N/A — keyless | ⚠️ objectAdmin is bucket-wide — can read/write all apps' artifacts. Should be prefix-conditioned to `card/`. See open findings. |
-| stocks-artifact-publisher | stocks-artifact-publisher@haderach-ai.iam.gserviceaccount.com | CI/CD artifact publish for heymichael/stocks repo | Bucket: haderach-app-artifacts | `roles/storage.objectAdmin` | WIF (keyless via GitHub Actions) | N/A — keyless | ⚠️ Same bucket-wide objectAdmin issue as card. |
-| expenses-artifact-publisher | expenses-artifact-publisher@haderach-ai.iam.gserviceaccount.com | CI/CD artifact publish for heymichael/expenses repo | Bucket: haderach-app-artifacts | `roles/storage.objectAdmin` | WIF (keyless via GitHub Actions) | N/A — keyless | ⚠️ Same bucket-wide objectAdmin issue as card. |
-| vendors-artifact-publisher | vendors-artifact-publisher@haderach-ai.iam.gserviceaccount.com | CI/CD artifact publish for heymichael/vendors repo | Bucket: haderach-app-artifacts | `roles/storage.objectAdmin` | WIF (keyless via GitHub Actions) | N/A — keyless | ⚠️ Same bucket-wide objectAdmin issue as card. |
-| home-artifact-publisher | home-artifact-publisher@haderach-ai.iam.gserviceaccount.com | CI/CD artifact publish for heymichael/haderach-home repo | Bucket: haderach-app-artifacts | `roles/storage.objectAdmin` | WIF (keyless via GitHub Actions) | N/A — keyless | ⚠️ Same bucket-wide objectAdmin issue as card. |
-| admin-sys-artifact-publisher | admin-sys-artifact-publisher@haderach-ai.iam.gserviceaccount.com | CI/CD artifact publish for heymichael/system-admin repo | Bucket: haderach-app-artifacts | `roles/storage.objectAdmin` | WIF (keyless via GitHub Actions) | N/A — keyless | ⚠️ Same bucket-wide objectAdmin issue as card. |
-| admin-vend-artifact-publisher | admin-vend-artifact-publisher@haderach-ai.iam.gserviceaccount.com | CI/CD artifact publish for heymichael/admin-vendors repo | Bucket: haderach-app-artifacts | `roles/storage.objectAdmin` | WIF (keyless via GitHub Actions) | N/A — keyless | ⚠️ Same bucket-wide objectAdmin issue as card. |
+| stocks-artifact-publisher | stocks-artifact-publisher@haderach-ai.iam.gserviceaccount.com | CI/CD artifact publish for heymichael/stocks repo | Bucket: haderach-app-artifacts | `roles/storage.objectAdmin` | WIF (keyless via GitHub Actions) | N/A — keyless | ⚠️ Bucket-wide objectAdmin — can read/write all apps' artifacts. Should be prefix-conditioned to `stocks/`. See open findings. |
+| expenses-artifact-publisher | expenses-artifact-publisher@haderach-ai.iam.gserviceaccount.com | CI/CD artifact publish for heymichael/expenses repo | Bucket: haderach-app-artifacts | `roles/storage.objectAdmin` | WIF (keyless via GitHub Actions) | N/A — keyless | ⚠️ Same bucket-wide objectAdmin issue. |
+| vendors-artifact-publisher | vendors-artifact-publisher@haderach-ai.iam.gserviceaccount.com | CI/CD artifact publish for heymichael/vendors repo | Bucket: haderach-app-artifacts | `roles/storage.objectAdmin` | WIF (keyless via GitHub Actions) | N/A — keyless | ⚠️ Same bucket-wide objectAdmin issue. |
+| home-artifact-publisher | home-artifact-publisher@haderach-ai.iam.gserviceaccount.com | CI/CD artifact publish for heymichael/haderach-home repo | Bucket: haderach-app-artifacts | `roles/storage.objectAdmin` | WIF (keyless via GitHub Actions) | N/A — keyless | ⚠️ Same bucket-wide objectAdmin issue. |
+| admin-sys-artifact-publisher | admin-sys-artifact-publisher@haderach-ai.iam.gserviceaccount.com | CI/CD artifact publish for heymichael/system-admin repo | Bucket: haderach-app-artifacts | `roles/storage.objectAdmin` | WIF (keyless via GitHub Actions) | N/A — keyless | ⚠️ Same bucket-wide objectAdmin issue. |
+| admin-vend-artifact-publisher | admin-vend-artifact-publisher@haderach-ai.iam.gserviceaccount.com | CI/CD artifact publish for heymichael/admin-vendors repo | Bucket: haderach-app-artifacts | `roles/storage.objectAdmin` | WIF (keyless via GitHub Actions) | N/A — keyless | ⚠️ Same bucket-wide objectAdmin issue. |
 
 ### Backend service publishers (Artifact Registry + Cloud Run)
 
@@ -79,7 +78,7 @@ These bindings grant access to GCS buckets directly to user/group identities —
 
 | # | SA(s) | Finding | Severity | Remediation |
 |---|---|---|---|---|
-| 1 | card-, stocks-, expenses-, vendors-, home-, admin-sys-, admin-vend-artifact-publisher | `objectAdmin` on full `haderach-app-artifacts` bucket — any frontend CI job can overwrite any other app's artifacts | Medium | Add IAM conditions restricting each SA to its own prefix (`<app_id>/`). Same pattern already in place for `test-results-publisher`. |
+| 1 | stocks-, expenses-, vendors-, home-, admin-sys-, admin-vend-artifact-publisher | `objectAdmin` on full `haderach-app-artifacts` bucket — any frontend CI job can overwrite any other app's artifacts | Medium | Add IAM conditions restricting each SA to its own prefix (`<app_id>/`). Same pattern already in place for `test-results-publisher`. |
 | 2 | default compute SA | vendors-api, stocks-api still share the default compute SA — each can access all secrets granted to it. agent-api remediated under task #271. | Medium | Give each remaining Cloud Run service a dedicated runtime SA (like `cms-api-runner` and `agent-api-runtime`). Tracked under task #272 (full-stack IAM/TF audit). |
 | 3 | mixpanel-bigquery-reader | `bigquery.dataViewer` at project level — can read any BigQuery dataset | Low | Restrict to the specific Mixpanel export dataset once it is confirmed. |
 | 4 | test-results-publisher | `objectViewer` is bucket-wide — can read all app artifacts, not just `test-results/` | Low | Add prefix condition matching the `objectAdmin` scope. |
@@ -101,4 +100,4 @@ These bindings grant access to GCS buckets directly to user/group identities —
 
 | SA | Removed | Reason |
 |---|---|---|
-| _(none yet)_ | | |
+| card-artifact-publisher | 2026-04-23 | Card app retired (task #257). Deleted SA, WIF binding, and `card_publisher_admin` GCS bucket IAM grant. Approved 2026-04-23 by Michael Mader. |

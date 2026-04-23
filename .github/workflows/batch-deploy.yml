@@ -17,15 +17,6 @@ on:
         required: false
         type: boolean
         default: false
-      card_sha:
-        description: "card commit SHA (leave empty to skip unless latest is checked)"
-        required: false
-        type: string
-      card_latest:
-        description: "card: use latest main artifact"
-        required: false
-        type: boolean
-        default: false
       stocks_sha:
         description: "stocks commit SHA (leave empty to skip unless latest is checked)"
         required: false
@@ -97,7 +88,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  ALL_APP_IDS: "home card expenses stocks vendors admin-system admin-vendors site"
+  ALL_APP_IDS: "home expenses stocks vendors admin-system admin-vendors site"
 
 jobs:
   resolve:
@@ -123,7 +114,6 @@ jobs:
           GH_TOKEN: ${{ secrets.CROSS_REPO_PAT }}
           DEPLOY_ALL: ${{ inputs.deploy_all_latest }}
           HOME_SHA: ${{ inputs.home_sha }}
-          CARD_SHA: ${{ inputs.card_sha }}
           EXPENSES_SHA: ${{ inputs.expenses_sha }}
           STOCKS_SHA: ${{ inputs.stocks_sha }}
           VENDORS_SHA: ${{ inputs.vendors_sha }}
@@ -131,7 +121,6 @@ jobs:
           ADMIN_VENDORS_SHA: ${{ inputs.admin_vendors_sha }}
           SITE_SHA: ${{ inputs.site_sha }}
           HOME_LATEST: ${{ inputs.home_latest }}
-          CARD_LATEST: ${{ inputs.card_latest }}
           EXPENSES_LATEST: ${{ inputs.expenses_latest }}
           STOCKS_LATEST: ${{ inputs.stocks_latest }}
           VENDORS_LATEST: ${{ inputs.vendors_latest }}
@@ -140,14 +129,14 @@ jobs:
           SITE_LATEST: ${{ inputs.site_latest }}
           BUCKET: ${{ vars.GCS_ARTIFACT_BUCKET }}
         run: |
-          declare -A APP_REPOS=([home]=haderach-home [card]=card [expenses]=expenses [stocks]=stocks [vendors]=vendors [admin-system]=system-admin [admin-vendors]=admin-vendors [site]=site)
-          declare -A APP_SHAS=([home]="$HOME_SHA" [card]="$CARD_SHA" [expenses]="$EXPENSES_SHA" [stocks]="$STOCKS_SHA" [vendors]="$VENDORS_SHA" [admin-system]="$ADMIN_SYSTEM_SHA" [admin-vendors]="$ADMIN_VENDORS_SHA" [site]="$SITE_SHA")
-          declare -A APP_LATEST=([home]="$HOME_LATEST" [card]="$CARD_LATEST" [expenses]="$EXPENSES_LATEST" [stocks]="$STOCKS_LATEST" [vendors]="$VENDORS_LATEST" [admin-system]="$ADMIN_SYSTEM_LATEST" [admin-vendors]="$ADMIN_VENDORS_LATEST" [site]="$SITE_LATEST")
+          declare -A APP_REPOS=([home]=haderach-home [expenses]=expenses [stocks]=stocks [vendors]=vendors [admin-system]=system-admin [admin-vendors]=admin-vendors [site]=site)
+          declare -A APP_SHAS=([home]="$HOME_SHA" [expenses]="$EXPENSES_SHA" [stocks]="$STOCKS_SHA" [vendors]="$VENDORS_SHA" [admin-system]="$ADMIN_SYSTEM_SHA" [admin-vendors]="$ADMIN_VENDORS_SHA" [site]="$SITE_SHA")
+          declare -A APP_LATEST=([home]="$HOME_LATEST" [expenses]="$EXPENSES_LATEST" [stocks]="$STOCKS_LATEST" [vendors]="$VENDORS_LATEST" [admin-system]="$ADMIN_SYSTEM_LATEST" [admin-vendors]="$ADMIN_VENDORS_LATEST" [site]="$SITE_LATEST")
 
           MATRIX_ENTRIES=()
           DEPLOY_JSON="{}"
 
-          for app in home card expenses stocks vendors admin-system admin-vendors site; do
+          for app in home expenses stocks vendors admin-system admin-vendors site; do
             sha="${APP_SHAS[$app]}"
             use_latest="${APP_LATEST[$app]}"
             repo="${APP_REPOS[$app]}"

@@ -9,7 +9,6 @@ on:
         type: choice
         options:
           - home
-          - card
           - expenses
           - stocks
           - vendors
@@ -43,7 +42,7 @@ concurrency:
 
 env:
   APP_ID: ${{ inputs.app_id }}
-  ALL_APP_IDS: "home card expenses stocks vendors admin-system admin-vendors site"
+  ALL_APP_IDS: "home expenses stocks vendors admin-system admin-vendors site"
 
 jobs:
   resolve:
@@ -71,7 +70,7 @@ jobs:
           MANUAL_SHA: ${{ inputs.commit_sha }}
           BUCKET: ${{ vars.GCS_ARTIFACT_BUCKET }}
         run: |
-          declare -A APP_REPOS=([home]=haderach-home [card]=card [expenses]=expenses [stocks]=stocks [vendors]=vendors [admin-system]=system-admin [admin-vendors]=admin-vendors [site]=site)
+          declare -A APP_REPOS=([home]=haderach-home [expenses]=expenses [stocks]=stocks [vendors]=vendors [admin-system]=system-admin [admin-vendors]=admin-vendors [site]=site)
 
           if [[ "$USE_LATEST" == "true" ]]; then
             repo="${APP_REPOS[$APP_ID]}"

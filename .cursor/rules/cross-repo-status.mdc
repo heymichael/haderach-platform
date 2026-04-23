@@ -18,7 +18,6 @@ The full set of repos lives under the parent directory `../` (relative to this p
 - vendors
 - stocks
 - haderach-platform
-- card
 - admin-system
 - agent
 - haderach-cms
@@ -36,7 +35,7 @@ Run a **single** Shell call (with `required_permissions: ["all"]`) that loops th
 
 ```bash
 BASE="/Users/michaelmader_1/haderach_org/haderach_site"
-for repo in haderach-home vendors stocks haderach-platform card admin-system agent haderach-cms; do
+for repo in haderach-home vendors stocks haderach-platform admin-system agent haderach-cms; do
   echo "=== $repo ==="
   cd "$BASE/$repo" 2>/dev/null || { echo "NOT FOUND"; continue; }
   git fetch origin --quiet 2>&1

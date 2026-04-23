@@ -105,7 +105,7 @@ Deploys an app artifact to Firebase Hosting via manual dispatch.
 
 Manual dispatch (`workflow_dispatch`) with inputs:
 
-- `app_id`: which app to deploy (`home`, `card`, `expenses`, `stocks`, `vendors`, `admin-system`, `admin-vendors`, or `site`).
+- `app_id`: which app to deploy (`home`, `expenses`, `stocks`, `vendors`, `admin-system`, `admin-vendors`, or `site`).
 - `use_latest_artifact`: boolean (default true) — resolve latest main SHA automatically.
 - `commit_sha`: manual app commit SHA (used only when `use_latest_artifact` is false).
 - `target_env`: `staging` or `production`.
@@ -135,9 +135,9 @@ once, and does one atomic deploy.
 Manual dispatch (`workflow_dispatch`) with inputs:
 
 - `deploy_all_latest`: boolean — resolve latest main SHA for any app with an empty SHA.
-- Per-app inputs: `home_sha`, `card_sha`, `expenses_sha`, `stocks_sha`, `vendors_sha`,
+- Per-app inputs: `home_sha`, `expenses_sha`, `stocks_sha`, `vendors_sha`,
   `admin_system_sha`, `admin_vendors_sha` — optional commit SHAs.
-- Per-app latest toggles: `home_latest`, `card_latest`, `expenses_latest`, `stocks_latest`,
+- Per-app latest toggles: `home_latest`, `expenses_latest`, `stocks_latest`,
   `vendors_latest`, `admin_system_latest`, `admin_vendors_latest` — boolean, use latest main artifact for that app.
 - `target_env`: `staging` or `production`.
 
@@ -283,7 +283,7 @@ Actual values are set manually via `gcloud secrets versions add`.
 
 Current model is manual SHA dispatch. Planned evolution toward PR-promote
 (version file checked into repo, merge triggers deploy) or event-driven
-(card repo triggers platform via repository dispatch).
+(app repo triggers platform via repository dispatch).
 
 ## Deployment Contract for App Repos
 
@@ -312,12 +312,12 @@ gs://haderach-app-artifacts/<app_id>/versions/<commit-sha>/
 
 ```json
 {
-  "app_id": "card",
+  "app_id": "vendors",
   "version": "1.2.3+build.45",
   "commit_sha": "abc123...",
   "published_at": "2026-03-05T12:00:00Z",
   "artifact": {
-    "runtime_uri": "gs://haderach-app-artifacts/card/versions/abc123.../runtime.tar.gz",
+    "runtime_uri": "gs://haderach-app-artifacts/vendors/versions/abc123.../runtime.tar.gz",
     "checksum_sha256": "..."
   },
   "compatibility": {
@@ -333,7 +333,6 @@ Platform consumes metadata and promotes specific versions by environment.
 | App ID | Route prefix | Repo | Status |
 |---|---|---|---|
 | `home` | `/` | `haderach-home` | Deployed |
-| `card` | `/card/` | `card` | Deployed |
 | `expenses` | `/expenses/` | `expenses` | Deployed |
 | `stocks` | `/stocks/` | `stocks` | Deployed |
 | `vendors` | `/vendors/` | `vendors` | Deployed |
@@ -378,11 +377,11 @@ Authentication is centralized at the platform level. Users sign in once at
 
 ### Sign-in flow
 
-1. User navigates to an app route (e.g., `/card/`).
+1. User navigates to an app route (e.g., `/vendors/`).
 2. App's `AuthGate` checks for an existing Firebase Auth session (shared via
    same-origin IndexedDB persistence).
 3. If no session exists:
-   - **Production**: the app redirects to `/?returnTo=/card/`.
+   - **Production**: the app redirects to `/?returnTo=/vendors/`.
    - **Local dev** (`import.meta.env.DEV`): the app shows a dev-only "Sign in
      with Google" button, allowing authentication directly on the app's origin
      without requiring haderach-home to be running.
@@ -394,7 +393,7 @@ Authentication is centralized at the platform level. Users sign in once at
 
 ### Role-based access control
 
-User access is controlled via four stackable roles stored in the Postgres `users` and
+User access is controlled via three stackable roles stored in the Postgres `users` and
 `user_roles` tables (managed by the agent service on Cloud SQL).
 Roles are global (not per-app) and a user can hold multiple roles.
 
@@ -405,7 +404,6 @@ Roles are global (not per-app) and a user can hold multiple roles.
 | `user` | expenses, vendors | Only `allowed_vendor_ids` | None | `admin` via System Admin UI |
 | `admin` | expenses, vendors | Only `allowed_vendor_ids` | Create users, grant `user`/`admin` roles | `admin` via System Admin UI |
 | `finance_admin` | None (needs `user`/`admin` too) | All spend (bypasses filtering) | Grant `allowed_vendor_ids` to users | `admin`/`finance_admin` via Admin UI |
-| `haderach_user` | card | N/A | None | `admin` via System Admin UI |
 
 #### Admin apps
 
@@ -442,7 +440,7 @@ users (id UUID, email, first_name, last_name, created_at)
   └─ user_allowed_vendors (user_id → users.id, vendor_id → vendors.id)
   └─ user_denied_vendors (user_id → users.id, vendor_id → vendors.id)
 
-roles (id UUID, name)  — admin, finance_admin, user, haderach_user
+roles (id UUID, name)  — admin, finance_admin, user
 
 apps (id UUID, slug, label, path, type, sort_order)
   └─ app_granting_roles (app_id → apps.id, role_id → roles.id)
@@ -458,8 +456,8 @@ Users with the `admin` role can manage users via the System Administration app
 at `/admin/system/`. This app supports creating users, assigning `user`/`admin`
 roles, and deleting users.
 
-`finance_admin` and `haderach_user` roles are assigned via the
-agent API (`PATCH /agent/api/users/{email}`) or the `agent/scripts/seed_users.py`
+The `finance_admin` role is assigned via the agent API
+(`PATCH /agent/api/users/{email}`) or the `agent/scripts/seed_users.py`
 Postgres seed script.
 
 Initial data is seeded using `agent/scripts/seed_users.py`.
