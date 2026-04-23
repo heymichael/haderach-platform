@@ -57,6 +57,15 @@ These SAs are attached as the identity of Cloud Run services at runtime. They ac
 |---|---|---|---|---|---|---|---|
 | agent-local-dev | agent-local-dev@haderach-ai.iam.gserviceaccount.com | Local development — agent service runtime, Postgres via Cloud SQL Proxy, Firebase token verification | Project: haderach-ai | `roles/cloudsql.client`, `roles/firebaseauth.admin` | `agent/agent-local-dev-sa-key.json` (JSON key, gitignored, chmod 600) | Quarterly | `firebaseauth.admin` is overpowered for ID token verification — no narrower built-in role exists in GCP for this use case. Accepted risk, documented. `datastore.user` removed 2026-04-14. |
 
+### Bucket-only IAM (no service account)
+
+These bindings grant access to GCS buckets directly to user/group identities — no SA is created or managed for the workflow.
+
+| Bucket | Principal | Role | Purpose | Notes |
+|---|---|---|---|---|
+| haderach-demo-data | `user:michael@haderach.ai` | `roles/storage.objectAdmin` (bucket-scoped) | Owner-only writer for the curated demo / shared local-dev dataset | Per `docs/demo-data-policy.md`, the policy owner is the only writer. No SA is used because the owner already authenticates as themselves via `gcloud auth login`. Created task #239, approved 2026-04-22. |
+| haderach-demo-data | `group:haderach-developers-data@haderach.ai` | `roles/storage.objectViewer` (bucket-scoped) | Read-only access for developers to download the curated artifact for local dev | Group membership is managed in Google Workspace, not Terraform. Add/remove members in the group to grant/revoke access. Created task #239, approved 2026-04-22. |
+
 ### Planned / in-progress SAs
 
 | SA Name | Purpose | Status | Notes |

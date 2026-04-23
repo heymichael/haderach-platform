@@ -22,3 +22,8 @@ output "app_artifacts_bucket" {
   description = "GCS bucket for app build artifacts"
   value       = google_storage_bucket.app_artifacts.name
 }
+
+output "demo_data_bucket" {
+  description = "GCS bucket for curated demo / shared local-dev data"
+  value       = google_storage_bucket.demo_data.name
+}
