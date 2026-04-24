@@ -1,6 +1,6 @@
 ---
 description: Enforce service-oriented data access — frontend apps must go through APIs, not directly to databases
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Service-Oriented Data Access

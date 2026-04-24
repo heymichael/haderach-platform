@@ -34,7 +34,20 @@ Application implementation, app CI, and app-local tests live in separate app rep
 - `services/content-api/` - authenticated static-file server for `docs.haderach.ai` (FastAPI + Google OAuth + GCS).
 - `scripts/seed-users.py` - deprecated — see `agent/scripts/seed_users.py`.
 - `docs/architecture.md` - ownership boundaries, release flow, deploy workflow, routing model, auth/RBAC.
+- `docs/cursor-rule-matrix.md` - workspace-wide Cursor rule inventory and `alwaysApply` matrix.
 - `infra/` - Terraform modules for GCP infrastructure (Cloud Run, Cloud SQL, Secret Manager, GCS, IAM, WIF).
+
+## Docs index
+
+Use these docs as the main entry points for platform and workspace governance:
+
+| Doc | Purpose |
+|---|---|
+| `docs/architecture.md` | Platform ownership boundaries, deploy flow, routing model, auth/RBAC, and core invariants |
+| `docs/cursor-rule-matrix.md` | Workspace-wide Cursor rule inventory and `alwaysApply` matrix |
+| `docs/demo-data-runbook.md` | Demo-data operational runbook and local-load workflow |
+| `docs/demo-data-policy.md` | Demo-data policy and governance expectations |
+| `docs/sa-matrix.md` | Service account inventory, scopes, and ownership |
 
 ```text
 haderach-platform/
