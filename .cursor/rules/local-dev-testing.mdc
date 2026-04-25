@@ -1,6 +1,6 @@
 ---
 description: Standard procedure for spinning up the local dev environment for testing
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Local Dev Testing

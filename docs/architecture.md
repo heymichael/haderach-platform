@@ -30,7 +30,8 @@ haderach-platform/
 │       ├── deploy-content-api.yml
 │       └── redeploy-all.yml
 ├── docs/
-│   └── architecture.md
+│   ├── architecture.md
+│   └── cursor-rule-matrix.md
 ├── hosting/
 │   └── public/
 │       └── .gitkeep          # deploy-time-only; all content from app artifacts
@@ -80,6 +81,12 @@ Canonical flow:
 7. Platform smoke checks
 
 The platform never builds app source directly; it consumes app-published artifacts.
+
+## Cursor Rule Matrix
+
+Workspace-level Cursor rule coverage and `alwaysApply` settings are tracked in
+`docs/cursor-rule-matrix.md`. Update that document when rule families, repo
+coverage, or `alwaysApply` values change.
 
 ## Routing Model
 

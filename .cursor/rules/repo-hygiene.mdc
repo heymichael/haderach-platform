@@ -16,7 +16,7 @@ This repository is the control plane for hosting, routing, deployment orchestrat
 - Use or update docs when behavior/contracts change:
   - `README.md`
   - `docs/architecture.md`
-  - `tasks/` when work priority/state changes (taskmd format)
+  - related records in `../haderach-tasks/` when work priority/state changes
 - Preserve security/indexing defaults:
   - default `noindex` / `nofollow`
   - only allow indexing with explicit approval path documented

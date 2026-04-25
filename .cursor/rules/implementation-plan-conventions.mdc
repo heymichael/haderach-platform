@@ -1,0 +1,16 @@
+---
+description: Store implementation plans in haderach-tasks
+alwaysApply: true
+---
+
+# Implementation Plan Conventions
+
+- When drafting a task-backed implementation plan from this repo, write it to
+  `../haderach-tasks/implementation-plans/`.
+- Do not store task-backed implementation plans in `.cursor/` or
+  `haderach-platform/docs/`.
+- When a task exists, name the plan
+  `<task-id>-<short-slug>-implementation-plan.md`.
+- Update the related task file in `../haderach-tasks/tasks/` to link to the new
+  plan path.
+- The Cursor plan format is fine to keep; only the storage location changes.

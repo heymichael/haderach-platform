@@ -1,3 +1,8 @@
+---
+description: Backend API authentication policy
+alwaysApply: false
+---
+
 # Backend API authentication policy
 
 All Haderach backend services exposed via Firebase Hosting rewrites or public Cloud Run URLs must authenticate callers on every request.
