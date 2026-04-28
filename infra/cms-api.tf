@@ -50,6 +50,16 @@ resource "google_cloud_run_v2_service" "cms_api" {
         }
       }
 
+      env {
+        name = "PREVIEW_TOKEN_SECRET"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.preview_token_secret.secret_id
+            version = "latest"
+          }
+        }
+      }
+
       resources {
         limits = {
           cpu    = "1"
@@ -71,6 +81,7 @@ resource "google_cloud_run_v2_service" "cms_api" {
   depends_on = [
     google_secret_manager_secret_iam_member.cms_api_runner_db_url,
     google_secret_manager_secret_iam_member.cms_api_runner_payload_secret,
+    google_secret_manager_secret_iam_member.cms_api_runner_preview_token_secret,
     google_secret_manager_secret_version.cms_database_url,
   ]
 }

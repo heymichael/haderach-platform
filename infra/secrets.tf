@@ -141,3 +141,14 @@ resource "google_secret_manager_secret" "cms_api_key" {
 
 # Value set after first deploy: create agent user in Payload admin, copy generated API key:
 #   echo -n "<key>" | gcloud secrets versions add CMS_API_KEY --data-file=-
+
+resource "google_secret_manager_secret" "preview_token_secret" {
+  secret_id = "PREVIEW_TOKEN_SECRET"
+  project   = var.project_id
+
+  replication {
+    auto {}
+  }
+}
+
+# Value set manually: openssl rand -base64 32 | gcloud secrets versions add PREVIEW_TOKEN_SECRET --data-file=-

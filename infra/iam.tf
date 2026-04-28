@@ -121,6 +121,13 @@ resource "google_secret_manager_secret_iam_member" "cms_api_runner_cms_api_key" 
   member    = "serviceAccount:${google_service_account.cms_api_runner.email}"
 }
 
+resource "google_secret_manager_secret_iam_member" "cms_api_runner_preview_token_secret" {
+  secret_id = google_secret_manager_secret.preview_token_secret.secret_id
+  project   = var.project_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.cms_api_runner.email}"
+}
+
 # agent-api needs CMS_API_KEY to call the Payload API.
 # Repointed from default compute SA → agent-api-runtime under bug #269 (2026-04-21).
 resource "google_secret_manager_secret_iam_member" "agent_api_cms_api_key" {
