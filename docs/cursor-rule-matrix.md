@@ -1,6 +1,6 @@
 # Cursor Rule Matrix
 
-Last reviewed: 2026-04-24
+Last reviewed: 2026-04-28
 
 This document tracks the current `.cursor/rules/*.mdc` coverage across the
 workspace so rule sprawl and `alwaysApply` usage can be reviewed deliberately.
@@ -26,6 +26,7 @@ workspace so rule sprawl and `alwaysApply` usage can be reviewed deliberately.
 | CMS Auth Policy |  |  |  |  |  |  |  | No |  |  |  |  |
 | Content Deployment |  |  |  |  |  |  |  |  | No |  |  |  |
 | Cross-Repo Status | No |  | No | No | No | No | No | No |  | No | No | No |
+| Database Change Control |  |  | Yes |  |  |  |  |  |  |  |  |  |
 | Dev Data Mocking |  |  |  |  |  |  |  |  |  |  | No |  |
 | IAM Governance | Yes |  | Yes |  |  |  |  | Yes |  |  |  |  |
 | Implementation Plan Conventions | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
@@ -34,7 +35,7 @@ workspace so rule sprawl and `alwaysApply` usage can be reviewed deliberately.
 | PR Conventions | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | Repo Boundary / Hygiene | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | Resource Records |  | No |  |  |  |  |  |  |  |  |  |  |
-| Service-Oriented Data Access | No |  | No | No | No | No | No | No |  | No | No | No |
+| Service-Oriented Data Access | No |  | Yes | No | No | No | No | Yes |  | No | No | No |
 | Strategy Records |  | No |  |  |  |  |  |  |  |  |  |  |
 | Task Lifecycle Timing |  | Yes |  |  |  |  |  |  |  |  |  |  |
 | Task Management | Yes | No | No | No | No | No | No | No |  | No | No | No |
