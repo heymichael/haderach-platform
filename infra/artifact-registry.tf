@@ -25,3 +25,12 @@ resource "google_artifact_registry_repository_iam_member" "cms_publisher_ar_writ
   role       = "roles/artifactregistry.writer"
   member     = "serviceAccount:${google_service_account.cms_artifact_publisher.email}"
 }
+
+# IAM approval: 2026-04-29, Michael Mader (task #300)
+resource "google_artifact_registry_repository_iam_member" "digital_media_publisher_ar_writer" {
+  location   = google_artifact_registry_repository.apps.location
+  repository = google_artifact_registry_repository.apps.repository_id
+  project    = var.project_id
+  role       = "roles/artifactregistry.writer"
+  member     = "serviceAccount:${google_service_account.digital_media_artifact_publisher.email}"
+}

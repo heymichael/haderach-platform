@@ -113,3 +113,28 @@ resource "google_service_account" "site_artifact_publisher" {
   description  = "CI/CD artifact upload for heymichael/site repo"
   project      = var.project_id
 }
+
+# ---------------------------------------------------------------------------
+# Digital Media service accounts (task #300, approved 2026-04-29)
+# ---------------------------------------------------------------------------
+
+resource "google_service_account" "digital_media_api_runner" {
+  account_id   = "digital-media-api-runner"
+  display_name = "digital-media-api-runner"
+  description  = "Cloud Run runtime identity for digital-media-api service"
+  project      = var.project_id
+}
+
+resource "google_service_account" "digital_media_artifact_publisher" {
+  account_id   = "digital-media-publisher"
+  display_name = "digital-media-artifact-publisher"
+  description  = "CI/CD image push and deploy for heymichael/digital-media repo"
+  project      = var.project_id
+}
+
+resource "google_service_account" "digital_media_ui_artifact_publisher" {
+  account_id   = "digital-media-ui-publisher"
+  display_name = "digital-media-ui-artifact-publisher"
+  description  = "CI/CD artifact upload for heymichael/digital-media-ui repo"
+  project      = var.project_id
+}

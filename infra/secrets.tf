@@ -152,3 +152,21 @@ resource "google_secret_manager_secret" "preview_token_secret" {
 }
 
 # Value set manually: openssl rand -base64 32 | gcloud secrets versions add PREVIEW_TOKEN_SECRET --data-file=-
+
+# ---------------------------------------------------------------------------
+# Digital Media secrets (task #300, approved 2026-04-29)
+# ---------------------------------------------------------------------------
+
+resource "google_secret_manager_secret" "digital_media_database_url" {
+  secret_id = "DIGITAL_MEDIA_DATABASE_URL"
+  project   = var.project_id
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "digital_media_database_url" {
+  secret      = google_secret_manager_secret.digital_media_database_url.id
+  secret_data = "postgresql://${google_sql_user.digital_media_app.name}:${random_password.digital_media_db_password.result}@/${google_sql_database.digital_media.name}?host=/cloudsql/${google_sql_database_instance.digital_media.connection_name}"
+}

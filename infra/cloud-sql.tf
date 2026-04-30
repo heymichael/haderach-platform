@@ -15,8 +15,8 @@ resource "google_sql_database_instance" "main" {
     disk_type         = "PD_SSD"
 
     ip_configuration {
-      ipv4_enabled    = true
-      require_ssl     = true
+      ipv4_enabled = true
+      require_ssl  = true
     }
 
     backup_configuration {
@@ -76,8 +76,8 @@ resource "google_sql_database_instance" "cms" {
     disk_type         = "PD_SSD"
 
     ip_configuration {
-      ipv4_enabled    = true
-      require_ssl     = true
+      ipv4_enabled = true
+      require_ssl  = true
     }
 
     database_flags {
@@ -145,6 +145,97 @@ resource "google_sql_user" "cms_app" {
 }
 
 resource "random_password" "cms_db_password" {
+  length  = 32
+  special = false
+}
+
+# ---------------------------------------------------------------------------
+# Cloud SQL — Postgres instance for Digital Media (asset storage metadata + vectors)
+# IAM approval: 2026-04-29, Michael Mader (task #300)
+# ---------------------------------------------------------------------------
+
+resource "google_sql_database_instance" "digital_media" {
+  name             = "haderach-digital-media"
+  project          = var.project_id
+  region           = var.region
+  database_version = "POSTGRES_15"
+
+  settings {
+    tier              = "db-f1-micro"
+    availability_type = "ZONAL"
+    disk_size         = 10
+    disk_type         = "PD_SSD"
+
+    ip_configuration {
+      ipv4_enabled = true
+      require_ssl  = true
+    }
+
+    database_flags {
+      name  = "log_checkpoints"
+      value = "on"
+    }
+
+    database_flags {
+      name  = "log_connections"
+      value = "on"
+    }
+
+    database_flags {
+      name  = "log_disconnections"
+      value = "on"
+    }
+
+    database_flags {
+      name  = "log_statement"
+      value = "ddl"
+    }
+
+    database_flags {
+      name  = "cloudsql.enable_pgaudit"
+      value = "on"
+    }
+
+    database_flags {
+      name  = "password_encryption"
+      value = "scram-sha-256"
+    }
+
+    backup_configuration {
+      enabled                        = true
+      point_in_time_recovery_enabled = true
+      start_time                     = "04:00"
+      transaction_log_retention_days = 7
+
+      backup_retention_settings {
+        retained_backups = 7
+      }
+    }
+
+    maintenance_window {
+      day          = 7
+      hour         = 5
+      update_track = "stable"
+    }
+  }
+
+  deletion_protection = true
+}
+
+resource "google_sql_database" "digital_media" {
+  name     = "digital-media"
+  project  = var.project_id
+  instance = google_sql_database_instance.digital_media.name
+}
+
+resource "google_sql_user" "digital_media_app" {
+  name     = "digital-media-app"
+  project  = var.project_id
+  instance = google_sql_database_instance.digital_media.name
+  password = random_password.digital_media_db_password.result
+}
+
+resource "random_password" "digital_media_db_password" {
   length  = 32
   special = false
 }
