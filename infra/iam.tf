@@ -204,6 +204,13 @@ resource "google_secret_manager_secret_iam_member" "digital_media_runner_db_url"
   member    = "serviceAccount:${google_service_account.digital_media_api_runner.email}"
 }
 
+# Runtime SA needs to sign blobs for GCS signed URL generation (approved 2026-04-30)
+resource "google_service_account_iam_member" "digital_media_runner_self_signer" {
+  service_account_id = google_service_account.digital_media_api_runner.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:${google_service_account.digital_media_api_runner.email}"
+}
+
 # ---------------------------------------------------------------------------
 # Digital Media CI/CD IAM (task #300, approved 2026-04-29)
 # ---------------------------------------------------------------------------
