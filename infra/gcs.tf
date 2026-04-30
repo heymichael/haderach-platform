@@ -176,9 +176,9 @@ resource "google_storage_bucket" "digital_media_haderach" {
   uniform_bucket_level_access = true
 
   cors {
-    origin          = ["https://haderach.dev", "http://localhost:5173"]
-    method          = ["GET", "PUT", "POST"]
-    response_header = ["Content-Type", "Content-Length"]
+    origin          = ["https://haderach.ai", "http://localhost:5173"]
+    method          = ["GET", "PUT", "POST", "HEAD", "OPTIONS"]
+    response_header = ["Content-Type", "Content-Length", "Content-MD5", "x-goog-content-length-range"]
     max_age_seconds = 3600
   }
 
