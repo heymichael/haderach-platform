@@ -147,3 +147,52 @@ Each entry includes:
 - **Auth header format:** `Authorization: users API-Key <key>`
 - **Created by:** michael@haderach.ai via Payload REST API
 - **Next rotation due:** 2026-07-16
+
+---
+
+### 2026-04-29 — digital-media-api-runner SA — CREATED
+
+- **Event:** created
+- **Service:** Cloud Run runtime identity for `digital-media-api`
+- **SA:** `digital-media-api-runner@haderach-ai.iam.gserviceaccount.com`
+- **Created by:** Terraform (applied by michael@haderach.ai)
+- **Credential location:** No JSON key — Cloud Run uses SA directly via IAM
+- **Classification:** N/A (no key to rotate; SA identity managed by GCP)
+- **Terraform PR:** heymichael/haderach-platform (task #300)
+
+---
+
+### 2026-04-29 — digital-media-publisher SA — CREATED
+
+- **Event:** created
+- **Service:** CI/CD image push and deploy for `heymichael/digital-media` repo
+- **SA:** `digital-media-publisher@haderach-ai.iam.gserviceaccount.com`
+- **Created by:** Terraform (applied by michael@haderach.ai)
+- **Credential location:** No JSON key — WIF (keyless via GitHub Actions)
+- **Classification:** N/A (WIF keyless; no key to rotate)
+- **Terraform PR:** heymichael/haderach-platform (task #300)
+
+---
+
+### 2026-04-29 — digital-media-ui-publisher SA — CREATED
+
+- **Event:** created
+- **Service:** CI/CD artifact publish for `heymichael/digital-media-ui` repo
+- **SA:** `digital-media-ui-publisher@haderach-ai.iam.gserviceaccount.com`
+- **Created by:** Terraform (applied by michael@haderach.ai)
+- **Credential location:** No JSON key — WIF (keyless via GitHub Actions)
+- **Classification:** N/A (WIF keyless; no key to rotate)
+- **Terraform PR:** heymichael/haderach-platform (task #300)
+
+---
+
+### 2026-04-29 — Postgres database password (digital-media-app) — CREATED
+
+- **Event:** created
+- **Service:** Cloud SQL — instance `haderach-digital-media`, project `haderach-ai`
+- **User:** `digital-media-app`
+- **Created by:** Terraform (`random_password.digital_media_db_password`, applied by michael@haderach.ai)
+- **Credential location:** Secret Manager (`DIGITAL_MEDIA_DATABASE_URL`, version 1); local dev via `digital-media/digital-media-database-url.txt` (gitignored)
+- **Classification:** access credential (quarterly rotation)
+- **Method:** Auto-generated 32-char random password via Terraform; connection string auto-populated in Secret Manager
+- **Terraform PR:** heymichael/haderach-platform (task #300)

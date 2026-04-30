@@ -177,3 +177,62 @@ resource "google_project_iam_member" "cms_publisher_cloudsql_client" {
 # Updated: switched from Cloud Run to GCS artifact deployment
 # ---------------------------------------------------------------------------
 # GCS permissions defined in gcs.tf (site_publisher_admin)
+
+# ---------------------------------------------------------------------------
+# Digital Media service IAM (task #300, approved 2026-04-29)
+# ---------------------------------------------------------------------------
+
+# Runtime SA needs Cloud SQL access
+resource "google_project_iam_member" "digital_media_runner_cloudsql_client" {
+  project = var.project_id
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${google_service_account.digital_media_api_runner.email}"
+}
+
+# Runtime SA needs Vertex AI access for embeddings and Vision API for auto-tagging
+resource "google_project_iam_member" "digital_media_runner_vertex_user" {
+  project = var.project_id
+  role    = "roles/aiplatform.user"
+  member  = "serviceAccount:${google_service_account.digital_media_api_runner.email}"
+}
+
+# Runtime SA needs DATABASE_URL secret
+resource "google_secret_manager_secret_iam_member" "digital_media_runner_db_url" {
+  secret_id = google_secret_manager_secret.digital_media_database_url.secret_id
+  project   = var.project_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.digital_media_api_runner.email}"
+}
+
+# ---------------------------------------------------------------------------
+# Digital Media CI/CD IAM (task #300, approved 2026-04-29)
+# ---------------------------------------------------------------------------
+
+# digital-media-artifact-publisher needs run.developer to deploy new revisions
+resource "google_project_iam_member" "digital_media_publisher_run_developer" {
+  project = var.project_id
+  role    = "roles/run.developer"
+  member  = "serviceAccount:${google_service_account.digital_media_artifact_publisher.email}"
+}
+
+# digital-media-artifact-publisher needs to act-as digital-media-api-runner when deploying
+resource "google_service_account_iam_member" "digital_media_publisher_act_as_runner" {
+  service_account_id = google_service_account.digital_media_api_runner.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.digital_media_artifact_publisher.email}"
+}
+
+# digital-media-artifact-publisher needs cloudsql.client for CI migrations via proxy
+resource "google_project_iam_member" "digital_media_publisher_cloudsql_client" {
+  project = var.project_id
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${google_service_account.digital_media_artifact_publisher.email}"
+}
+
+# digital-media-artifact-publisher needs DATABASE_URL secret for CI migrations
+resource "google_secret_manager_secret_iam_member" "digital_media_publisher_db_url" {
+  secret_id = google_secret_manager_secret.digital_media_database_url.secret_id
+  project   = var.project_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.digital_media_artifact_publisher.email}"
+}

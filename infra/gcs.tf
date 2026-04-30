@@ -55,8 +55,8 @@ resource "google_storage_bucket" "app_artifacts" {
 
   lifecycle_rule {
     condition {
-      age                = 90
-      matches_prefix     = ["test-results/"]
+      age            = 90
+      matches_prefix = ["test-results/"]
     }
     action {
       type = "Delete"
@@ -162,4 +162,48 @@ resource "google_storage_bucket_iam_member" "deployer_admin" {
   bucket = google_storage_bucket.app_artifacts.name
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.platform_deployer.email}"
+}
+
+# ---------------------------------------------------------------------------
+# Digital Media asset storage (task #300, approved 2026-04-29)
+# ---------------------------------------------------------------------------
+
+resource "google_storage_bucket" "digital_media_haderach" {
+  name                        = "haderach-media-haderach"
+  location                    = "US"
+  project                     = var.project_id
+  force_destroy               = false
+  uniform_bucket_level_access = true
+
+  cors {
+    origin          = ["https://haderach.dev", "http://localhost:5173"]
+    method          = ["GET", "PUT", "POST"]
+    response_header = ["Content-Type", "Content-Length"]
+    max_age_seconds = 3600
+  }
+
+  versioning {
+    enabled = false
+  }
+}
+
+# Bucket IAM: digital-media-api-runner can manage objects (signed URL generation, metadata reads)
+resource "google_storage_bucket_iam_member" "digital_media_runner_bucket_admin" {
+  bucket = google_storage_bucket.digital_media_haderach.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.digital_media_api_runner.email}"
+}
+
+# Bucket IAM: digital-media-artifact-publisher can manage app artifacts
+resource "google_storage_bucket_iam_member" "digital_media_publisher_admin" {
+  bucket = google_storage_bucket.app_artifacts.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.digital_media_artifact_publisher.email}"
+}
+
+# Bucket IAM: digital-media-ui-artifact-publisher can manage app artifacts
+resource "google_storage_bucket_iam_member" "digital_media_ui_publisher_admin" {
+  bucket = google_storage_bucket.app_artifacts.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.digital_media_ui_artifact_publisher.email}"
 }

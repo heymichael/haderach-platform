@@ -34,6 +34,13 @@
     ],
     "rewrites": [
       {
+        "source": "/media/api/**",
+        "run": {
+          "serviceId": "digital-media-api",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "/agent/api/**",
         "run": {
           "serviceId": "agent-api",
@@ -60,6 +67,10 @@
           "serviceId": "cms-api",
           "region": "us-central1"
         }
+      },
+      {
+        "source": "/media/**",
+        "destination": "/media/index.html"
       },
       {
         "source": "/site/**",

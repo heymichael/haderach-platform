@@ -107,3 +107,21 @@ resource "google_service_account_iam_member" "site_wif_binding" {
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/github-actions/attribute.repository/heymichael/site"
 }
+
+# ---------------------------------------------------------------------------
+# Digital Media WIF bindings (task #300, approved 2026-04-29)
+# ---------------------------------------------------------------------------
+
+# heymichael/digital-media repo can impersonate digital-media-artifact-publisher
+resource "google_service_account_iam_member" "digital_media_wif_binding" {
+  service_account_id = google_service_account.digital_media_artifact_publisher.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/github-actions/attribute.repository/heymichael/digital-media"
+}
+
+# heymichael/digital-media-ui repo can impersonate digital-media-ui-artifact-publisher
+resource "google_service_account_iam_member" "digital_media_ui_wif_binding" {
+  service_account_id = google_service_account.digital_media_ui_artifact_publisher.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/github-actions/attribute.repository/heymichael/digital-media-ui"
+}
