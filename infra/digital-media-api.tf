@@ -22,7 +22,7 @@ resource "google_cloud_run_v2_service" "digital_media_api" {
       image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.apps.repository_id}/digital-media-api:latest"
 
       ports {
-        container_port = 8000
+        container_port = 8080
       }
 
       volume_mounts {
